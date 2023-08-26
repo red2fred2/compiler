@@ -1,13 +1,14 @@
 //! The lexer for the language
 
 use logos::{Logos, Lexer};
+use std::fmt::Debug;
 
 static mut LINE: usize = 1;
 static mut LINE_START: usize = 0;
 
-#[derive(Logos, Debug, PartialEq)]
+#[derive(Logos, PartialEq)]
 #[logos(skip r"[ \t\f]+")]
-pub enum Token {
+pub enum TokenEnum {
 	#[token("\n", new_line)]
 	#[regex(r"//[^\n]*\n", new_line)]
 	HELPER,
@@ -106,13 +107,60 @@ pub enum Token {
 	STAR,
 }
 
-// impl Debug for Token {}
+impl Debug for TokenEnum {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::HELPER => write!(f, "HELPER"),
+            Self::AND => write!(f, "AND"),
+            Self::BOOL => write!(f, "BOOL"),
+            Self::CLASS => write!(f, "CLASS"),
+            Self::ELSE => write!(f, "ELSE"),
+            Self::EXIT => write!(f, "EXIT"),
+            Self::FALSE => write!(f, "FALSE"),
+            Self::GIVE => write!(f, "GIVE"),
+            Self::IF => write!(f, "IF"),
+            Self::INT => write!(f, "INT"),
+            Self::MAGIC => write!(f, "MAGIC"),
+            Self::OR => write!(f, "OR"),
+            Self::PERFECT => write!(f, "PERFECT"),
+            Self::RETURN => write!(f, "RETURN"),
+            Self::TAKE => write!(f, "TAKE"),
+            Self::TRUE => write!(f, "TRUE"),
+            Self::VOID => write!(f, "VOID"),
+            Self::WHILE => write!(f, "WHILE"),
+            Self::ID(arg0) => write!(f, "ID:{arg0}"),
+            Self::INTLITERAL(arg0) => write!(f, "INTLITERAL:{arg0}"),
+            Self::STRINGLITERAL(arg0) => write!(f, "STRINGLITERAL:{arg0}"),
+            Self::ASSIGN => write!(f, "ASSIGN"),
+            Self::COMMA => write!(f, "COMMA"),
+            Self::CROSS => write!(f, "CROSS"),
+            Self::DASH => write!(f, "DASH"),
+            Self::EQUALS => write!(f, "EQUALS"),
+            Self::GREATER => write!(f, "GREATER"),
+            Self::GREATEREQ => write!(f, "GREATEREQ"),
+            Self::LCURLY => write!(f, "LCURLY"),
+            Self::LESS => write!(f, "LESS"),
+            Self::LESSEQ => write!(f, "LESSEQ"),
+            Self::LPAREN => write!(f, "LPAREN"),
+            Self::NOT => write!(f, "NOT"),
+            Self::NOTEQUALS => write!(f, "NOTEQUALS"),
+            Self::OTHER => write!(f, "OTHER"),
+            Self::POSTDEC => write!(f, "POSTDEC"),
+            Self::POSTINC => write!(f, "POSTINC"),
+            Self::RCURLY => write!(f, "RCURLY"),
+            Self::RPAREN => write!(f, "RPAREN"),
+            Self::SEMICOL => write!(f, "SEMICOL"),
+            Self::SLASH => write!(f, "SLASH"),
+            Self::STAR => write!(f, "STAR"),
+        }
+    }
+}
 
-fn copy(lexer: &mut Lexer<Token>) -> Option<String> {
+fn copy(lexer: &mut Lexer<TokenEnum>) -> Option<String> {
 	lexer.slice().parse().ok()
 }
 
-fn new_line(lexer: &mut Lexer<Token>) -> Option<()> {
+fn new_line(lexer: &mut Lexer<TokenEnum>) -> Option<()> {
 	unsafe {
 		LINE += 1;
 		LINE_START = lexer.span().end;
@@ -122,7 +170,7 @@ fn new_line(lexer: &mut Lexer<Token>) -> Option<()> {
 }
 
 pub fn lex(string: &str) {
-	let mut lexer = Token::lexer(string);
+	let mut lexer = TokenEnum::lexer(string);
 
 	loop {
 		// If this is None we're done reading, break out of the loop
@@ -135,7 +183,7 @@ pub fn lex(string: &str) {
 		};
 
 		// Ignore certain helper tokens
-		if token == Token::HELPER {
+		if token == TokenEnum::HELPER {
 			continue
 		}
 
