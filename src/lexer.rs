@@ -2,9 +2,15 @@
 
 use logos::{Logos, Lexer};
 
+static mut LINE: usize = 1;
+static mut LINE_START: usize = 0;
+
 #[derive(Logos, Debug, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")]
 pub enum Token {
+	#[token("\n", new_line)]
+	NEWLINE,
+
 	//Keywords
 	#[token("and")]
 	AND,
@@ -99,8 +105,19 @@ pub enum Token {
 	STAR,
 }
 
+// impl Debug for Token {}
+
 fn copy(lexer: &mut Lexer<Token>) -> Option<String> {
 	lexer.slice().parse().ok()
+}
+
+fn new_line(lexer: &mut Lexer<Token>) -> Option<()> {
+	unsafe {
+		LINE += 1;
+		LINE_START = lexer.span().start + 1;
+	}
+
+	Some(())
 }
 
 pub fn lex(string: &str) {
@@ -116,8 +133,19 @@ pub fn lex(string: &str) {
 			break
 		};
 
+		// Ignore certain helper tokens
+		if token == Token::NEWLINE {
+			continue
+		}
 
-		// let val = lexer.slice();
-		println!("{token:?}");
+		// Figure out line and character position in flex style
+		let char;
+		let line;
+		unsafe {
+			char = lexer.span().start + 1 - LINE_START;
+			line = LINE
+		};
+
+		println!("{token:?} [{line},{char}]");
 	}
 }
