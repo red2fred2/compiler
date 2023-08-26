@@ -1,6 +1,6 @@
 //! The lexer for the language
 
-use logos::Logos;
+use logos::{Logos, Lexer};
 
 #[derive(Logos, Debug, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")]
@@ -40,6 +40,14 @@ pub enum Token {
 	VOID,
 	#[token["while"]]
 	WHILE,
+
+	// Identifiers
+	#[regex(r"[\p{L}_][\p{L}_\d]*", copy)]
+	ID(String),
+}
+
+fn copy(lexer: &mut Lexer<Token>) -> Option<String> {
+	lexer.slice().parse().ok()
 }
 
 pub fn lex(string: &str) {
