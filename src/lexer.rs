@@ -45,6 +45,14 @@ pub enum Token {
 	// Identifiers
 	#[regex(r"[\p{L}_][\p{L}_\d]*", copy)]
 	ID(String),
+
+	// Integer literals
+	#[regex(r"\d+", copy)]
+	INTLITERAL(String),
+
+	// String literals
+	#[regex("\"[^\"]*\"", copy)]
+	STRINGLITERAL(String),
 }
 
 fn copy(lexer: &mut Lexer<Token>) -> Option<String> {
