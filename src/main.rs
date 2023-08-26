@@ -6,5 +6,5 @@
 pub mod lexer;
 
 fn main() {
-	lexer::lex("too hot and false")
+	lexer::lex(include_str!("../test.dm"));
 }
