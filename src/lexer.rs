@@ -8,37 +8,37 @@ pub enum Token {
 	//Keywords
 	#[token("and")]
 	AND,
-	#[token["bool"]]
+	#[token("bool")]
 	BOOL,
-	#[token["class"]]
+	#[token("class")]
 	CLASS,
-	#[token["else"]]
+	#[token("else")]
 	ELSE,
-	#[token["today I don't feel like doing any work"]]
+	#[token("today I don't feel like doing any work")]
 	EXIT,
-	#[regex[r"false|too hot"]]
+	#[regex(r"false|too hot")]
 	FALSE,
-	#[token["give"]]
+	#[token("give")]
 	GIVE,
-	#[token["if"]]
+	#[token("if")]
 	IF,
-	#[token["int"]]
+	#[token("int")]
 	INT,
 	#[token("24Kmagic")]
 	MAGIC,
-	#[token["or"]]
+	#[token("or")]
 	OR,
-	#[token["perfect"]]
+	#[token("perfect")]
 	PERFECT,
-	#[token["return"]]
+	#[token("return")]
 	RETURN,
-	#[token["take"]]
+	#[token("take")]
 	TAKE,
-	#[token["true"]]
+	#[token("true")]
 	TRUE,
-	#[token["void"]]
+	#[token("void")]
 	VOID,
-	#[token["while"]]
+	#[token("while")]
 	WHILE,
 
 	// Identifiers
