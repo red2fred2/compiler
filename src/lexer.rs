@@ -6,10 +6,11 @@ static mut LINE: usize = 1;
 static mut LINE_START: usize = 0;
 
 #[derive(Logos, Debug, PartialEq)]
-#[logos(skip r"[ \t\n\f]+")]
+#[logos(skip r"[ \t\f]+")]
 pub enum Token {
 	#[token("\n", new_line)]
-	NEWLINE,
+	#[regex(r"//[^\n]*\n", new_line)]
+	HELPER,
 
 	//Keywords
 	#[token("and")]
@@ -114,7 +115,7 @@ fn copy(lexer: &mut Lexer<Token>) -> Option<String> {
 fn new_line(lexer: &mut Lexer<Token>) -> Option<()> {
 	unsafe {
 		LINE += 1;
-		LINE_START = lexer.span().start + 1;
+		LINE_START = lexer.span().end;
 	}
 
 	Some(())
@@ -134,7 +135,7 @@ pub fn lex(string: &str) {
 		};
 
 		// Ignore certain helper tokens
-		if token == Token::NEWLINE {
+		if token == Token::HELPER {
 			continue
 		}
 
