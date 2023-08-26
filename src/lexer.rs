@@ -16,7 +16,8 @@ pub enum Token {
 	ELSE,
 	#[token("today I don't feel like doing any work")]
 	EXIT,
-	#[regex(r"false|too hot")]
+	#[token("false")]
+	#[token("too hot")]
 	FALSE,
 	#[token("give")]
 	GIVE,
