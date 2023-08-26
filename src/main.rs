@@ -6,5 +6,5 @@
 pub mod lexer;
 
 fn main() {
-	lexer::lex("and and n\n and")
+	lexer::lex("too hot and false")
 }

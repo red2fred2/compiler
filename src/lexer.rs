@@ -5,8 +5,41 @@ use logos::Logos;
 #[derive(Logos, Debug, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")]
 pub enum Token {
+	//Keywords
 	#[token("and")]
-	AND
+	AND,
+	#[token["bool"]]
+	BOOL,
+	#[token["class"]]
+	CLASS,
+	#[token["else"]]
+	ELSE,
+	#[token["today I don't feel like doing any work"]]
+	EXIT,
+	#[regex[r"false|too hot"]]
+	FALSE,
+	#[token["give"]]
+	GIVE,
+	#[token["if"]]
+	IF,
+	#[token["int"]]
+	INT,
+	#[token("24Kmagic")]
+	MAGIC,
+	#[token["or"]]
+	OR,
+	#[token["perfect"]]
+	PERFECT,
+	#[token["return"]]
+	RETURN,
+	#[token["take"]]
+	TAKE,
+	#[token["true"]]
+	TRUE,
+	#[token["void"]]
+	VOID,
+	#[token["while"]]
+	WHILE,
 }
 
 pub fn lex(string: &str) {
