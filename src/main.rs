@@ -9,7 +9,7 @@ pub mod lexer;
 
 fn main() -> Result<()> {
 	let string = include_str!("../test.dm").to_string() + "\n";
-	lexer::lex_and_print(string.as_str())?;
+	lexer::lex(string.as_str(), "tokens.txt")?;
 
 	Ok(())
 }

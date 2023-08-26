@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 use logos::{Logos, Lexer};
-use std::fmt::Debug;
+use std::{fmt::Debug, fs::File, io::Write};
 
 static mut LINE: usize = 1;
 static mut LINE_START: usize = 0;
@@ -177,9 +177,13 @@ fn new_line(lexer: &mut Lexer<TokenEnum>) -> Option<()> {
 	Some(())
 }
 
-fn lex_optional(string: &str, print: bool) -> Result<Vec<Token>> {
+/// Runs the lexer on a given input string
+pub fn lex(string: &str, file: &str) -> Result<Vec<Token>> {
 	let mut lexer = TokenEnum::lexer(string);
 	let mut tokens = Vec::new();
+
+	// Open file for writing
+	let mut file = File::create(file)?;
 
 	loop {
 		// If this is None we're done reading, break out of the loop
@@ -204,23 +208,13 @@ fn lex_optional(string: &str, print: bool) -> Result<Vec<Token>> {
 			line = LINE
 		};
 
-		// Print and push token
-		if print {
-			println!("{token:?} [{line},{char}]");
-		}
+
+		// Write and push token
+		let out = format!("{token:?} [{line},{char}]\n");
+		file.write_all(out.as_bytes())?;
 
 		tokens.push(Token {token, line, char});
 	}
 
 	Ok(tokens)
-}
-
-/// Runs the lexer on a given input string
-pub fn lex(string: &str) -> Result<Vec<Token>> {
-	lex_optional(string, false)
-}
-
-/// Runs the lexer on a given input string and prints out tokens in bison format
-pub fn lex_and_print(string: &str) -> Result<Vec<Token>> {
-	lex_optional(string, true)
 }
