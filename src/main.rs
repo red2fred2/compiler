@@ -6,5 +6,6 @@
 pub mod lexer;
 
 fn main() {
-	lexer::lex(include_str!("../test.dm"));
+	let string = include_str!("../test.dm").to_string() + "\n";
+	lexer::lex(string.as_str());
 }
