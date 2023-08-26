@@ -1,10 +1,18 @@
 //! The lexer for the language
 
+use anyhow::Result;
 use logos::{Logos, Lexer};
 use std::fmt::Debug;
 
 static mut LINE: usize = 1;
 static mut LINE_START: usize = 0;
+
+#[allow(unused)]
+pub struct Token {
+	token: TokenEnum,
+	line: usize,
+	char: usize,
+}
 
 #[derive(Logos, PartialEq)]
 #[logos(skip r"[ \t\f]+")]
@@ -169,8 +177,9 @@ fn new_line(lexer: &mut Lexer<TokenEnum>) -> Option<()> {
 	Some(())
 }
 
-pub fn lex(string: &str) {
+fn lex_optional(string: &str, print: bool) -> Result<Vec<Token>> {
 	let mut lexer = TokenEnum::lexer(string);
+	let mut tokens = Vec::new();
 
 	loop {
 		// If this is None we're done reading, break out of the loop
@@ -195,6 +204,23 @@ pub fn lex(string: &str) {
 			line = LINE
 		};
 
-		println!("{token:?} [{line},{char}]");
+		// Print and push token
+		if print {
+			println!("{token:?} [{line},{char}]");
+		}
+
+		tokens.push(Token {token, line, char});
 	}
+
+	Ok(tokens)
+}
+
+/// Runs the lexer on a given input string
+pub fn lex(string: &str) -> Result<Vec<Token>> {
+	lex_optional(string, false)
+}
+
+/// Runs the lexer on a given input string and prints out tokens in bison format
+pub fn lex_and_print(string: &str) -> Result<Vec<Token>> {
+	lex_optional(string, true)
 }
