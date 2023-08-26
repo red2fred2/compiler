@@ -53,6 +53,50 @@ pub enum Token {
 	// String literals
 	#[regex("\"[^\"]*\"", copy)]
 	STRINGLITERAL(String),
+
+	// Operators
+	#[token("=")]
+	ASSIGN,
+	#[token(",")]
+	COMMA,
+	#[token("+")]
+	CROSS,
+	#[token("-")]
+	DASH,
+	#[token("==")]
+	EQUALS,
+	#[token(">")]
+	GREATER,
+	#[token(">=")]
+	GREATEREQ,
+	#[token("{")]
+	LCURLY,
+	#[token("<")]
+	LESS,
+	#[token("<=")]
+	LESSEQ,
+	#[token("(")]
+	LPAREN,
+	#[token("!")]
+	NOT,
+	#[token("!=")]
+	NOTEQUALS,
+	#[token(":")]
+	OTHER,
+	#[token("--")]
+	POSTDEC,
+	#[token("++")]
+	POSTINC,
+	#[token("}")]
+	RCURLY,
+	#[token(")")]
+	RPAREN,
+	#[token(";")]
+	SEMICOL,
+	#[token("/")]
+	SLASH,
+	#[token("*")]
+	STAR,
 }
 
 fn copy(lexer: &mut Lexer<Token>) -> Option<String> {
