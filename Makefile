@@ -8,7 +8,7 @@ default:
 
 compile:
 	@cargo build --release
-	@cp target/release/"$$(pwd | xargs basename)" .
+	@cp target/release/"$$(pwd | xargs basename)" ./dmc
 
 install-rust:
 	@echo "Installing rust in ~/.cargo"
