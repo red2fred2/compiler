@@ -36,7 +36,7 @@ pub enum TokenEnum {
 	#[regex(r"[\p{L}_][\p{L}_\d]*", copy)] ID(String),
 	#[token("if")] IF,
 	#[token("int")] INT,
-	#[regex(r"\d+", copy)] INTLITERAL(String),
+	#[regex(r"\d+", int)] INTLITERAL(String),
 	#[token("{")] LCURLY,
 	#[token("<")] LESS,
 	#[token("<=")] LESSEQ,
@@ -115,6 +115,17 @@ fn copy(lexer: &mut Lexer<TokenEnum>) -> Option<String> {
 	lexer.slice().parse().ok()
 }
 
+fn int(lexer: &mut Lexer<TokenEnum>) -> Option<String> {
+	let number: String = lexer.slice().parse().unwrap();
+
+	if number.parse::<i32>().is_err() {
+		start_err(lexer);
+		eprintln!("Integer literal overflow.");
+	}
+
+	Some(number)
+}
+
 fn new_line(lexer: &mut Lexer<TokenEnum>) -> Option<()> {
 	unsafe {
 		LINE += 1;
@@ -122,6 +133,31 @@ fn new_line(lexer: &mut Lexer<TokenEnum>) -> Option<()> {
 	}
 
 	Some(())
+}
+
+fn start_err(lexer: &Lexer<'_, TokenEnum>) {
+	let c1;
+	let c2;
+	let line;
+	unsafe {
+		c1 = lexer.span().start + 1 - LINE_START;
+		c2 = lexer.span().end + 1 - LINE_START;
+		line = LINE
+	};
+
+	eprint!("FATAL [{line},{c1}-{line},{c2}]: ");
+}
+
+fn lex_err(lexer: &Lexer<'_, TokenEnum>, string: &str) {
+	let index = lexer.span().start;
+	let character = string.chars().nth(index).unwrap();
+
+	start_err(lexer);
+
+	match character {
+		'"' => eprintln!("Unterminated string literal detected"),
+		_ => eprintln!("Illegal character {character}"),
+	}
 }
 
 /// Runs the lexer on a given input string
@@ -138,14 +174,13 @@ pub fn lex(string: &str, file: &str) -> Result<Vec<Token>> {
 
 		// If this isn't Ok no token was matched, print out an error
 		let Ok(token) = token else {
-			println!("aw crap");
-			break
+			lex_err(&lexer, &string);
+
+			continue
 		};
 
 		// Ignore certain helper tokens
-		if token == TokenEnum::HELPER {
-			continue
-		}
+		if token == TokenEnum::HELPER {continue}
 
 		// Figure out line and character position in flex style
 		let char;
