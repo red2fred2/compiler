@@ -16,6 +16,3 @@ install-rust:
 	@# This command can look super sketchy, but it is a standard way to install
 	@# Rust without a package manager: https://www.rust-lang.org/tools/install
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-run:
-	@cargo run --release
