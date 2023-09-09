@@ -206,12 +206,16 @@ fn lex_err(lexer: &Lexer<'_, TokenEnum>, string: &str) {
 }
 
 /// Runs the lexer on a given input string
-pub fn lex(string: &str, file: &str) -> Result<Vec<Token>> {
+pub fn lex(string: &str, write_path: Option<String>) -> Result<Vec<Token>> {
     let mut lexer = TokenEnum::lexer(string);
     let mut tokens = Vec::new();
 
-    // Open file for writing
-    let mut file = File::create(file)?;
+    // Open file for writing if enabled
+    let mut file = None;
+
+    if let Some(path) = write_path {
+        file = Some(File::create(path)?);
+    }
 
     loop {
         // If this is None we're done reading, break out of the loop
@@ -234,13 +238,16 @@ pub fn lex(string: &str, file: &str) -> Result<Vec<Token>> {
         let line;
         unsafe {
             char = lexer.span().start + 1 - LINE_START;
-            line = LINE
+            line = LINE;
         };
 
-        // Write and push token
-        let out = format!("{token:?} [{line},{char}]\n");
-        file.write_all(out.as_bytes())?;
+        // Write and push token if file writing is enabled
+        if let Some(file) = &mut file {
+            let out = format!("{token:?} [{line},{char}]\n");
+            file.write_all(out.as_bytes())?;
+        }
 
+        // Push the token into the list
         tokens.push(Token { token, line, char });
     }
 
@@ -249,7 +256,7 @@ pub fn lex(string: &str, file: &str) -> Result<Vec<Token>> {
     let line;
     unsafe {
         char = lexer.span().start + 1 - LINE_START;
-        line = LINE
+        line = LINE - 1;
     };
 
     tokens.push(Token {
@@ -257,6 +264,13 @@ pub fn lex(string: &str, file: &str) -> Result<Vec<Token>> {
         char,
         token: TokenEnum::EOF,
     });
+
+    // Write and push token if file writing is enabled
+    if let Some(file) = &mut file {
+        let t = TokenEnum::EOF;
+        let out = format!("{t:?} [{line},{char}]\n");
+        file.write_all(out.as_bytes())?;
+    }
 
     Ok(tokens)
 }

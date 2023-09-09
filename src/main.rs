@@ -16,7 +16,7 @@ struct Args {
     input_file: Option<String>,
     /// File to output token stream to
     #[arg(short, long)]
-    token_file: String,
+    token_file: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -24,7 +24,7 @@ fn main() -> Result<()> {
     let path = args.input_file.unwrap();
     let contents = std::fs::read_to_string(path)? + "\n";
 
-    lexer::lex(contents.as_str(), &args.token_file)?;
+    lexer::lex(contents.as_str(), args.token_file)?;
 
     Ok(())
 }
