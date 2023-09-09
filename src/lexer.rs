@@ -1,7 +1,7 @@
 //! The lexer for the language
 
 use anyhow::Result;
-use logos::{Logos, Lexer};
+use logos::{Lexer, Logos};
 use std::{fmt::Debug, fs::File, io::Write};
 
 static mut LINE: usize = 1;
@@ -9,57 +9,101 @@ static mut LINE_START: usize = 0;
 
 #[allow(unused)]
 pub struct Token {
-	token: TokenEnum,
-	line: usize,
-	char: usize,
+    token: TokenEnum,
+    line: usize,
+    char: usize,
 }
 
 #[derive(Logos, PartialEq)]
 #[logos(skip r"[ \t\f]+")]
 pub enum TokenEnum {
-	#[regex(r"(//[^\n]*\n|)|\n", new_line)] HELPER,
+    #[regex(r"(//[^\n]*\n|)|\n", new_line)]
+    HELPER,
 
-	#[token("and")] AND,
-	#[token("=")] ASSIGN,
-	#[token("bool")] BOOL,
-	#[token(",")] COMMA,
-	#[token("class")] CLASS,
-	#[token(":")] COLON,
-	#[token("+")] CROSS,
-	#[token("-")] DASH,
-	#[token("else")] ELSE,
-	#[token("==")] EQUALS,
-	#[token("today I don't feel like doing any work")] EXIT,
-	#[token("false")] #[token("too hot")] FALSE,
-	#[token("give")] GIVE,
-	#[token(">")] GREATER,
-	#[token(">=")] GREATEREQ,
-	#[regex(r"[\p{L}_][\p{L}_\d]*", copy)] ID(String),
-	#[token("if")] IF,
-	#[token("int")] INT,
-	#[regex(r"\d+", int)] INTLITERAL(String),
-	#[token("{")] LCURLY,
-	#[token("<")] LESS,
-	#[token("<=")] LESSEQ,
-	#[token("(")] LPAREN,
-	#[token("24Kmagic")] MAGIC,
-	#[token("!")] NOT,
-	#[token("!=")] NOTEQUALS,
-	#[token("or")] OR,
-	#[token("perfect")] PERFECT,
-	#[token("--")] POSTDEC,
-	#[token("++")] POSTINC,
-	#[token("}")] RCURLY,
-	#[token("return")] RETURN,
-	#[token(")")] RPAREN,
-	#[token(";")] SEMICOL,
-	#[token("/")] SLASH,
-	#[token("*")] STAR,
-	#[regex("\"[^\"]*\"", copy)] STRINGLITERAL(String),
-	#[token("take")] TAKE,
-	#[token("true")] TRUE,
-	#[token("void")] VOID,
-	#[token("while")] WHILE,
+    #[token("and")]
+    AND,
+    #[token("=")]
+    ASSIGN,
+    #[token("bool")]
+    BOOL,
+    #[token(",")]
+    COMMA,
+    #[token("class")]
+    CLASS,
+    #[token(":")]
+    COLON,
+    #[token("+")]
+    CROSS,
+    #[token("-")]
+    DASH,
+    #[token("else")]
+    ELSE,
+    EOF,
+    #[token("==")]
+    EQUALS,
+    #[token("today I don't feel like doing any work")]
+    EXIT,
+    #[token("false")]
+    #[token("too hot")]
+    FALSE,
+    #[token("give")]
+    GIVE,
+    #[token(">")]
+    GREATER,
+    #[token(">=")]
+    GREATEREQ,
+    #[regex(r"[\p{L}_][\p{L}_\d]*", copy)]
+    ID(String),
+    #[token("if")]
+    IF,
+    #[token("int")]
+    INT,
+    #[regex(r"\d+", int)]
+    INTLITERAL(String),
+    #[token("{")]
+    LCURLY,
+    #[token("<")]
+    LESS,
+    #[token("<=")]
+    LESSEQ,
+    #[token("(")]
+    LPAREN,
+    #[token("24Kmagic")]
+    MAGIC,
+    #[token("!")]
+    NOT,
+    #[token("!=")]
+    NOTEQUALS,
+    #[token("or")]
+    OR,
+    #[token("perfect")]
+    PERFECT,
+    #[token("--")]
+    POSTDEC,
+    #[token("++")]
+    POSTINC,
+    #[token("}")]
+    RCURLY,
+    #[token("return")]
+    RETURN,
+    #[token(")")]
+    RPAREN,
+    #[token(";")]
+    SEMICOL,
+    #[token("/")]
+    SLASH,
+    #[token("*")]
+    STAR,
+    #[regex("\"[^\"]*\"", copy)]
+    STRINGLITERAL(String),
+    #[token("take")]
+    TAKE,
+    #[token("true")]
+    TRUE,
+    #[token("void")]
+    VOID,
+    #[token("while")]
+    WHILE,
 }
 
 impl Debug for TokenEnum {
@@ -71,6 +115,7 @@ impl Debug for TokenEnum {
             Self::CLASS => write!(f, "CLASS"),
             Self::COLON => write!(f, "COLON"),
             Self::ELSE => write!(f, "ELSE"),
+            Self::EOF => write!(f, "EOF"),
             Self::EXIT => write!(f, "EXIT"),
             Self::FALSE => write!(f, "FALSE"),
             Self::GIVE => write!(f, "GIVE"),
@@ -112,91 +157,106 @@ impl Debug for TokenEnum {
 }
 
 fn copy(lexer: &mut Lexer<TokenEnum>) -> Option<String> {
-	lexer.slice().parse().ok()
+    lexer.slice().parse().ok()
 }
 
 fn int(lexer: &mut Lexer<TokenEnum>) -> Option<String> {
-	let number: String = lexer.slice().parse().unwrap();
+    let number: String = lexer.slice().parse().unwrap();
 
-	if number.parse::<i32>().is_err() {
-		start_err(lexer);
-		eprintln!("Integer literal overflow.");
-	}
+    if number.parse::<i32>().is_err() {
+        start_err(lexer);
+        eprintln!("Integer literal overflow.");
+    }
 
-	Some(number)
+    Some(number)
 }
 
 fn new_line(lexer: &mut Lexer<TokenEnum>) -> Option<()> {
-	unsafe {
-		LINE += 1;
-		LINE_START = lexer.span().end;
-	}
+    unsafe {
+        LINE += 1;
+        LINE_START = lexer.span().end;
+    }
 
-	Some(())
+    Some(())
 }
 
 fn start_err(lexer: &Lexer<'_, TokenEnum>) {
-	let c1;
-	let c2;
-	let line;
-	unsafe {
-		c1 = lexer.span().start + 1 - LINE_START;
-		c2 = lexer.span().end + 1 - LINE_START;
-		line = LINE
-	};
+    let c1;
+    let c2;
+    let line;
+    unsafe {
+        c1 = lexer.span().start + 1 - LINE_START;
+        c2 = lexer.span().end + 1 - LINE_START;
+        line = LINE
+    };
 
-	eprint!("FATAL [{line},{c1}-{line},{c2}]: ");
+    eprint!("FATAL [{line},{c1}-{line},{c2}]: ");
 }
 
 fn lex_err(lexer: &Lexer<'_, TokenEnum>, string: &str) {
-	let index = lexer.span().start;
-	let character = string.chars().nth(index).unwrap();
+    let index = lexer.span().start;
+    let character = string.chars().nth(index).unwrap();
 
-	start_err(lexer);
+    start_err(lexer);
 
-	match character {
-		'"' => eprintln!("Unterminated string literal detected"),
-		_ => eprintln!("Illegal character {character}"),
-	}
+    match character {
+        '"' => eprintln!("Unterminated string literal detected"),
+        _ => eprintln!("Illegal character {character}"),
+    }
 }
 
 /// Runs the lexer on a given input string
 pub fn lex(string: &str, file: &str) -> Result<Vec<Token>> {
-	let mut lexer = TokenEnum::lexer(string);
-	let mut tokens = Vec::new();
+    let mut lexer = TokenEnum::lexer(string);
+    let mut tokens = Vec::new();
 
-	// Open file for writing
-	let mut file = File::create(file)?;
+    // Open file for writing
+    let mut file = File::create(file)?;
 
-	loop {
-		// If this is None we're done reading, break out of the loop
-		let Some(token) = lexer.next() else {break};
+    loop {
+        // If this is None we're done reading, break out of the loop
+        let Some(token) = lexer.next() else { break };
 
-		// If this isn't Ok no token was matched, print out an error
-		let Ok(token) = token else {
-			lex_err(&lexer, &string);
+        // If this isn't Ok no token was matched, print out an error
+        let Ok(token) = token else {
+            lex_err(&lexer, &string);
 
-			continue
-		};
+            continue;
+        };
 
-		// Ignore certain helper tokens
-		if token == TokenEnum::HELPER {continue}
+        // Ignore certain helper tokens
+        if token == TokenEnum::HELPER {
+            continue;
+        }
 
-		// Figure out line and character position in flex style
-		let char;
-		let line;
-		unsafe {
-			char = lexer.span().start + 1 - LINE_START;
-			line = LINE
-		};
+        // Figure out line and character position in flex style
+        let char;
+        let line;
+        unsafe {
+            char = lexer.span().start + 1 - LINE_START;
+            line = LINE
+        };
 
+        // Write and push token
+        let out = format!("{token:?} [{line},{char}]\n");
+        file.write_all(out.as_bytes())?;
 
-		// Write and push token
-		let out = format!("{token:?} [{line},{char}]\n");
-		file.write_all(out.as_bytes())?;
+        tokens.push(Token { token, line, char });
+    }
 
-		tokens.push(Token {token, line, char});
-	}
+    // Figure out line and character position in flex style
+    let char;
+    let line;
+    unsafe {
+        char = lexer.span().start + 1 - LINE_START;
+        line = LINE
+    };
 
-	Ok(tokens)
+    tokens.push(Token {
+        line,
+        char,
+        token: TokenEnum::EOF,
+    });
+
+    Ok(tokens)
 }
