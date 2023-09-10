@@ -5,6 +5,9 @@
 
 use anyhow::{Ok, Result};
 use clap::Parser;
+use lalrpop_util::lalrpop_mod;
+
+lalrpop_mod!(pub grammar); // synthesized by LALRPOP
 
 pub mod lexer;
 pub mod parser;
@@ -30,7 +33,17 @@ fn main() -> Result<()> {
     let path = args.input_file;
     let contents = std::fs::read_to_string(path)? + "\n";
 
-    lexer::lex(contents.as_str(), args.token_file)?;
+    // Lexer
+    if args.token_file.is_some() {
+        lexer::lex(contents.as_str(), args.token_file)?;
+    }
+
+    // Parser
+    if args.parse {
+        let result = grammar::ProgramParser::new().parse(&contents);
+
+        println!("{result:?}");
+    }
 
     Ok(())
 }

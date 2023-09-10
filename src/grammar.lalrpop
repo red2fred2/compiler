@@ -1,0 +1,175 @@
+grammar;
+
+pub Program = {
+	Globals
+}
+
+Globals = {
+	Globals Declaration,
+	EPSILON,
+}
+
+Declaration = {
+	VariableDeclaration,
+	ClassDeclaration,
+	FunctionDeclaration,
+}
+
+VariableDeclaration = {
+	Id COLON Type SEMICOLON,
+	Id COLON Type ASSIGN Expression SEMICOLON,
+}
+
+Type = {
+	Primitive,
+	PERFECT Primitive,
+	Id,
+	PERFECT Id,
+}
+
+Primitive = {
+	INT,
+	BOOL,
+	VOID,
+}
+
+ClassDeclaration = {
+	Id COLON CLASS LCURLY ClassBody RCURLY SEMICOLON
+}
+
+ClassBody = {
+	ClassBody VariableDeclaration,
+	ClassBody FunctionDeclaration,
+	EPSILON,
+}
+
+FunctionDeclaration = {
+	Id COLON LPAREN Formals RPAREN Type LCURLY StatementList RCURLY,
+}
+
+Formals = {
+	FormalsList,
+	EPSILON,
+}
+
+FormalsList = {
+	FormalDeclaration,
+	FormalsList COMMA FormalDeclaration
+}
+
+FormalDeclaration = {Id COLON Type}
+
+StatementList = {
+	StatementList Statement SEMICOLON,
+	StatementList BlockStatement,
+	EPSILON,
+}
+
+BlockStatement = {
+	WHILE LPAREN Expression RPAREN LCURLY StatementList RCURLY,
+	IF LPAREN Expression RPAREN LCURLY StatementList RCURLY,
+	IF LPAREN Expression RPAREN LCURLY StatementList RCURLY ELSE LCURLY StatementList RCURLY,
+}
+
+Statement = {
+	VariableDeclaration,
+	Loc ASSIGN Expression,
+	Loc POSTDEC,
+	Loc POSTINC,
+	GIVE Expression,
+	TAKE Loc,
+	RETURN Expression,
+	RETURN,
+	EXIT,
+	CallExpression,
+}
+
+Expression = {
+	Expression DASH Expression,
+	Expression CROSS Expression,
+	Expression STAR Expression,
+	Expression SLASH Expression,
+	Expression AND Expression,
+	Expression OR Expression,
+	Expression EQUALS Expression,
+	Expression NOTEQUALS Expression,
+	Expression GREATER Expression,
+	Expression GREATEREQ Expression,
+	Expression LESS Expression,
+	Expression LESSEQ Expression,
+	NOT Expression,
+	DASH Term,
+	Term,
+}
+
+CallExpression = {
+	Id LPAREN RPAREN,
+	Id LPAREN ActualsList RPAREN,
+}
+
+ActualsList = {
+	Expression,
+	ActualsList COMMA Expression,
+}
+
+Term = {
+	Loc,
+	INTLITERAL,
+	STRINGLITERAL,
+	TRUE,
+	FALSE,
+	MAGIC,
+	LPAREN Expression RPAREN,
+	CallExpression,
+}
+
+Loc = {
+	Id,
+	Loc POSTDEC Id
+}
+
+Id = {ID}
+
+// Terminal symbols
+AND = {"and"}
+ASSIGN = {"="}
+BOOL = {"bool"}
+CLASS = {"class"}
+COLON = {":"}
+COMMA = {","}
+CROSS = {"+"}
+DASH = {"-"}
+ELSE = {"else"}
+EPSILON = {""}
+EQUALS = {"=="}
+EXIT = {"today I don't feel like doing any work"}
+FALSE = {"false"}
+GIVE = {"give"}
+GREATER = {">"}
+GREATEREQ = {">="}
+ID = {r"[\p{L}_][\p{L}_\d]*"}
+IF = {"if"}
+INT = {"int"}
+INTLITERAL = {r"\d+"}
+LCURLY = {"{"}
+LESS = {"<"}
+LESSEQ = {"<="}
+LPAREN = {"("}
+MAGIC = {"24Kmagic"}
+NOT = {"!"}
+NOTEQUALS = {"!="}
+OR = {"or"}
+PERFECT = {"perfect"}
+POSTDEC = {"--"}
+POSTINC = {"++"}
+RCURLY = {"}"}
+RETURN = {"return"}
+RPAREN = {")"}
+SEMICOLON = {";"}
+SLASH = {"/"}
+STAR = {"*"}
+STRINGLITERAL = {"\"[^\"]*\""}
+TAKE = {"take"}
+TRUE = {"true"}
+VOID = {"void"}
+WHILE = {"while"}
