@@ -1,5 +1,13 @@
 grammar;
 
+match {} else {
+    // Ignore comments
+	r"//[^\n\r]*[\n\r]*" => {},
+    // Ignore whitespace
+	r"\s*" => {},
+    _,
+}
+
 pub Program: () = {
 	Globals
 }
@@ -34,7 +42,7 @@ Primitive: () = {
 }
 
 ClassDeclaration: () = {
-	Id COLON CLASS LCURLY ClassBody RCURLY SEMICOLON
+	Id COLON CLASS LCURLY ClassBody RCURLY SEMICOLON,
 }
 
 ClassBody: () = {
@@ -43,7 +51,7 @@ ClassBody: () = {
 	EPSILON,
 }
 
-pub FunctionDeclaration: () = {
+FunctionDeclaration: () = {
 	Id COLON LPAREN Formals RPAREN Type LCURLY StatementList RCURLY,
 }
 
@@ -60,7 +68,7 @@ FormalsList: () = {
 FormalDeclaration: () = {Id COLON Type}
 
 StatementList: () = {
-	StatementList Statement SEMICOLON,
+	StatementList Statement,
 	StatementList BlockStatement,
 	EPSILON,
 }
@@ -73,15 +81,15 @@ BlockStatement: () = {
 
 Statement: () = {
 	VariableDeclaration,
-	Loc ASSIGN Expression,
-	Loc POSTDEC,
-	Loc POSTINC,
-	GIVE Expression,
-	TAKE Loc,
-	RETURN Expression,
-	RETURN,
-	EXIT,
-	CallExpression,
+	Loc ASSIGN Expression SEMICOLON,
+	Loc POSTDEC SEMICOLON,
+	Loc POSTINC SEMICOLON,
+	GIVE Expression SEMICOLON,
+	TAKE Loc SEMICOLON,
+	RETURN Expression SEMICOLON,
+	RETURN SEMICOLON,
+	EXIT SEMICOLON,
+	CallExpression SEMICOLON,
 }
 
 Expression: () = {
