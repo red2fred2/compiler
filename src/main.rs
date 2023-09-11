@@ -42,7 +42,9 @@ fn main() -> Result<()> {
     if args.parse {
         let result = grammar::ProgramParser::new().parse(&contents);
 
-        println!("{result:?}");
+        if !result.is_ok() {
+            eprintln!("syntax error\nParse failed");
+        }
     }
 
     Ok(())
