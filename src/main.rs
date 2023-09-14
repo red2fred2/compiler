@@ -10,7 +10,6 @@ use lalrpop_util::lalrpop_mod;
 lalrpop_mod!(pub grammar); // synthesized by LALRPOP
 
 pub mod lexer;
-pub mod parser;
 
 /// Drewno Mars language compiler
 #[derive(Parser, Debug)]
