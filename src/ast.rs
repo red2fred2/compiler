@@ -8,6 +8,8 @@ use std::{cell::RefCell, rc::Rc};
 
 pub trait Declaration: std::fmt::Debug {}
 
+pub trait Expression {}
+
 pub trait List<T> {
     fn add(&mut self, item: T) {
         let mut storage = self.__get_list();
@@ -17,13 +19,28 @@ pub trait List<T> {
     fn __get_list(&mut self) -> &mut Vec<T>;
 }
 
+// Enums
+
+#[derive(Debug)]
+pub enum Boolean {
+    FALSE,
+    TRUE,
+}
+impl Expression for Boolean {}
+
+#[derive(Debug)]
+pub enum Primitive {
+    BOOL,
+    INT,
+    VOID,
+}
+
 // Structs
 
 #[derive(Debug)]
 pub struct Loc {
     pub name: String,
 }
-
 impl Loc {
     pub fn new_from_id(id: Id) -> Self {
         let name = id.name;
@@ -45,14 +62,12 @@ pub struct Id {
 pub struct Program {
     declarations: Vec<Rc<RefCell<dyn Declaration>>>,
 }
-
 impl Program {
     pub fn new() -> Self {
         let declarations = Vec::new();
         Self { declarations }
     }
 }
-
 impl List<Rc<RefCell<dyn Declaration>>> for Program {
     fn __get_list(&mut self) -> &mut Vec<Rc<RefCell<dyn Declaration>>> {
         &mut self.declarations
