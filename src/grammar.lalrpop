@@ -141,7 +141,7 @@ Expression6: () = {
 	Term,
 }
 
-CallExpression: () = {
+CallExpression: CallExpression = {
 	Id LPAREN RPAREN,
 	Id LPAREN ActualsList RPAREN,
 }
