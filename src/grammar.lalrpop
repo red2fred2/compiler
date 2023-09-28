@@ -1,4 +1,4 @@
-// use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::ast::*;
 
@@ -151,15 +151,15 @@ ActualsList: () = {
 	ActualsList COMMA Expression,
 }
 
-Term: () = {
-	Loc,
-	INTLITERAL,
-	STRINGLITERAL,
-	TRUE,
-	FALSE,
-	MAGIC,
-	LPAREN Expression RPAREN,
-	CallExpression,
+pub Term: Rc<RefCell<dyn Expression>> = {
+	<loc: Loc> => rc(loc),
+	<int: INTLITERAL> => rc(IntegerLiteral::new(int)),
+	<string: STRINGLITERAL> => rc(StringLiteral::new(string)),
+	TRUE => rc(Boolean::TRUE),
+	FALSE => rc(Boolean::FALSE),
+	MAGIC => rc(Magic {}),
+	// LPAREN <Expression> RPAREN,
+	// <CallExpression>,
 }
 
 Loc: Loc = {
