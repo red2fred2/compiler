@@ -167,7 +167,9 @@ Loc: Loc = {
 	<loc: Loc> POSTDEC <id: Id> => Loc::new_from_loc(loc, id),
 }
 
-Id: Id = {ID}
+Id: Id = {
+	<name: ID> => Id {name: name.to_string()},
+}
 
 // Terminal symbols
 AND = {"and"}
@@ -186,9 +188,7 @@ FALSE = {"false"}
 GIVE = {"give"}
 GREATER = {">"}
 GREATEREQ = {">="}
-ID: Id = {
-	<name: r"[a-zA-Z_][a-zA-Z_\d]*"> => Id {name: name.to_string()},
-}
+ID = {r"[a-zA-Z_][a-zA-Z_\d]*"}
 IF = {"if"}
 INT = {"int"}
 INTLITERAL = {r"\d+"}
