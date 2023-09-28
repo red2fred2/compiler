@@ -46,10 +46,6 @@ pub enum Primitive {
 // Structs
 
 #[derive(Debug)]
-pub struct Magic {}
-impl Expression for Magic {}
-
-#[derive(Debug)]
 pub struct Id {
     pub name: String,
 }
@@ -82,6 +78,10 @@ impl Loc {
     }
 }
 impl Expression for Loc {}
+
+#[derive(Debug)]
+pub struct Magic {}
+impl Expression for Magic {}
 
 #[derive(Debug)]
 pub struct Program {
