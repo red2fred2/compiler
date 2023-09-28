@@ -4,6 +4,8 @@
 
 use std::{cell::RefCell, rc::Rc};
 
+// Traits
+
 pub trait Declaration: std::fmt::Debug {}
 
 pub trait List<T> {
@@ -13,6 +15,30 @@ pub trait List<T> {
         storage.push(value);
     }
     fn __get_list(&mut self) -> &mut Vec<T>;
+}
+
+// Structs
+
+#[derive(Debug)]
+pub struct Loc {
+    pub name: String,
+}
+
+impl Loc {
+    pub fn new_from_id(id: Id) -> Self {
+        let name = id.name;
+        Self { name }
+    }
+
+    pub fn new_from_loc(loc: Loc, id: Id) -> Self {
+        let name = format!("{}--{}", loc.name, id.name);
+        Self { name }
+    }
+}
+
+#[derive(Debug)]
+pub struct Id {
+    pub name: String,
 }
 
 #[derive(Debug)]
@@ -31,9 +57,4 @@ impl List<Rc<RefCell<dyn Declaration>>> for Program {
     fn __get_list(&mut self) -> &mut Vec<Rc<RefCell<dyn Declaration>>> {
         &mut self.declarations
     }
-}
-
-#[derive(Debug)]
-pub struct Id {
-    pub name: String,
 }

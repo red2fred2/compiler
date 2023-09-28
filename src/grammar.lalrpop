@@ -162,12 +162,12 @@ Term: () = {
 	CallExpression,
 }
 
-Loc: () = {
-	Id,
-	Loc POSTDEC Id
+pub Loc: Loc = {
+	<id: Id> => Loc::new_from_id(id),
+	<loc: Loc> POSTDEC <id: Id> => Loc::new_from_loc(loc, id),
 }
 
-pub Id: Id = {
+Id: Id = {
 	<name: ID> => Id {name: name.to_string()},
 }
 

@@ -40,7 +40,7 @@ fn main() -> Result<()> {
 
     // Parser
     if args.parse {
-        let result = grammar::IdParser::new().parse(&contents);
+        let result = grammar::LocParser::new().parse(&contents);
 
         println!("{result:?}");
 
