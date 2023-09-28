@@ -1,3 +1,5 @@
+use crate::ast::*;
+
 grammar;
 
 match {} else {
@@ -8,8 +10,8 @@ match {} else {
     _,
 }
 
-pub Program: () = {
-	Globals
+pub Program: Program = {
+	Globals => Program::new(),
 }
 
 Globals: () = {
