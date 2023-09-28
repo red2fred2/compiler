@@ -1,3 +1,5 @@
+// use std::{cell::RefCell, rc::Rc};
+
 use crate::ast::*;
 
 grammar;
@@ -10,12 +12,15 @@ match {} else {
     _,
 }
 
-pub Program: Program = {
-	Globals => Program::new(),
+pub Program: () = {
+	Globals,
 }
 
 Globals: () = {
-	Globals Declaration,
+	// <program: Globals> <declaration: Declaration> => {
+	// 	program.add(declaration);
+	// 	program
+	// },
 	EPSILON,
 }
 
@@ -162,7 +167,9 @@ Loc: () = {
 	Loc POSTDEC Id
 }
 
-Id: () = {ID}
+pub Id: Id = {
+	<name: ID> => Id {name: name.to_string()},
+}
 
 // Terminal symbols
 AND = {"and"}
