@@ -111,29 +111,51 @@ Expression1: Rc<RefCell<dyn Expression>> = {
 }
 
 Expression2: Rc<RefCell<dyn Expression>> = {
-    <left: Expression2> AND <right: Expression3> => rc(BinaryExpression { left, right, operator: Operator::AND }),
+    <left: Expression2> AND <right: Expression3> => {
+        rc(BinaryExpression { left, right, operator: Operator::AND })
+    },
     <Expression3>,
 }
 
 Expression3: Rc<RefCell<dyn Expression>> = {
-    <left: Expression3> EQUALS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::EQUALS }),
-    <left: Expression3> NOTEQUALS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::NOTEQUALS }),
-    <left: Expression3> GREATER <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::GREATER }),
-    <left: Expression3> GREATEREQ <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::GREATEREQ }),
-    <left: Expression3> LESS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::LESS }),
-    <left: Expression3> LESSEQ <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::LESSEQ }),
+    <left: Expression3> EQUALS <right: Expression4> => {
+        rc(BinaryExpression { left, right, operator: Operator::EQUALS })
+    },
+    <left: Expression3> NOTEQUALS <right: Expression4> => {
+        rc(BinaryExpression { left, right, operator: Operator::NOTEQUALS })
+    },
+    <left: Expression3> GREATER <right: Expression4> => {
+        rc(BinaryExpression { left, right, operator: Operator::GREATER })
+    },
+    <left: Expression3> GREATEREQ <right: Expression4> => {
+        rc(BinaryExpression { left, right, operator: Operator::GREATEREQ })
+    },
+    <left: Expression3> LESS <right: Expression4> => {
+        rc(BinaryExpression { left, right, operator: Operator::LESS })
+    },
+    <left: Expression3> LESSEQ <right: Expression4> => {
+        rc(BinaryExpression { left, right, operator: Operator::LESSEQ })
+    },
     <Expression4>,
 }
 
 Expression4: Rc<RefCell<dyn Expression>> = {
-    <left: Expression4> DASH <right: Expression5> => rc(BinaryExpression { left, right, operator: Operator::SUBTRACT }),
-    <left: Expression4> CROSS <right: Expression5> => rc(BinaryExpression { left, right, operator: Operator::ADD }),
+    <left: Expression4> DASH <right: Expression5> => {
+        rc(BinaryExpression { left, right, operator: Operator::SUBTRACT })
+    },
+    <left: Expression4> CROSS <right: Expression5> => {
+        rc(BinaryExpression { left, right, operator: Operator::ADD })
+    },
     <Expression5>,
 }
 
 Expression5: Rc<RefCell<dyn Expression>> = {
-    <left: Expression5> STAR <right: Expression6> => rc(BinaryExpression { left, right, operator: Operator::MULTIPLY }),
-    <left: Expression5> SLASH <right: Expression6> => rc(BinaryExpression { left, right, operator: Operator::DIVIDE }),
+    <left: Expression5> STAR <right: Expression6> => {
+        rc(BinaryExpression { left, right, operator: Operator::MULTIPLY })
+    },
+    <left: Expression5> SLASH <right: Expression6> => {
+        rc(BinaryExpression { left, right, operator: Operator::DIVIDE })
+    },
     <Expression6>,
 }
 
