@@ -135,13 +135,17 @@ Expression5:() = {
 	Expression6,
 }
 
-Expression6: () = {
-	DASH Expression6,
-	NOT Expression6,
-	Term,
+pub Expression6: Rc<RefCell<dyn Expression>> = {
+	DASH <expression: Expression6> => {
+		rc(Negative { expression })
+	},
+	NOT <expression: Expression6> => {
+		rc(Not { expression })
+	},
+	<Term>,
 }
 
-pub CallExpression: CallExpression = {
+CallExpression: CallExpression = {
 	<id: Id> LPAREN <actuals: ActualsList> RPAREN => {
 		CallExpression { id, actuals }
 	},
@@ -154,10 +158,10 @@ pub CallExpression: CallExpression = {
 ActualsList: Actuals = {
 	// Expression,
 	// ActualsList COMMA Expression,
-	<expression: Term> => {
+	<expression: Expression6> => {
 		vec![expression]
 	},
-	<mut list: ActualsList> COMMA <expression: Term> => {
+	<mut list: ActualsList> COMMA <expression: Expression6> => {
 		list.push(expression);
 		list
 	},
@@ -170,9 +174,9 @@ Term: Rc<RefCell<dyn Expression>> = {
 	TRUE => rc(Boolean::TRUE),
 	FALSE => rc(Boolean::FALSE),
 	MAGIC => rc(Magic {}),
-	LPAREN <Term> RPAREN,
+	LPAREN <Expression6> RPAREN,
 	// LPAREN <Expression> RPAREN,
-	// <CallExpression>,
+	<expression: CallExpression> => rc(expression),
 }
 
 Loc: Loc = {

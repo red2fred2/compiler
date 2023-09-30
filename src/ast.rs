@@ -84,6 +84,18 @@ pub struct Magic {}
 impl Expression for Magic {}
 
 #[derive(Debug)]
+pub struct Negative {
+    pub expression: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Negative {}
+
+#[derive(Debug)]
+pub struct Not {
+    pub expression: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Not {}
+
+#[derive(Debug)]
 pub struct StringLiteral {
     pub value: String,
 }
