@@ -1,5 +1,12 @@
 //! Since Rust doesn't have inheritance, I'm going to use traits and we'll see
 //! if it turns into a nightmare.
+//!
+//! The lack of inherited storage in rust makes it a bit annoying, since you can't
+//! just define a node that holds two others and inherit from that.
+//!
+//! Rust's strict memory rules front loaded a lot of the pain, though I'd much
+//! rather deal with typing RefCell 100 times than dealing with C trying to shove
+//! something where it doesn't belong.
 #![allow(unused)]
 
 use std::{cell::RefCell, rc::Rc, str::FromStr};
@@ -46,6 +53,13 @@ pub struct CallExpression {
 impl Expression for CallExpression {}
 
 #[derive(Debug)]
+pub struct Divide {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Divide {}
+
+#[derive(Debug)]
 pub struct Id {
     pub name: String,
 }
@@ -82,6 +96,13 @@ impl Expression for Loc {}
 #[derive(Debug)]
 pub struct Magic {}
 impl Expression for Magic {}
+
+#[derive(Debug)]
+pub struct Multiply {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Multiply {}
 
 #[derive(Debug)]
 pub struct Negative {
