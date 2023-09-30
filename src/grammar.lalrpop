@@ -141,12 +141,17 @@ Expression6: () = {
 	Term,
 }
 
-CallExpression: () = {
-	Id LPAREN RPAREN,
-	Id LPAREN ActualsList RPAREN,
+pub CallExpression: CallExpression = {
+	<id: Id> LPAREN <actuals: ActualsList> RPAREN => {
+		CallExpression { id, actuals }
+	},
+	<id: Id> LPAREN  RPAREN => {
+		let actuals = Vec::new();
+		CallExpression { id, actuals }
+	},
 }
 
-pub ActualsList: Actuals = {
+ActualsList: Actuals = {
 	// Expression,
 	// ActualsList COMMA Expression,
 	<expression: Term> => {

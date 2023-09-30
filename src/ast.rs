@@ -39,6 +39,13 @@ pub enum Primitive {
 pub type Actuals = Vec<Rc<RefCell<dyn Expression>>>;
 
 #[derive(Debug)]
+pub struct CallExpression {
+    pub id: Id,
+    pub actuals: Actuals,
+}
+impl Expression for CallExpression {}
+
+#[derive(Debug)]
 pub struct Id {
     pub name: String,
 }

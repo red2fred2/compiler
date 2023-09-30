@@ -40,7 +40,7 @@ fn main() -> Result<()> {
 
     // Parser
     if args.parse {
-        let result = grammar::ActualsListParser::new().parse(&contents);
+        let result = grammar::CallExpressionParser::new().parse(&contents);
 
         println!("{result:#?}");
 
