@@ -6,185 +6,185 @@ grammar;
 
 match {} else {
     // Ignore comments
-	r"//[^\n\r]*[\n\r]*" => {},
+    r"//[^\n\r]*[\n\r]*" => {},
     // Ignore whitespace
-	r"\s*" => {},
+    r"\s*" => {},
     _,
 }
 
 pub Program: () = {
-	Globals,
+    Globals,
 }
 
 Globals: () = {
-	// <program: Globals> <declaration: Declaration> => {
-	// 	program.add(declaration);
-	// 	program
-	// },
-	EPSILON,
+    // <program: Globals> <declaration: Declaration> => {
+    // 	program.add(declaration);
+    // 	program
+    // },
+    EPSILON,
 }
 
 Declaration: () = {
-	VariableDeclaration,
-	ClassDeclaration,
-	FunctionDeclaration,
+    VariableDeclaration,
+    ClassDeclaration,
+    FunctionDeclaration,
 }
 
 VariableDeclaration: () = {
-	Id COLON Type SEMICOLON,
-	Id COLON Type ASSIGN Expression SEMICOLON,
+    Id COLON Type SEMICOLON,
+    Id COLON Type ASSIGN Expression SEMICOLON,
 }
 
 Type: () = {
-	Primitive,
-	PERFECT Primitive,
-	Id,
-	PERFECT Id,
+    Primitive,
+    PERFECT Primitive,
+    Id,
+    PERFECT Id,
 }
 
 pub Primitive: Primitive = {
-	INT => Primitive::INT,
-	BOOL => Primitive::BOOL,
-	VOID => Primitive::VOID,
+    INT => Primitive::INT,
+    BOOL => Primitive::BOOL,
+    VOID => Primitive::VOID,
 }
 
 ClassDeclaration: () = {
-	Id COLON CLASS LCURLY ClassBody RCURLY SEMICOLON,
+    Id COLON CLASS LCURLY ClassBody RCURLY SEMICOLON,
 }
 
 ClassBody: () = {
-	ClassBody VariableDeclaration,
-	ClassBody FunctionDeclaration,
-	EPSILON,
+    ClassBody VariableDeclaration,
+    ClassBody FunctionDeclaration,
+    EPSILON,
 }
 
 FunctionDeclaration: () = {
-	Id COLON LPAREN Formals RPAREN Type LCURLY StatementList RCURLY,
+    Id COLON LPAREN Formals RPAREN Type LCURLY StatementList RCURLY,
 }
 
 Formals: () = {
-	FormalsList,
-	EPSILON,
+    FormalsList,
+    EPSILON,
 }
 
 FormalsList: () = {
-	FormalDeclaration,
-	FormalDeclaration COMMA FormalsList
+    FormalDeclaration,
+    FormalDeclaration COMMA FormalsList
 }
 
 FormalDeclaration: () = {Id COLON Type}
 
 StatementList: () = {
-	StatementList Statement,
-	StatementList BlockStatement,
-	EPSILON,
+    StatementList Statement,
+    StatementList BlockStatement,
+    EPSILON,
 }
 
 BlockStatement: () = {
-	WHILE LPAREN Expression RPAREN LCURLY StatementList RCURLY,
-	IF LPAREN Expression RPAREN LCURLY StatementList RCURLY,
-	IF LPAREN Expression RPAREN LCURLY StatementList RCURLY ELSE LCURLY StatementList RCURLY,
+    WHILE LPAREN Expression RPAREN LCURLY StatementList RCURLY,
+    IF LPAREN Expression RPAREN LCURLY StatementList RCURLY,
+    IF LPAREN Expression RPAREN LCURLY StatementList RCURLY ELSE LCURLY StatementList RCURLY,
 }
 
 Statement: () = {
-	VariableDeclaration,
-	Loc ASSIGN Expression SEMICOLON,
-	Loc POSTDEC SEMICOLON,
-	Loc POSTINC SEMICOLON,
-	GIVE Expression SEMICOLON,
-	TAKE Loc SEMICOLON,
-	RETURN Expression SEMICOLON,
-	RETURN SEMICOLON,
-	EXIT SEMICOLON,
-	CallExpression SEMICOLON,
+    VariableDeclaration,
+    Loc ASSIGN Expression SEMICOLON,
+    Loc POSTDEC SEMICOLON,
+    Loc POSTINC SEMICOLON,
+    GIVE Expression SEMICOLON,
+    TAKE Loc SEMICOLON,
+    RETURN Expression SEMICOLON,
+    RETURN SEMICOLON,
+    EXIT SEMICOLON,
+    CallExpression SEMICOLON,
 }
 
 pub Expression: Rc<RefCell<dyn Expression>> = {
-	<Expression1>,
+    <Expression1>,
 }
 
 Expression1: Rc<RefCell<dyn Expression>> = {
-	<left: Expression1> OR <right: Expression2> => {
-		rc(BinaryExpression { left, right, operator: Operator::OR })
-	},
-	<Expression2>
+    <left: Expression1> OR <right: Expression2> => {
+        rc(BinaryExpression { left, right, operator: Operator::OR })
+    },
+    <Expression2>
 }
 
 Expression2: Rc<RefCell<dyn Expression>> = {
-	<left: Expression2> AND <right: Expression3> => rc(BinaryExpression { left, right, operator: Operator::AND }),
-	<Expression3>,
+    <left: Expression2> AND <right: Expression3> => rc(BinaryExpression { left, right, operator: Operator::AND }),
+    <Expression3>,
 }
 
 Expression3: Rc<RefCell<dyn Expression>> = {
-	<left: Expression3> EQUALS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::EQUALS }),
-	<left: Expression3> NOTEQUALS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::NOTEQUALS }),
-	<left: Expression3> GREATER <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::GREATER }),
-	<left: Expression3> GREATEREQ <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::GREATEREQ }),
-	<left: Expression3> LESS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::LESS }),
-	<left: Expression3> LESSEQ <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::LESSEQ }),
-	<Expression4>,
+    <left: Expression3> EQUALS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::EQUALS }),
+    <left: Expression3> NOTEQUALS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::NOTEQUALS }),
+    <left: Expression3> GREATER <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::GREATER }),
+    <left: Expression3> GREATEREQ <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::GREATEREQ }),
+    <left: Expression3> LESS <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::LESS }),
+    <left: Expression3> LESSEQ <right: Expression4> => rc(BinaryExpression { left, right, operator: Operator::LESSEQ }),
+    <Expression4>,
 }
 
 Expression4: Rc<RefCell<dyn Expression>> = {
-	<left: Expression4> DASH <right: Expression5> => rc(BinaryExpression { left, right, operator: Operator::SUBTRACT }),
-	<left: Expression4> CROSS <right: Expression5> => rc(BinaryExpression { left, right, operator: Operator::ADD }),
-	<Expression5>,
+    <left: Expression4> DASH <right: Expression5> => rc(BinaryExpression { left, right, operator: Operator::SUBTRACT }),
+    <left: Expression4> CROSS <right: Expression5> => rc(BinaryExpression { left, right, operator: Operator::ADD }),
+    <Expression5>,
 }
 
 Expression5: Rc<RefCell<dyn Expression>> = {
-	<left: Expression5> STAR <right: Expression6> => rc(BinaryExpression { left, right, operator: Operator::MULTIPLY }),
-	<left: Expression5> SLASH <right: Expression6> => rc(BinaryExpression { left, right, operator: Operator::DIVIDE }),
-	<Expression6>,
+    <left: Expression5> STAR <right: Expression6> => rc(BinaryExpression { left, right, operator: Operator::MULTIPLY }),
+    <left: Expression5> SLASH <right: Expression6> => rc(BinaryExpression { left, right, operator: Operator::DIVIDE }),
+    <Expression6>,
 }
 
 Expression6: Rc<RefCell<dyn Expression>> = {
-	DASH <expression: Expression6> => {
-		rc(UnaryExpression { expression, operator: Operator::NEGATIVE })
-	},
-	NOT <expression: Expression6> => {
-		rc(UnaryExpression { expression, operator: Operator::NOT })
-	},
-	<Term>,
+    DASH <expression: Expression6> => {
+        rc(UnaryExpression { expression, operator: Operator::NEGATIVE })
+    },
+    NOT <expression: Expression6> => {
+        rc(UnaryExpression { expression, operator: Operator::NOT })
+    },
+    <Term>,
 }
 
 CallExpression: CallExpression = {
-	<id: Id> LPAREN <actuals: ActualsList> RPAREN => {
-		CallExpression { id, actuals }
-	},
-	<id: Id> LPAREN  RPAREN => {
-		let actuals = Vec::new();
-		CallExpression { id, actuals }
-	},
+    <id: Id> LPAREN <actuals: ActualsList> RPAREN => {
+        CallExpression { id, actuals }
+    },
+    <id: Id> LPAREN  RPAREN => {
+        let actuals = Vec::new();
+        CallExpression { id, actuals }
+    },
 }
 
 ActualsList: Actuals = {
-	<expression: Expression> => {
-		vec![expression]
-	},
-	<mut list: ActualsList> COMMA <expression: Expression> => {
-		list.push(expression);
-		list
-	},
+    <expression: Expression> => {
+        vec![expression]
+    },
+    <mut list: ActualsList> COMMA <expression: Expression> => {
+        list.push(expression);
+        list
+    },
 }
 
 Term: Rc<RefCell<dyn Expression>> = {
-	<loc: Loc> => rc(loc),
-	<int: INTLITERAL> => rc(IntegerLiteral::new(int)),
-	<string: STRINGLITERAL> => rc(StringLiteral::new(string)),
-	TRUE => rc(Boolean::TRUE),
-	FALSE => rc(Boolean::FALSE),
-	MAGIC => rc(Magic {}),
-	LPAREN <Expression> RPAREN,
-	<expression: CallExpression> => rc(expression),
+    <loc: Loc> => rc(loc),
+    <int: INTLITERAL> => rc(IntegerLiteral::new(int)),
+    <string: STRINGLITERAL> => rc(StringLiteral::new(string)),
+    TRUE => rc(Boolean::TRUE),
+    FALSE => rc(Boolean::FALSE),
+    MAGIC => rc(Magic {}),
+    LPAREN <Expression> RPAREN,
+    <expression: CallExpression> => rc(expression),
 }
 
 Loc: Loc = {
-	<id: Id> => Loc::new_from_id(id),
-	<loc: Loc> POSTDEC <id: Id> => Loc::new_from_loc(loc, id),
+    <id: Id> => Loc::new_from_id(id),
+    <loc: Loc> POSTDEC <id: Id> => Loc::new_from_loc(loc, id),
 }
 
 Id: Id = {
-	<name: ID> => Id {name: name.to_string()},
+    <name: ID> => Id {name: name.to_string()},
 }
 
 // Terminal symbols
