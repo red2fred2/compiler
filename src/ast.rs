@@ -1,9 +1,6 @@
 //! Since Rust doesn't have inheritance, I'm going to use traits and we'll see
 //! if it turns into a nightmare.
 //!
-//! The lack of inherited storage in rust makes it a bit annoying, since you can't
-//! just define a node that holds two others and inherit from that.
-//!
 //! Rust's strict memory rules front loaded a lot of the pain, though I'd much
 //! rather deal with typing RefCell 100 times than dealing with C trying to shove
 //! something where it doesn't belong.
@@ -35,6 +32,24 @@ pub enum Boolean {
 impl Expression for Boolean {}
 
 #[derive(Debug)]
+pub enum Operator {
+    ADD,
+    AND,
+    DIVIDE,
+    EQUALS,
+    GREATER,
+    GREATEREQ,
+    LESS,
+    LESSEQ,
+    MULTIPLY,
+    NEGATIVE,
+    NOT,
+    NOTEQUALS,
+    OR,
+    SUBTRACT,
+}
+
+#[derive(Debug)]
 pub enum Primitive {
     BOOL,
     INT,
@@ -46,18 +61,12 @@ pub enum Primitive {
 pub type Actuals = Vec<Rc<RefCell<dyn Expression>>>;
 
 #[derive(Debug)]
-pub struct Add {
+pub struct BinaryExpression {
     pub left: Rc<RefCell<dyn Expression>>,
     pub right: Rc<RefCell<dyn Expression>>,
+    pub operator: Operator,
 }
-impl Expression for Add {}
-
-#[derive(Debug)]
-pub struct And {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for And {}
+impl Expression for BinaryExpression {}
 
 #[derive(Debug)]
 pub struct CallExpression {
@@ -65,34 +74,6 @@ pub struct CallExpression {
     pub actuals: Actuals,
 }
 impl Expression for CallExpression {}
-
-#[derive(Debug)]
-pub struct Divide {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Divide {}
-
-#[derive(Debug)]
-pub struct Equals {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Equals {}
-
-#[derive(Debug)]
-pub struct Greater {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Greater {}
-
-#[derive(Debug)]
-pub struct GreaterEq {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for GreaterEq {}
 
 #[derive(Debug)]
 pub struct Id {
@@ -110,20 +91,6 @@ impl IntegerLiteral {
     }
 }
 impl Expression for IntegerLiteral {}
-
-#[derive(Debug)]
-pub struct Less {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Less {}
-
-#[derive(Debug)]
-pub struct LessEq {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for LessEq {}
 
 #[derive(Debug)]
 pub struct Loc {
@@ -147,39 +114,6 @@ pub struct Magic {}
 impl Expression for Magic {}
 
 #[derive(Debug)]
-pub struct Multiply {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Multiply {}
-
-#[derive(Debug)]
-pub struct Negative {
-    pub expression: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Negative {}
-
-#[derive(Debug)]
-pub struct Not {
-    pub expression: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Not {}
-
-#[derive(Debug)]
-pub struct NotEquals {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for NotEquals {}
-
-#[derive(Debug)]
-pub struct Or {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-}
-impl Expression for Or {}
-
-#[derive(Debug)]
 pub struct StringLiteral {
     pub value: String,
 }
@@ -195,8 +129,8 @@ impl StringLiteral {
 impl Expression for StringLiteral {}
 
 #[derive(Debug)]
-pub struct Subtract {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
+pub struct UnaryExpression {
+    pub expression: Rc<RefCell<dyn Expression>>,
+    pub operator: Operator,
 }
-impl Expression for Subtract {}
+impl Expression for UnaryExpression {}
