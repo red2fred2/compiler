@@ -99,21 +99,21 @@ Statement: () = {
 	CallExpression SEMICOLON,
 }
 
-pub Expression: () = {
-	Expression1,
+pub Expression: Rc<RefCell<dyn Expression>> = {
+	<Expression1>,
 }
 
-Expression1:() = {
-	Expression1 OR Expression2,
-	Expression2
+Expression1: Rc<RefCell<dyn Expression>> = {
+	<left: Expression1> OR <right: Expression2> => rc(Or { left, right }),
+	<Expression2>
 }
 
-Expression2:() = {
-	Expression2 AND Expression3,
-	Expression3,
+Expression2: Rc<RefCell<dyn Expression>> = {
+	<left: Expression2> AND <right: Expression3> => rc(And { left, right }),
+	<Expression3>,
 }
 
-pub Expression3: Rc<RefCell<dyn Expression>> = {
+Expression3: Rc<RefCell<dyn Expression>> = {
 	<left: Expression3> EQUALS <right: Expression4> => rc(Equals { left, right }),
 	<left: Expression3> NOTEQUALS <right: Expression4> => rc(NotEquals { left, right }),
 	<left: Expression3> GREATER <right: Expression4> => rc(Greater { left, right }),
@@ -156,26 +156,23 @@ CallExpression: CallExpression = {
 }
 
 ActualsList: Actuals = {
-	// Expression,
-	// ActualsList COMMA Expression,
-	<expression: Expression3> => {
+	<expression: Expression> => {
 		vec![expression]
 	},
-	<mut list: ActualsList> COMMA <expression: Expression3> => {
+	<mut list: ActualsList> COMMA <expression: Expression> => {
 		list.push(expression);
 		list
 	},
 }
 
 Term: Rc<RefCell<dyn Expression>> = {
-	// ligma
 	<loc: Loc> => rc(loc),
 	<int: INTLITERAL> => rc(IntegerLiteral::new(int)),
 	<string: STRINGLITERAL> => rc(StringLiteral::new(string)),
 	TRUE => rc(Boolean::TRUE),
 	FALSE => rc(Boolean::FALSE),
 	MAGIC => rc(Magic {}),
-	LPAREN <Expression3> RPAREN,
+	LPAREN <Expression> RPAREN,
 	<expression: CallExpression> => rc(expression),
 }
 

@@ -53,6 +53,13 @@ pub struct Add {
 impl Expression for Add {}
 
 #[derive(Debug)]
+pub struct And {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for And {}
+
+#[derive(Debug)]
 pub struct CallExpression {
     pub id: Id,
     pub actuals: Actuals,
@@ -164,6 +171,13 @@ pub struct NotEquals {
     pub right: Rc<RefCell<dyn Expression>>,
 }
 impl Expression for NotEquals {}
+
+#[derive(Debug)]
+pub struct Or {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Or {}
 
 #[derive(Debug)]
 pub struct StringLiteral {

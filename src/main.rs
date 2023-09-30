@@ -40,7 +40,7 @@ fn main() -> Result<()> {
 
     // Parser
     if args.parse {
-        let result = grammar::Expression3Parser::new().parse(&contents);
+        let result = grammar::ExpressionParser::new().parse(&contents);
 
         println!("{result:?}");
 
