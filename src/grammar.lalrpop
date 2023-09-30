@@ -123,13 +123,13 @@ Expression3:() = {
 	Expression4,
 }
 
-Expression4:() = {
-	Expression4 DASH Expression5,
-	Expression4 CROSS Expression5,
-	Expression5,
+pub Expression4: Rc<RefCell<dyn Expression>> = {
+	<left: Expression4> DASH <right: Expression5> => rc(Subtract { left, right }),
+	<left: Expression4> CROSS <right: Expression5> => rc(Add { left, right }),
+	<Expression5>,
 }
 
-pub Expression5: Rc<RefCell<dyn Expression>> = {
+Expression5: Rc<RefCell<dyn Expression>> = {
 	<left: Expression5> STAR <right: Expression6> => rc(Multiply { left, right }),
 	<left: Expression5> SLASH <right: Expression6> => rc(Divide { left, right }),
 	<Expression6>,
@@ -158,23 +158,24 @@ CallExpression: CallExpression = {
 ActualsList: Actuals = {
 	// Expression,
 	// ActualsList COMMA Expression,
-	<expression: Expression5> => {
+	<expression: Expression4> => {
 		vec![expression]
 	},
-	<mut list: ActualsList> COMMA <expression: Expression5> => {
+	<mut list: ActualsList> COMMA <expression: Expression4> => {
 		list.push(expression);
 		list
 	},
 }
 
 Term: Rc<RefCell<dyn Expression>> = {
+	// ligma
 	<loc: Loc> => rc(loc),
 	<int: INTLITERAL> => rc(IntegerLiteral::new(int)),
 	<string: STRINGLITERAL> => rc(StringLiteral::new(string)),
 	TRUE => rc(Boolean::TRUE),
 	FALSE => rc(Boolean::FALSE),
 	MAGIC => rc(Magic {}),
-	LPAREN <Expression5> RPAREN,
+	LPAREN <Expression4> RPAREN,
 	<expression: CallExpression> => rc(expression),
 }
 

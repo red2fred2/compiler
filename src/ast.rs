@@ -46,6 +46,13 @@ pub enum Primitive {
 pub type Actuals = Vec<Rc<RefCell<dyn Expression>>>;
 
 #[derive(Debug)]
+pub struct Add {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Add {}
+
+#[derive(Debug)]
 pub struct CallExpression {
     pub id: Id,
     pub actuals: Actuals,
@@ -130,3 +137,10 @@ impl StringLiteral {
     }
 }
 impl Expression for StringLiteral {}
+
+#[derive(Debug)]
+pub struct Subtract {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Subtract {}
