@@ -67,6 +67,27 @@ pub struct Divide {
 impl Expression for Divide {}
 
 #[derive(Debug)]
+pub struct Equals {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Equals {}
+
+#[derive(Debug)]
+pub struct Greater {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Greater {}
+
+#[derive(Debug)]
+pub struct GreaterEq {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for GreaterEq {}
+
+#[derive(Debug)]
 pub struct Id {
     pub name: String,
 }
@@ -82,6 +103,20 @@ impl IntegerLiteral {
     }
 }
 impl Expression for IntegerLiteral {}
+
+#[derive(Debug)]
+pub struct Less {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for Less {}
+
+#[derive(Debug)]
+pub struct LessEq {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for LessEq {}
 
 #[derive(Debug)]
 pub struct Loc {
@@ -122,6 +157,13 @@ pub struct Not {
     pub expression: Rc<RefCell<dyn Expression>>,
 }
 impl Expression for Not {}
+
+#[derive(Debug)]
+pub struct NotEquals {
+    pub left: Rc<RefCell<dyn Expression>>,
+    pub right: Rc<RefCell<dyn Expression>>,
+}
+impl Expression for NotEquals {}
 
 #[derive(Debug)]
 pub struct StringLiteral {

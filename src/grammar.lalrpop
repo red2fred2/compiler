@@ -113,17 +113,17 @@ Expression2:() = {
 	Expression3,
 }
 
-Expression3:() = {
-	Expression3 EQUALS Expression4,
-	Expression3 NOTEQUALS Expression4,
-	Expression3 GREATER Expression4,
-	Expression3 GREATEREQ Expression4,
-	Expression3 LESS Expression4,
-	Expression3 LESSEQ Expression4,
-	Expression4,
+pub Expression3: Rc<RefCell<dyn Expression>> = {
+	<left: Expression3> EQUALS <right: Expression4> => rc(Equals { left, right }),
+	<left: Expression3> NOTEQUALS <right: Expression4> => rc(NotEquals { left, right }),
+	<left: Expression3> GREATER <right: Expression4> => rc(Greater { left, right }),
+	<left: Expression3> GREATEREQ <right: Expression4> => rc(GreaterEq { left, right }),
+	<left: Expression3> LESS <right: Expression4> => rc(Less { left, right }),
+	<left: Expression3> LESSEQ <right: Expression4> => rc(LessEq { left, right }),
+	<Expression4>,
 }
 
-pub Expression4: Rc<RefCell<dyn Expression>> = {
+Expression4: Rc<RefCell<dyn Expression>> = {
 	<left: Expression4> DASH <right: Expression5> => rc(Subtract { left, right }),
 	<left: Expression4> CROSS <right: Expression5> => rc(Add { left, right }),
 	<Expression5>,
@@ -158,10 +158,10 @@ CallExpression: CallExpression = {
 ActualsList: Actuals = {
 	// Expression,
 	// ActualsList COMMA Expression,
-	<expression: Expression4> => {
+	<expression: Expression3> => {
 		vec![expression]
 	},
-	<mut list: ActualsList> COMMA <expression: Expression4> => {
+	<mut list: ActualsList> COMMA <expression: Expression3> => {
 		list.push(expression);
 		list
 	},
@@ -175,7 +175,7 @@ Term: Rc<RefCell<dyn Expression>> = {
 	TRUE => rc(Boolean::TRUE),
 	FALSE => rc(Boolean::FALSE),
 	MAGIC => rc(Magic {}),
-	LPAREN <Expression4> RPAREN,
+	LPAREN <Expression3> RPAREN,
 	<expression: CallExpression> => rc(expression),
 }
 
