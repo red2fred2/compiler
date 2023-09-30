@@ -40,9 +40,9 @@ fn main() -> Result<()> {
 
     // Parser
     if args.parse {
-        let result = grammar::TermParser::new().parse(&contents);
+        let result = grammar::ActualsListParser::new().parse(&contents);
 
-        println!("{result:?}");
+        println!("{result:#?}");
 
         if !result.is_ok() {
             eprintln!("syntax error\nParse failed");

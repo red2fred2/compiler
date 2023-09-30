@@ -141,23 +141,31 @@ Expression6: () = {
 	Term,
 }
 
-CallExpression: CallExpression = {
+CallExpression: () = {
 	Id LPAREN RPAREN,
 	Id LPAREN ActualsList RPAREN,
 }
 
-ActualsList: () = {
-	Expression,
-	ActualsList COMMA Expression,
+pub ActualsList: Actuals = {
+	// Expression,
+	// ActualsList COMMA Expression,
+	<expression: Term> => {
+		vec![expression]
+	},
+	<mut list: ActualsList> COMMA <expression: Term> => {
+		list.push(expression);
+		list
+	},
 }
 
-pub Term: Rc<RefCell<dyn Expression>> = {
+Term: Rc<RefCell<dyn Expression>> = {
 	<loc: Loc> => rc(loc),
 	<int: INTLITERAL> => rc(IntegerLiteral::new(int)),
 	<string: STRINGLITERAL> => rc(StringLiteral::new(string)),
 	TRUE => rc(Boolean::TRUE),
 	FALSE => rc(Boolean::FALSE),
 	MAGIC => rc(Magic {}),
+	LPAREN <Term> RPAREN,
 	// LPAREN <Expression> RPAREN,
 	// <CallExpression>,
 }
