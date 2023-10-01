@@ -61,17 +61,22 @@ FunctionDeclaration: () = {
     Id COLON LPAREN Formals RPAREN Type LCURLY StatementList RCURLY,
 }
 
-Formals: () = {
-    FormalsList,
-    EPSILON,
+pub Formals: Vec<Formal> = {
+    <FormalsList>,
+    EPSILON => Vec::new(),
 }
 
-FormalsList: () = {
-    FormalDeclaration,
-    FormalDeclaration COMMA FormalsList
+FormalsList: Vec<Formal> = {
+    <item: FormalDeclaration> => vec![item],
+    <mut list: FormalsList> COMMA <item: FormalDeclaration> => {
+        list.push(item);
+        list
+    },
 }
 
-FormalDeclaration: () = {Id COLON Type}
+FormalDeclaration: Formal = {
+    <id: Id> COLON <t: Type> => Formal { id, t },
+}
 
 StatementList: Vec<Statement> = {
     <mut list: StatementList> <item: Statement> => {
@@ -82,7 +87,7 @@ StatementList: Vec<Statement> = {
     EPSILON => Vec::new(),
 }
 
-pub BlockStatement: BlockStatement = {
+BlockStatement: BlockStatement = {
     WHILE LPAREN <condition: Expression> RPAREN LCURLY <then: StatementList> RCURLY => {
         BlockStatement::While(condition, then)
     },

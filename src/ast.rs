@@ -82,6 +82,12 @@ pub struct CallExpression {
 }
 
 #[derive(Debug)]
+pub struct Formal {
+    pub id: Id,
+    pub t: Type,
+}
+
+#[derive(Debug)]
 pub struct Id {
     pub name: String,
 }
