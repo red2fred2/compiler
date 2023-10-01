@@ -15,6 +15,12 @@ pub trait Declaration: std::fmt::Debug {}
 // Enums
 
 #[derive(Debug)]
+pub enum BlockStatement {
+    While(Expression, Vec<Statement>),
+    If(Expression, Vec<Statement>, Vec<Statement>),
+}
+
+#[derive(Debug)]
 pub enum Expression {
     Add(Box<Expression>, Box<Expression>),
     And(Box<Expression>, Box<Expression>),

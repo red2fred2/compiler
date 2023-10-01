@@ -73,19 +73,30 @@ FormalsList: () = {
 
 FormalDeclaration: () = {Id COLON Type}
 
-StatementList: () = {
-    StatementList Statement,
-    StatementList BlockStatement,
-    EPSILON,
+StatementList: Vec<Statement> = {
+    <mut list: StatementList> <item: Statement> => {
+        list.push(item);
+        list
+    },
+    // StatementList BlockStatement,
+    EPSILON => Vec::new(),
 }
 
-BlockStatement: () = {
-    WHILE LPAREN Expression RPAREN LCURLY StatementList RCURLY,
-    IF LPAREN Expression RPAREN LCURLY StatementList RCURLY,
-    IF LPAREN Expression RPAREN LCURLY StatementList RCURLY ELSE LCURLY StatementList RCURLY,
+pub BlockStatement: BlockStatement = {
+    WHILE LPAREN <condition: Expression> RPAREN LCURLY <then: StatementList> RCURLY => {
+        BlockStatement::While(condition, then)
+    },
+    IF LPAREN <condition: Expression> RPAREN LCURLY <then: StatementList> RCURLY <alt: (ELSE LCURLY <StatementList> RCURLY)?> => {
+        let alt = match alt {
+            Some(a) => a,
+            None => Vec::new(),
+        };
+
+        BlockStatement::If(condition, then, alt)
+    },
 }
 
-pub Statement: Statement = {
+Statement: Statement = {
     <declaration: VariableDeclaration> => {
         Statement::VariableDeclaration(declaration)
     },
