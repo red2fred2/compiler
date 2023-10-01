@@ -10,19 +10,19 @@ match {} else {
     _,
 }
 
-pub Program: () = {
-    Globals,
+pub Program: Vec<Declaration> = {
+    <Globals>,
 }
 
-Globals: () = {
-    // <program: Globals> <declaration: Declaration> => {
-    // 	program.add(declaration);
-    // 	program
-    // },
-    EPSILON,
+Globals: Vec<Declaration> = {
+    <mut list: Globals> <item: Declaration> => {
+        list.push(item);
+        list
+    },
+    EPSILON => Vec::new(),
 }
 
-pub Declaration: Declaration = {
+Declaration: Declaration = {
     <VariableDeclaration>,
     <ClassDeclaration>,
     <FunctionDeclaration>,
