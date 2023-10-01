@@ -5,9 +5,6 @@
 
 use anyhow::Result;
 use clap::Parser;
-use lalrpop_util::lalrpop_mod;
-
-lalrpop_mod!(pub grammar); // synthesized by LALRPOP
 
 pub mod ast;
 pub mod lexer;
@@ -29,7 +26,7 @@ struct Args {
 
     // Unparse flag
     #[arg(short, long)]
-    unparse: bool,
+    unparse: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -43,21 +40,9 @@ fn main() -> Result<()> {
     }
 
     // Parser
-    if args.parse || args.unparse {
-        let result = grammar::ProgramParser::new().parse(&contents);
-
-        if let Ok(program) = result {
-            if args.unparse {
-                for declaration in program {
-                    println!("{declaration:#?}");
-                }
-            }
-        } else {
-            eprintln!("syntax error\nParse failed")
-        }
+    if args.parse || args.unparse.is_some() {
+        ast::parser(&contents, args.unparse)?;
     }
-
-    // Unparse
 
     Ok(())
 }
