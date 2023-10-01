@@ -16,34 +16,34 @@ pub trait Declaration: std::fmt::Debug {}
 
 #[derive(Debug)]
 pub enum Expression {
-    ADD(Box<Expression>, Box<Expression>),
-    AND(Box<Expression>, Box<Expression>),
-    CALLEXPRESSION(CallExpression),
-    DIVIDE(Box<Expression>, Box<Expression>),
-    EQUALS(Box<Expression>, Box<Expression>),
-    FALSE,
-    GREATER(Box<Expression>, Box<Expression>),
-    GREATEREQ(Box<Expression>, Box<Expression>),
-    INTEGERLITERAL(IntegerLiteral),
-    LESS(Box<Expression>, Box<Expression>),
-    LESSEQ(Box<Expression>, Box<Expression>),
-    LOC(Loc),
-    MAGIC,
-    MULTIPLY(Box<Expression>, Box<Expression>),
-    NEGATIVE(Box<Expression>),
-    NOT(Box<Expression>),
-    NOTEQUALS(Box<Expression>, Box<Expression>),
-    OR(Box<Expression>, Box<Expression>),
-    STRINGLITERAL(StringLiteral),
-    SUBTRACT(Box<Expression>, Box<Expression>),
-    TRUE,
+    Add(Box<Expression>, Box<Expression>),
+    And(Box<Expression>, Box<Expression>),
+    CallExpression(CallExpression),
+    Divide(Box<Expression>, Box<Expression>),
+    Equals(Box<Expression>, Box<Expression>),
+    False,
+    Greater(Box<Expression>, Box<Expression>),
+    GreaterEq(Box<Expression>, Box<Expression>),
+    IntegerLiteral(IntegerLiteral),
+    Less(Box<Expression>, Box<Expression>),
+    LessEq(Box<Expression>, Box<Expression>),
+    Loc(Loc),
+    Magic,
+    Multiply(Box<Expression>, Box<Expression>),
+    Negative(Box<Expression>),
+    Not(Box<Expression>),
+    NotEquals(Box<Expression>, Box<Expression>),
+    Or(Box<Expression>, Box<Expression>),
+    StringLiteral(StringLiteral),
+    Subtract(Box<Expression>, Box<Expression>),
+    True,
 }
 
 #[derive(Debug)]
 pub enum Primitive {
-    BOOL,
-    INT,
-    VOID,
+    Bool,
+    Int,
+    Void,
 }
 
 // Structs

@@ -41,9 +41,9 @@ Type: () = {
 }
 
 pub Primitive: Primitive = {
-    INT => Primitive::INT,
-    BOOL => Primitive::BOOL,
-    VOID => Primitive::VOID,
+    INT => Primitive::Int,
+    BOOL => Primitive::Bool,
+    VOID => Primitive::Void,
 }
 
 ClassDeclaration: () = {
@@ -103,66 +103,66 @@ pub Expression: Expression = {
 
 Expression1: Expression = {
     <left: Expression1> OR <right: Expression2> => {
-        Expression::OR(Box::new(left), Box::new(right))
+        Expression::Or(Box::new(left), Box::new(right))
     },
     <Expression2>
 }
 
 Expression2: Expression = {
     <left: Expression2> AND <right: Expression3> => {
-        Expression::AND(Box::new(left), Box::new(right))
+        Expression::And(Box::new(left), Box::new(right))
     },
     <Expression3>,
 }
 
 Expression3: Expression = {
     <left: Expression3> EQUALS <right: Expression4> => {
-        Expression::EQUALS(Box::new(left), Box::new(right))
+        Expression::Equals(Box::new(left), Box::new(right))
     },
     <left: Expression3> NOTEQUALS <right: Expression4> => {
-        Expression::NOTEQUALS(Box::new(left), Box::new(right))
+        Expression::NotEquals(Box::new(left), Box::new(right))
     },
     <left: Expression3> GREATER <right: Expression4> => {
-        Expression::GREATER(Box::new(left), Box::new(right))
+        Expression::Greater(Box::new(left), Box::new(right))
     },
     <left: Expression3> GREATEREQ <right: Expression4> => {
-        Expression::GREATEREQ(Box::new(left), Box::new(right))
+        Expression::GreaterEq(Box::new(left), Box::new(right))
     },
     <left: Expression3> LESS <right: Expression4> => {
-        Expression::LESS(Box::new(left), Box::new(right))
+        Expression::Less(Box::new(left), Box::new(right))
     },
     <left: Expression3> LESSEQ <right: Expression4> => {
-        Expression::LESSEQ(Box::new(left), Box::new(right))
+        Expression::LessEq(Box::new(left), Box::new(right))
     },
     <Expression4>,
 }
 
 Expression4: Expression = {
     <left: Expression4> DASH <right: Expression5> => {
-        Expression::SUBTRACT(Box::new(left), Box::new(right))
+        Expression::Subtract(Box::new(left), Box::new(right))
     },
     <left: Expression4> CROSS <right: Expression5> => {
-        Expression::ADD(Box::new(left), Box::new(right))
+        Expression::Add(Box::new(left), Box::new(right))
     },
     <Expression5>,
 }
 
 Expression5: Expression = {
     <left: Expression5> STAR <right: Expression6> => {
-        Expression::MULTIPLY(Box::new(left), Box::new(right))
+        Expression::Multiply(Box::new(left), Box::new(right))
     },
     <left: Expression5> SLASH <right: Expression6> => {
-        Expression::DIVIDE(Box::new(left), Box::new(right))
+        Expression::Divide(Box::new(left), Box::new(right))
     },
     <Expression6>,
 }
 
 Expression6: Expression = {
     DASH <expression: Expression6> => {
-        Expression::NEGATIVE(Box::new(expression))
+        Expression::Negative(Box::new(expression))
     },
     NOT <expression: Expression6> => {
-        Expression::NOT(Box::new(expression))
+        Expression::Not(Box::new(expression))
     },
     <Term>,
 }
@@ -188,14 +188,14 @@ ActualsList: Vec<Expression> = {
 }
 
 Term: Expression = {
-    <loc: Loc> => Expression::LOC(loc),
-    <int: INTLITERAL> => Expression::INTEGERLITERAL(IntegerLiteral::new(int)),
-    <string: STRINGLITERAL> => Expression::STRINGLITERAL(StringLiteral::new(string)),
-    TRUE => Expression::TRUE,
-    FALSE => Expression::FALSE,
-    MAGIC => Expression::MAGIC,
+    <loc: Loc> => Expression::Loc(loc),
+    <int: INTLITERAL> => Expression::IntegerLiteral(IntegerLiteral::new(int)),
+    <string: STRINGLITERAL> => Expression::StringLiteral(StringLiteral::new(string)),
+    TRUE => Expression::True,
+    FALSE => Expression::False,
+    MAGIC => Expression::Magic,
     LPAREN <Expression> RPAREN,
-    <expression: CallExpression> => Expression::CALLEXPRESSION(expression),
+    <expression: CallExpression> => Expression::CallExpression(expression),
 }
 
 Loc: Loc = {
