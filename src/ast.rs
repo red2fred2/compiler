@@ -1,16 +1,8 @@
 //! Since Rust doesn't have inheritance, I'm going to use traits and we'll see
 //! if it turns into a nightmare.
-//!
-//! Rust's strict memory rules front loaded a lot of the pain, though I'd much
-//! rather deal with typing RefCell 100 times than dealing with C trying to shove
-//! something where it doesn't belong.
 #![allow(unused)]
 
-use std::{cell::RefCell, rc::Rc, str::FromStr};
-
-// Traits
-
-pub trait Declaration: std::fmt::Debug {}
+use std::str::FromStr;
 
 // Enums
 
@@ -18,6 +10,25 @@ pub trait Declaration: std::fmt::Debug {}
 pub enum BlockStatement {
     While(Expression, Vec<Statement>),
     If(Expression, Vec<Statement>, Vec<Statement>),
+}
+
+#[derive(Debug)]
+pub enum Declaration {
+    Class {
+        id: Id,
+        body: Vec<Declaration>,
+    },
+    Function {
+        id: Id,
+        fn_input: Vec<Formal>,
+        fn_output: Type,
+        body: Vec<Statement>,
+    },
+    Variable {
+        name: Id,
+        t: Type,
+        assignment: Option<Expression>,
+    },
 }
 
 #[derive(Debug)]
@@ -62,7 +73,7 @@ pub enum Statement {
     Increment(Location),
     Return(Option<Expression>),
     Take(Location),
-    VariableDeclaration(VariableDeclaration),
+    VariableDeclaration(Declaration),
 }
 
 #[derive(Debug)]
@@ -85,14 +96,6 @@ pub struct CallExpression {
 pub struct Formal {
     pub id: Id,
     pub t: Type,
-}
-
-#[derive(Debug)]
-pub struct Function {
-    pub id: Id,
-    pub fn_input: Vec<Formal>,
-    pub fn_output: Type,
-    pub statements: Vec<Statement>,
 }
 
 #[derive(Debug)]
@@ -139,11 +142,4 @@ impl StringLiteral {
         let value = value.as_str().to_string();
         Self { value }
     }
-}
-
-#[derive(Debug)]
-pub struct VariableDeclaration {
-    pub name: Id,
-    pub t: Type,
-    pub assignment: Option<Expression>,
 }

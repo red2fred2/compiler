@@ -22,15 +22,15 @@ Globals: () = {
     EPSILON,
 }
 
-Declaration: () = {
-    VariableDeclaration,
-    ClassDeclaration,
-    FunctionDeclaration,
+pub Declaration: Declaration = {
+    <VariableDeclaration>,
+    <ClassDeclaration>,
+    <FunctionDeclaration>,
 }
 
-VariableDeclaration: VariableDeclaration = {
+VariableDeclaration: Declaration = {
     <name: Id> COLON <t: Type> <assignment: (ASSIGN <Expression>)?> SEMICOLON => {
-        VariableDeclaration { name, t, assignment }
+        Declaration::Variable { name, t, assignment }
      },
 }
 
@@ -47,19 +47,27 @@ Primitive: Primitive = {
     VOID => Primitive::Void,
 }
 
-ClassDeclaration: () = {
-    Id COLON CLASS LCURLY ClassBody RCURLY SEMICOLON,
+ClassDeclaration: Declaration = {
+    <id: Id> COLON CLASS LCURLY <body: ClassBody> RCURLY SEMICOLON => {
+        Declaration::Class { id, body }
+    },
 }
 
-ClassBody: () = {
-    ClassBody VariableDeclaration,
-    ClassBody FunctionDeclaration,
-    EPSILON,
+ClassBody: Vec<Declaration> = {
+    <mut list: ClassBody> <item: VariableDeclaration> => {
+        list.push(item);
+        list
+    },
+    <mut list: ClassBody> <item: FunctionDeclaration> => {
+        list.push(item);
+        list
+    },
+    EPSILON => Vec::new(),
 }
 
-pub FunctionDeclaration: Function = {
-    <id: Id> COLON LPAREN <fn_input: Formals> RPAREN <fn_output: Type> LCURLY <statements: StatementList> RCURLY => {
-        Function { id, fn_input, fn_output, statements }
+FunctionDeclaration: Declaration = {
+    <id: Id> COLON LPAREN <fn_input: Formals> RPAREN <fn_output: Type> LCURLY <body: StatementList> RCURLY => {
+        Declaration::Function { id, fn_input, fn_output, body }
     },
 }
 
@@ -90,16 +98,16 @@ StatementList: Vec<Statement> = {
 }
 
 BlockStatement: BlockStatement = {
-    WHILE LPAREN <condition: Expression> RPAREN LCURLY <then: StatementList> RCURLY => {
-        BlockStatement::While(condition, then)
+    WHILE LPAREN <condition: Expression> RPAREN LCURLY <body: StatementList> RCURLY => {
+        BlockStatement::While(condition, body)
     },
-    IF LPAREN <condition: Expression> RPAREN LCURLY <then: StatementList> RCURLY <alt: (ELSE LCURLY <StatementList> RCURLY)?> => {
-        let alt = match alt {
-            Some(a) => a,
+    IF LPAREN <condition: Expression> RPAREN LCURLY <body: StatementList> RCURLY <else_body: (ELSE LCURLY <StatementList> RCURLY)?> => {
+        let else_body = match else_body {
+            Some(x) => x,
             None => Vec::new(),
         };
 
-        BlockStatement::If(condition, then, alt)
+        BlockStatement::If(condition, body, else_body)
     },
 }
 
