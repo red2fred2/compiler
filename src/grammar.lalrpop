@@ -28,12 +28,13 @@ Declaration: () = {
     FunctionDeclaration,
 }
 
-VariableDeclaration: () = {
-    Id COLON Type SEMICOLON,
-    Id COLON Type ASSIGN Expression SEMICOLON,
+pub VariableDeclaration: VariableDeclaration = {
+    <name: Id> COLON <t: Type> <assignment: (ASSIGN <Expression>)?> SEMICOLON => {
+        VariableDeclaration { name, t, assignment }
+     },
 }
 
-pub Type: Type = {
+Type: Type = {
     <t: Primitive> => Type::Primitive(t),
     PERFECT <t: Primitive> => Type::PerfectPrimitive(t),
     <t: Id> => Type::Class(t),

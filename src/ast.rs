@@ -107,3 +107,10 @@ impl StringLiteral {
         Self { value }
     }
 }
+
+#[derive(Debug)]
+pub struct VariableDeclaration {
+    pub name: Id,
+    pub t: Type,
+    pub assignment: Option<Expression>,
+}
