@@ -28,7 +28,7 @@ Declaration: () = {
     FunctionDeclaration,
 }
 
-pub VariableDeclaration: VariableDeclaration = {
+VariableDeclaration: VariableDeclaration = {
     <name: Id> COLON <t: Type> <assignment: (ASSIGN <Expression>)?> SEMICOLON => {
         VariableDeclaration { name, t, assignment }
      },
@@ -85,17 +85,34 @@ BlockStatement: () = {
     IF LPAREN Expression RPAREN LCURLY StatementList RCURLY ELSE LCURLY StatementList RCURLY,
 }
 
-Statement: () = {
-    VariableDeclaration,
-    Loc ASSIGN Expression SEMICOLON,
-    Loc POSTDEC SEMICOLON,
-    Loc POSTINC SEMICOLON,
-    GIVE Expression SEMICOLON,
-    TAKE Loc SEMICOLON,
-    RETURN Expression SEMICOLON,
-    RETURN SEMICOLON,
-    EXIT SEMICOLON,
-    CallExpression SEMICOLON,
+pub Statement: Statement = {
+    <declaration: VariableDeclaration> => {
+        Statement::VariableDeclaration(declaration)
+    },
+    <location: Loc> ASSIGN <expression: Expression> SEMICOLON => {
+        Statement::Assignment(location, expression)
+    },
+    <location: Loc> POSTDEC SEMICOLON => {
+        Statement::Decrement(location)
+    },
+    <location: Loc> POSTINC SEMICOLON => {
+        Statement::Increment(location)
+    },
+    GIVE <expression: Expression> SEMICOLON => {
+        Statement::Give(expression)
+    },
+    TAKE <location: Loc> SEMICOLON => {
+        Statement::Take(location)
+    },
+    RETURN <expression: (<Expression>)?> SEMICOLON => {
+        Statement::Return(expression)
+    },
+    EXIT SEMICOLON => {
+        Statement::Exit
+    },
+    <call: CallExpression> SEMICOLON => {
+        Statement::CallExpression(call)
+    },
 }
 
 Expression: Expression = {

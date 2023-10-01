@@ -40,7 +40,7 @@ fn main() -> Result<()> {
 
     // Parser
     if args.parse {
-        let result = grammar::VariableDeclarationParser::new().parse(&contents);
+        let result = grammar::StatementParser::new().parse(&contents);
 
         println!("{result:#?}");
 

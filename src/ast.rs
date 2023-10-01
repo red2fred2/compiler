@@ -47,6 +47,19 @@ pub enum Primitive {
 }
 
 #[derive(Debug)]
+pub enum Statement {
+    Assignment(Location, Expression),
+    CallExpression(CallExpression),
+    Decrement(Location),
+    Exit,
+    Give(Expression),
+    Increment(Location),
+    Return(Option<Expression>),
+    Take(Location),
+    VariableDeclaration(VariableDeclaration),
+}
+
+#[derive(Debug)]
 pub enum Type {
     Primitive(Primitive),
     PerfectPrimitive(Primitive),
