@@ -88,6 +88,14 @@ pub struct Formal {
 }
 
 #[derive(Debug)]
+pub struct Function {
+    pub id: Id,
+    pub fn_input: Vec<Formal>,
+    pub fn_output: Type,
+    pub statements: Vec<Statement>,
+}
+
+#[derive(Debug)]
 pub struct Id {
     pub name: String,
 }

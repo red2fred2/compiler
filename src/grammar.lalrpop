@@ -57,11 +57,13 @@ ClassBody: () = {
     EPSILON,
 }
 
-FunctionDeclaration: () = {
-    Id COLON LPAREN Formals RPAREN Type LCURLY StatementList RCURLY,
+pub FunctionDeclaration: Function = {
+    <id: Id> COLON LPAREN <fn_input: Formals> RPAREN <fn_output: Type> LCURLY <statements: StatementList> RCURLY => {
+        Function { id, fn_input, fn_output, statements }
+    },
 }
 
-pub Formals: Vec<Formal> = {
+Formals: Vec<Formal> = {
     <FormalsList>,
     EPSILON => Vec::new(),
 }
