@@ -155,8 +155,8 @@ ActualsList: Vec<Expression> = {
 
 Term: Expression = {
     <x: Loc>            => Expression::Location(x),
-    <x: INTLITERAL>     => Expression::IntegerLiteral(IntegerLiteral::new(x)),
-    <x: STRINGLITERAL>  => Expression::StringLiteral(StringLiteral::new(x)),
+    <x: INTLITERAL>     => Expression::new_int(x),
+    <x: STRINGLITERAL>  => Expression::new_string(x),
     <x: CallExpression> => Expression::CallExpression(x),
     TRUE                => Expression::True,
     FALSE               => Expression::False,

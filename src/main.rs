@@ -3,7 +3,7 @@
 //!
 //! [language Specification](https://compilers.cool/language/)
 
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use clap::Parser;
 use lalrpop_util::lalrpop_mod;
 
@@ -26,6 +26,10 @@ struct Args {
     // Parse flag
     #[arg(short, long)]
     parse: bool,
+
+    // Unparse flag
+    #[arg(short, long)]
+    unparse: bool,
 }
 
 fn main() -> Result<()> {
@@ -39,15 +43,21 @@ fn main() -> Result<()> {
     }
 
     // Parser
-    if args.parse {
+    if args.parse || args.unparse {
         let result = grammar::ProgramParser::new().parse(&contents);
 
-        println!("{result:#?}");
-
-        if !result.is_ok() {
-            eprintln!("syntax error\nParse failed");
+        if let Ok(program) = result {
+            if args.unparse {
+                for declaration in program {
+                    println!("{declaration:#?}");
+                }
+            }
+        } else {
+            eprintln!("syntax error\nParse failed")
         }
     }
+
+    // Unparse
 
     Ok(())
 }
