@@ -188,7 +188,7 @@ ActualsList: Vec<Expression> = {
 }
 
 Term: Expression = {
-    <loc: Loc> => Expression::Loc(loc),
+    <location: Loc> => Expression::Location(location),
     <int: INTLITERAL> => Expression::IntegerLiteral(IntegerLiteral::new(int)),
     <string: STRINGLITERAL> => Expression::StringLiteral(StringLiteral::new(string)),
     TRUE => Expression::True,
@@ -198,9 +198,9 @@ Term: Expression = {
     <expression: CallExpression> => Expression::CallExpression(expression),
 }
 
-Loc: Loc = {
-    <id: Id> => Loc::new_from_id(id),
-    <loc: Loc> POSTDEC <id: Id> => Loc::new_from_loc(loc, id),
+Loc: Location = {
+    <id: Id> => Location::new_from_id(id),
+    <location: Loc> POSTDEC <id: Id> => Location::new_from_location(location, id),
 }
 
 Id: Id = {

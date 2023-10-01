@@ -27,7 +27,7 @@ pub enum Expression {
     IntegerLiteral(IntegerLiteral),
     Less(Box<Expression>, Box<Expression>),
     LessEq(Box<Expression>, Box<Expression>),
-    Loc(Loc),
+    Location(Location),
     Magic,
     Multiply(Box<Expression>, Box<Expression>),
     Negative(Box<Expression>),
@@ -71,17 +71,17 @@ impl IntegerLiteral {
 }
 
 #[derive(Debug)]
-pub struct Loc {
+pub struct Location {
     pub name: String,
 }
-impl Loc {
+impl Location {
     pub fn new_from_id(id: Id) -> Self {
         let name = id.name;
         Self { name }
     }
 
-    pub fn new_from_loc(loc: Loc, id: Id) -> Self {
-        let name = format!("{}--{}", loc.name, id.name);
+    pub fn new_from_location(location: Location, id: Id) -> Self {
+        let name = format!("{}--{}", location.name, id.name);
         Self { name }
     }
 }
