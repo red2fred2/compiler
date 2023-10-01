@@ -6,82 +6,63 @@ match {} else {
     // Ignore comments
     r"//[^\n\r]*[\n\r]*" => {},
     // Ignore whitespace
-    r"\s*" => {},
+    r"\s*"               => {},
     _,
 }
 
 pub Program: Vec<Declaration> = {
-    <Globals>,
+    <mut l: Program> <x: Declaration> => {l.push(x); l},
+    EPSILON                           => Vec::new(),
 }
 
-Globals: Vec<Declaration> = {
-    <mut list: Globals> <item: Declaration> => {
-        list.push(item);
-        list
-    },
-    EPSILON => Vec::new(),
-}
-
-Declaration: Declaration = {
+Declaration = {
     <VariableDeclaration>,
     <ClassDeclaration>,
     <FunctionDeclaration>,
 }
 
 VariableDeclaration: Declaration = {
-    <name: Id> COLON <t: Type> <assignment: (ASSIGN <Expression>)?> SEMICOLON => {
-        Declaration::Variable { name, t, assignment }
-     },
+    <name: Id> COLON <t: Type> <assignment: (ASSIGN <Expression>)?> SEMICOLON =>
+        Declaration::Variable { name, t, assignment },
 }
 
 Type: Type = {
-    <t: Primitive> => Type::Primitive(t),
+    <t: Primitive>         => Type::Primitive(t),
     PERFECT <t: Primitive> => Type::PerfectPrimitive(t),
-    <t: Id> => Type::Class(t),
-    PERFECT <t: Id> => Type::PerfectClass(t),
+    <t: Id>                => Type::Class(t),
+    PERFECT <t: Id>        => Type::PerfectClass(t),
 }
 
 Primitive: Primitive = {
-    INT => Primitive::Int,
+    INT  => Primitive::Int,
     BOOL => Primitive::Bool,
     VOID => Primitive::Void,
 }
 
 ClassDeclaration: Declaration = {
-    <id: Id> COLON CLASS LCURLY <body: ClassBody> RCURLY SEMICOLON => {
-        Declaration::Class { id, body }
-    },
+    <id: Id> COLON CLASS LCURLY <body: ClassBody> RCURLY SEMICOLON =>
+        Declaration::Class { id, body },
 }
 
 ClassBody: Vec<Declaration> = {
-    <mut list: ClassBody> <item: VariableDeclaration> => {
-        list.push(item);
-        list
-    },
-    <mut list: ClassBody> <item: FunctionDeclaration> => {
-        list.push(item);
-        list
-    },
-    EPSILON => Vec::new(),
+    <mut l: ClassBody> <x: VariableDeclaration> => {l.push(x); l},
+    <mut l: ClassBody> <x: FunctionDeclaration> => {l.push(x); l},
+    EPSILON                                     => Vec::new(),
 }
 
 FunctionDeclaration: Declaration = {
-    <id: Id> COLON LPAREN <fn_input: Formals> RPAREN <fn_output: Type> LCURLY <body: StatementList> RCURLY => {
-        Declaration::Function { id, fn_input, fn_output, body }
-    },
+    <id: Id> COLON LPAREN <fn_input: Formals> RPAREN <fn_output: Type> LCURLY <body: StatementList> RCURLY =>
+        Declaration::Function { id, fn_input, fn_output, body },
 }
 
-Formals: Vec<Formal> = {
+Formals = {
     <FormalsList>,
     EPSILON => Vec::new(),
 }
 
 FormalsList: Vec<Formal> = {
-    <item: FormalDeclaration> => vec![item],
-    <mut list: FormalsList> COMMA <item: FormalDeclaration> => {
-        list.push(item);
-        list
-    },
+    <x: FormalDeclaration>                            => vec![x],
+    <mut l: FormalsList> COMMA <x: FormalDeclaration> => {l.push(x); l},
 }
 
 FormalDeclaration: Formal = {
@@ -89,125 +70,71 @@ FormalDeclaration: Formal = {
 }
 
 StatementList: Vec<Statement> = {
-    <mut list: StatementList> <item: Statement> => {
-        list.push(item);
-        list
-    },
-    // StatementList BlockStatement,
-    EPSILON => Vec::new(),
+    <mut l: StatementList> <x: Statement>      => {l.push(x); l},
+    <mut l: StatementList> <x: BlockStatement> => {l.push(x); l},
+    EPSILON                                    => Vec::new(),
 }
 
-BlockStatement: BlockStatement = {
-    WHILE LPAREN <condition: Expression> RPAREN LCURLY <body: StatementList> RCURLY => {
-        BlockStatement::While(condition, body)
-    },
+BlockStatement: Statement = {
+    WHILE LPAREN <condition: Expression> RPAREN LCURLY <body: StatementList> RCURLY =>
+        Statement::While { condition, body },
     IF LPAREN <condition: Expression> RPAREN LCURLY <body: StatementList> RCURLY <else_body: (ELSE LCURLY <StatementList> RCURLY)?> => {
         let else_body = match else_body {
             Some(x) => x,
             None => Vec::new(),
         };
 
-        BlockStatement::If(condition, body, else_body)
+        Statement::If {condition, body, else_body }
     },
 }
 
 Statement: Statement = {
-    <declaration: VariableDeclaration> => {
-        Statement::VariableDeclaration(declaration)
-    },
-    <location: Loc> ASSIGN <expression: Expression> SEMICOLON => {
-        Statement::Assignment(location, expression)
-    },
-    <location: Loc> POSTDEC SEMICOLON => {
-        Statement::Decrement(location)
-    },
-    <location: Loc> POSTINC SEMICOLON => {
-        Statement::Increment(location)
-    },
-    GIVE <expression: Expression> SEMICOLON => {
-        Statement::Give(expression)
-    },
-    TAKE <location: Loc> SEMICOLON => {
-        Statement::Take(location)
-    },
-    RETURN <expression: (<Expression>)?> SEMICOLON => {
-        Statement::Return(expression)
-    },
-    EXIT SEMICOLON => {
-        Statement::Exit
-    },
-    <call: CallExpression> SEMICOLON => {
-        Statement::CallExpression(call)
-    },
+    <x: VariableDeclaration>                  => Statement::VariableDeclaration(x),
+    <x: Loc> ASSIGN <y: Expression> SEMICOLON => Statement::Assignment(x, y),
+    <x: Loc> POSTDEC SEMICOLON                => Statement::Decrement(x),
+    <x: Loc> POSTINC SEMICOLON                => Statement::Increment(x),
+    GIVE <x: Expression> SEMICOLON            => Statement::Give(x),
+    TAKE <x: Loc> SEMICOLON                   => Statement::Take(x),
+    RETURN <x: (<Expression>)?> SEMICOLON     => Statement::Return(x),
+    EXIT SEMICOLON                            => Statement::Exit,
+    <x: CallExpression> SEMICOLON             => Statement::CallExpression(x),
 }
 
-Expression: Expression = {
-    <Expression1>,
+Expression = {
+    <l: Expression> OR <r: Expression2> => Expression::Or(b(l), b(r)),
+    <Expression2>,
 }
 
-Expression1: Expression = {
-    <left: Expression1> OR <right: Expression2> => {
-        Expression::Or(Box::new(left), Box::new(right))
-    },
-    <Expression2>
-}
-
-Expression2: Expression = {
-    <left: Expression2> AND <right: Expression3> => {
-        Expression::And(Box::new(left), Box::new(right))
-    },
+Expression2 = {
+    <l: Expression2> AND <r: Expression3> => Expression::And(b(l), b(r)),
     <Expression3>,
 }
 
-Expression3: Expression = {
-    <left: Expression3> EQUALS <right: Expression4> => {
-        Expression::Equals(Box::new(left), Box::new(right))
-    },
-    <left: Expression3> NOTEQUALS <right: Expression4> => {
-        Expression::NotEquals(Box::new(left), Box::new(right))
-    },
-    <left: Expression3> GREATER <right: Expression4> => {
-        Expression::Greater(Box::new(left), Box::new(right))
-    },
-    <left: Expression3> GREATEREQ <right: Expression4> => {
-        Expression::GreaterEq(Box::new(left), Box::new(right))
-    },
-    <left: Expression3> LESS <right: Expression4> => {
-        Expression::Less(Box::new(left), Box::new(right))
-    },
-    <left: Expression3> LESSEQ <right: Expression4> => {
-        Expression::LessEq(Box::new(left), Box::new(right))
-    },
+Expression3 = {
+    <l: Expression3> EQUALS <r: Expression4>    => Expression::Equals(b(l), b(r)),
+    <l: Expression3> NOTEQUALS <r: Expression4> => Expression::NotEquals(b(l), b(r)),
+    <l: Expression3> GREATER <r: Expression4>   => Expression::Greater(b(l), b(r)),
+    <l: Expression3> GREATEREQ <r: Expression4> => Expression::GreaterEq(b(l), b(r)),
+    <l: Expression3> LESS <r: Expression4>      => Expression::Less(b(l), b(r)),
+    <l: Expression3> LESSEQ <r: Expression4>    => Expression::LessEq(b(l), b(r)),
     <Expression4>,
 }
 
-Expression4: Expression = {
-    <left: Expression4> DASH <right: Expression5> => {
-        Expression::Subtract(Box::new(left), Box::new(right))
-    },
-    <left: Expression4> CROSS <right: Expression5> => {
-        Expression::Add(Box::new(left), Box::new(right))
-    },
+Expression4 = {
+    <l: Expression4> DASH <r: Expression5>  => Expression::Subtract(b(l), b(r)),
+    <l: Expression4> CROSS <r: Expression5> => Expression::Add(b(l), b(r)),
     <Expression5>,
 }
 
-Expression5: Expression = {
-    <left: Expression5> STAR <right: Expression6> => {
-        Expression::Multiply(Box::new(left), Box::new(right))
-    },
-    <left: Expression5> SLASH <right: Expression6> => {
-        Expression::Divide(Box::new(left), Box::new(right))
-    },
+Expression5 = {
+    <l: Expression5> STAR <r: Expression6>  => Expression::Multiply(b(l), b(r)),
+    <l: Expression5> SLASH <r: Expression6> => Expression::Divide(b(l), b(r)),
     <Expression6>,
 }
 
-Expression6: Expression = {
-    DASH <expression: Expression6> => {
-        Expression::Negative(Box::new(expression))
-    },
-    NOT <expression: Expression6> => {
-        Expression::Not(Box::new(expression))
-    },
+Expression6 = {
+    DASH <x: Expression6> => Expression::Negative(b(x)),
+    NOT <x: Expression6>  => Expression::Not(b(x)),
     <Term>,
 }
 
@@ -222,28 +149,23 @@ CallExpression: CallExpression = {
 }
 
 ActualsList: Vec<Expression> = {
-    <expression: Expression> => {
-        vec![expression]
-    },
-    <mut list: ActualsList> COMMA <expression: Expression> => {
-        list.push(expression);
-        list
-    },
+    <x: Expression>                            => vec![x],
+    <mut l: ActualsList> COMMA <x: Expression> => {l.push(x); l},
 }
 
 Term: Expression = {
-    <location: Loc> => Expression::Location(location),
-    <int: INTLITERAL> => Expression::IntegerLiteral(IntegerLiteral::new(int)),
-    <string: STRINGLITERAL> => Expression::StringLiteral(StringLiteral::new(string)),
-    TRUE => Expression::True,
-    FALSE => Expression::False,
-    MAGIC => Expression::Magic,
+    <x: Loc>            => Expression::Location(x),
+    <x: INTLITERAL>     => Expression::IntegerLiteral(IntegerLiteral::new(x)),
+    <x: STRINGLITERAL>  => Expression::StringLiteral(StringLiteral::new(x)),
+    <x: CallExpression> => Expression::CallExpression(x),
+    TRUE                => Expression::True,
+    FALSE               => Expression::False,
+    MAGIC               => Expression::Magic,
     LPAREN <Expression> RPAREN,
-    <expression: CallExpression> => Expression::CallExpression(expression),
 }
 
 Loc: Location = {
-    <id: Id> => Location::new_from_id(id),
+    <id: Id>                         => Location::new_from_id(id),
     <location: Loc> POSTDEC <id: Id> => Location::new_from_location(location, id),
 }
 

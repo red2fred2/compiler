@@ -1,16 +1,14 @@
 //! Since Rust doesn't have inheritance, I'm going to use traits and we'll see
 //! if it turns into a nightmare.
-#![allow(unused)]
 
 use std::str::FromStr;
 
-// Enums
-
-#[derive(Debug)]
-pub enum BlockStatement {
-    While(Expression, Vec<Statement>),
-    If(Expression, Vec<Statement>, Vec<Statement>),
+// Wrap in a box so I don't have to write Box::new() 100 times
+pub fn b<T>(x: T) -> Box<T> {
+    Box::new(x)
 }
+
+// Enums
 
 #[derive(Debug)]
 pub enum Declaration {
@@ -70,10 +68,19 @@ pub enum Statement {
     Decrement(Location),
     Exit,
     Give(Expression),
+    If {
+        condition: Expression,
+        body: Vec<Statement>,
+        else_body: Vec<Statement>,
+    },
     Increment(Location),
     Return(Option<Expression>),
     Take(Location),
     VariableDeclaration(Declaration),
+    While {
+        condition: Expression,
+        body: Vec<Statement>,
+    },
 }
 
 #[derive(Debug)]
