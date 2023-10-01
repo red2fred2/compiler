@@ -87,6 +87,7 @@ BlockStatement: () = {
 
 Statement: () = {
     VariableDeclaration,
+    BlockStatement,
     Loc ASSIGN Expression SEMICOLON,
     Loc POSTDEC SEMICOLON,
     Loc POSTINC SEMICOLON,
