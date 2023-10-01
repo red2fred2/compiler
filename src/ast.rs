@@ -8,45 +8,35 @@
 
 use std::{cell::RefCell, rc::Rc, str::FromStr};
 
-// Functions
-
-/// Wraps a value in an Rc-RefCell so I don't have to keep doing this
-/// One point for nightmare. We'll see if it outweighs dealing with C++ memory.
-pub fn rc<T>(x: T) -> Rc<RefCell<T>> {
-    Rc::new(RefCell::new(x))
-}
-
 // Traits
 
 pub trait Declaration: std::fmt::Debug {}
 
-pub trait Expression: std::fmt::Debug {}
-
 // Enums
 
 #[derive(Debug)]
-pub enum Boolean {
+pub enum Expression {
+    ADD(Box<Expression>, Box<Expression>),
+    AND(Box<Expression>, Box<Expression>),
+    CALLEXPRESSION(CallExpression),
+    DIVIDE(Box<Expression>, Box<Expression>),
+    EQUALS(Box<Expression>, Box<Expression>),
     FALSE,
+    GREATER(Box<Expression>, Box<Expression>),
+    GREATEREQ(Box<Expression>, Box<Expression>),
+    INTEGERLITERAL(IntegerLiteral),
+    LESS(Box<Expression>, Box<Expression>),
+    LESSEQ(Box<Expression>, Box<Expression>),
+    LOC(Loc),
+    MAGIC,
+    MULTIPLY(Box<Expression>, Box<Expression>),
+    NEGATIVE(Box<Expression>),
+    NOT(Box<Expression>),
+    NOTEQUALS(Box<Expression>, Box<Expression>),
+    OR(Box<Expression>, Box<Expression>),
+    STRINGLITERAL(StringLiteral),
+    SUBTRACT(Box<Expression>, Box<Expression>),
     TRUE,
-}
-impl Expression for Boolean {}
-
-#[derive(Debug)]
-pub enum Operator {
-    ADD,
-    AND,
-    DIVIDE,
-    EQUALS,
-    GREATER,
-    GREATEREQ,
-    LESS,
-    LESSEQ,
-    MULTIPLY,
-    NEGATIVE,
-    NOT,
-    NOTEQUALS,
-    OR,
-    SUBTRACT,
 }
 
 #[derive(Debug)]
@@ -58,22 +48,11 @@ pub enum Primitive {
 
 // Structs
 
-pub type Actuals = Vec<Rc<RefCell<dyn Expression>>>;
-
-#[derive(Debug)]
-pub struct BinaryExpression {
-    pub left: Rc<RefCell<dyn Expression>>,
-    pub right: Rc<RefCell<dyn Expression>>,
-    pub operator: Operator,
-}
-impl Expression for BinaryExpression {}
-
 #[derive(Debug)]
 pub struct CallExpression {
     pub id: Id,
-    pub actuals: Actuals,
+    pub actuals: Vec<Expression>,
 }
-impl Expression for CallExpression {}
 
 #[derive(Debug)]
 pub struct Id {
@@ -90,7 +69,6 @@ impl IntegerLiteral {
         Self { value }
     }
 }
-impl Expression for IntegerLiteral {}
 
 #[derive(Debug)]
 pub struct Loc {
@@ -107,11 +85,6 @@ impl Loc {
         Self { name }
     }
 }
-impl Expression for Loc {}
-
-#[derive(Debug)]
-pub struct Magic {}
-impl Expression for Magic {}
 
 #[derive(Debug)]
 pub struct StringLiteral {
@@ -126,11 +99,3 @@ impl StringLiteral {
         Self { value }
     }
 }
-impl Expression for StringLiteral {}
-
-#[derive(Debug)]
-pub struct UnaryExpression {
-    pub expression: Rc<RefCell<dyn Expression>>,
-    pub operator: Operator,
-}
-impl Expression for UnaryExpression {}

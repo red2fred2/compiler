@@ -1,5 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
-
 use crate::ast::*;
 
 grammar;
@@ -99,72 +97,72 @@ Statement: () = {
     CallExpression SEMICOLON,
 }
 
-pub Expression: Rc<RefCell<dyn Expression>> = {
+pub Expression: Expression = {
     <Expression1>,
 }
 
-Expression1: Rc<RefCell<dyn Expression>> = {
+Expression1: Expression = {
     <left: Expression1> OR <right: Expression2> => {
-        rc(BinaryExpression { left, right, operator: Operator::OR })
+        Expression::OR(Box::new(left), Box::new(right))
     },
     <Expression2>
 }
 
-Expression2: Rc<RefCell<dyn Expression>> = {
+Expression2: Expression = {
     <left: Expression2> AND <right: Expression3> => {
-        rc(BinaryExpression { left, right, operator: Operator::AND })
+        Expression::AND(Box::new(left), Box::new(right))
     },
     <Expression3>,
 }
 
-Expression3: Rc<RefCell<dyn Expression>> = {
+Expression3: Expression = {
     <left: Expression3> EQUALS <right: Expression4> => {
-        rc(BinaryExpression { left, right, operator: Operator::EQUALS })
+        Expression::EQUALS(Box::new(left), Box::new(right))
     },
     <left: Expression3> NOTEQUALS <right: Expression4> => {
-        rc(BinaryExpression { left, right, operator: Operator::NOTEQUALS })
+        Expression::NOTEQUALS(Box::new(left), Box::new(right))
     },
     <left: Expression3> GREATER <right: Expression4> => {
-        rc(BinaryExpression { left, right, operator: Operator::GREATER })
+        Expression::GREATER(Box::new(left), Box::new(right))
     },
     <left: Expression3> GREATEREQ <right: Expression4> => {
-        rc(BinaryExpression { left, right, operator: Operator::GREATEREQ })
+        Expression::GREATEREQ(Box::new(left), Box::new(right))
     },
     <left: Expression3> LESS <right: Expression4> => {
-        rc(BinaryExpression { left, right, operator: Operator::LESS })
+        Expression::LESS(Box::new(left), Box::new(right))
     },
     <left: Expression3> LESSEQ <right: Expression4> => {
-        rc(BinaryExpression { left, right, operator: Operator::LESSEQ })
+        Expression::LESSEQ(Box::new(left), Box::new(right))
     },
     <Expression4>,
 }
 
-Expression4: Rc<RefCell<dyn Expression>> = {
+Expression4: Expression = {
     <left: Expression4> DASH <right: Expression5> => {
-        rc(BinaryExpression { left, right, operator: Operator::SUBTRACT })
+        Expression::SUBTRACT(Box::new(left), Box::new(right))
     },
     <left: Expression4> CROSS <right: Expression5> => {
-        rc(BinaryExpression { left, right, operator: Operator::ADD })
+        Expression::ADD(Box::new(left), Box::new(right))
     },
     <Expression5>,
 }
 
-Expression5: Rc<RefCell<dyn Expression>> = {
+Expression5: Expression = {
     <left: Expression5> STAR <right: Expression6> => {
-        rc(BinaryExpression { left, right, operator: Operator::MULTIPLY })
+        Expression::MULTIPLY(Box::new(left), Box::new(right))
     },
     <left: Expression5> SLASH <right: Expression6> => {
-        rc(BinaryExpression { left, right, operator: Operator::DIVIDE })
+        Expression::DIVIDE(Box::new(left), Box::new(right))
     },
     <Expression6>,
 }
 
-Expression6: Rc<RefCell<dyn Expression>> = {
+Expression6: Expression = {
     DASH <expression: Expression6> => {
-        rc(UnaryExpression { expression, operator: Operator::NEGATIVE })
+        Expression::NEGATIVE(Box::new(expression))
     },
     NOT <expression: Expression6> => {
-        rc(UnaryExpression { expression, operator: Operator::NOT })
+        Expression::NOT(Box::new(expression))
     },
     <Term>,
 }
@@ -179,7 +177,7 @@ CallExpression: CallExpression = {
     },
 }
 
-ActualsList: Actuals = {
+ActualsList: Vec<Expression> = {
     <expression: Expression> => {
         vec![expression]
     },
@@ -189,15 +187,15 @@ ActualsList: Actuals = {
     },
 }
 
-Term: Rc<RefCell<dyn Expression>> = {
-    <loc: Loc> => rc(loc),
-    <int: INTLITERAL> => rc(IntegerLiteral::new(int)),
-    <string: STRINGLITERAL> => rc(StringLiteral::new(string)),
-    TRUE => rc(Boolean::TRUE),
-    FALSE => rc(Boolean::FALSE),
-    MAGIC => rc(Magic {}),
+Term: Expression = {
+    <loc: Loc> => Expression::LOC(loc),
+    <int: INTLITERAL> => Expression::INTEGERLITERAL(IntegerLiteral::new(int)),
+    <string: STRINGLITERAL> => Expression::STRINGLITERAL(StringLiteral::new(string)),
+    TRUE => Expression::TRUE,
+    FALSE => Expression::FALSE,
+    MAGIC => Expression::MAGIC,
     LPAREN <Expression> RPAREN,
-    <expression: CallExpression> => rc(expression),
+    <expression: CallExpression> => Expression::CALLEXPRESSION(expression),
 }
 
 Loc: Loc = {
