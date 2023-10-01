@@ -33,14 +33,14 @@ VariableDeclaration: () = {
     Id COLON Type ASSIGN Expression SEMICOLON,
 }
 
-Type: () = {
-    Primitive,
-    PERFECT Primitive,
-    Id,
-    PERFECT Id,
+pub Type: Type = {
+    <t: Primitive> => Type::Primitive(t),
+    PERFECT <t: Primitive> => Type::PerfectPrimitive(t),
+    <t: Id> => Type::Class(t),
+    PERFECT <t: Id> => Type::PerfectClass(t),
 }
 
-pub Primitive: Primitive = {
+Primitive: Primitive = {
     INT => Primitive::Int,
     BOOL => Primitive::Bool,
     VOID => Primitive::Void,
@@ -97,7 +97,7 @@ Statement: () = {
     CallExpression SEMICOLON,
 }
 
-pub Expression: Expression = {
+Expression: Expression = {
     <Expression1>,
 }
 

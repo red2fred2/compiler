@@ -46,6 +46,14 @@ pub enum Primitive {
     Void,
 }
 
+#[derive(Debug)]
+pub enum Type {
+    Primitive(Primitive),
+    PerfectPrimitive(Primitive),
+    Class(Id),
+    PerfectClass(Id),
+}
+
 // Structs
 
 #[derive(Debug)]
