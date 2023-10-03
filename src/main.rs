@@ -8,6 +8,7 @@ use clap::Parser;
 
 pub mod ast;
 pub mod lexer;
+mod parser_test;
 
 /// Drewno Mars language compiler
 #[derive(Parser, Debug)]

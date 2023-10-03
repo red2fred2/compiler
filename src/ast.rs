@@ -13,7 +13,7 @@ pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
 }
 
-fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
+pub fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
     let mut str: Vec<char> = format!("{x:#?}").replace(",\n", "\n").chars().collect();
     let len = str.len() - 1;
     str[0] = '{';
@@ -21,7 +21,7 @@ fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
     str.iter().collect()
 }
 
-fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
+pub fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
     format!("{x:?}").replace('[', "(").replace(']', ")")
 }
 
@@ -94,6 +94,7 @@ impl Debug for Declaration {
     }
 }
 
+#[derive(PartialEq)]
 pub enum Expression {
     Add(Box<Expression>, Box<Expression>),
     And(Box<Expression>, Box<Expression>),
@@ -251,6 +252,7 @@ impl Debug for Type {
 
 // Structs
 
+#[derive(PartialEq)]
 pub struct CallExpression {
     pub id: Id,
     pub actuals: Vec<Expression>,
@@ -271,6 +273,7 @@ impl Debug for Formal {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Id {
     pub name: String,
 }
@@ -280,6 +283,7 @@ impl Debug for Id {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Location {
     pub name: String,
 }
