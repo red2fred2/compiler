@@ -10,20 +10,6 @@ fn test_b() {
     assert_eq!(Box::new(x), b(x))
 }
 
-#[test]
-fn test_fmt_body() {
-    let vec = vec![1, 2, 3];
-    let expected = "{\n    1\n    2\n    3\n}";
-    assert_eq!(fmt_body(&vec), expected);
-}
-
-#[test]
-fn test_fmt_list() {
-    let vec = vec![1, 2, 3];
-    let expected = "(1, 2, 3)";
-    assert_eq!(fmt_list(&vec), expected);
-}
-
 // Methods
 
 #[test]

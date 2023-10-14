@@ -7,6 +7,7 @@ use anyhow::Result;
 use clap::Parser;
 
 pub mod ast;
+pub mod parser;
 mod parser_test;
 
 /// Drewno Mars language compiler
@@ -16,11 +17,11 @@ struct Args {
     /// File to be compiled
     input_file: String,
 
-    // Parse flag
+    /// Parse flag
     #[arg(short, long)]
     parse: bool,
 
-    // Unparse flag
+    /// Unparse flag
     #[arg(short, long)]
     unparse: Option<String>,
 }
@@ -31,7 +32,7 @@ fn main() -> Result<()> {
     let contents = std::fs::read_to_string(path)? + "\n";
 
     if args.parse || args.unparse.is_some() {
-        ast::parser(&contents, args.unparse)?;
+        parser::parse(&contents, args.unparse)?;
     }
 
     Ok(())

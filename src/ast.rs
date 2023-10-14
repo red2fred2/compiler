@@ -1,19 +1,14 @@
 //! Since Rust doesn't have inheritance, I'm going to use traits and we'll see
 //! if it turns into a nightmare.
 
-use std::{fmt::Debug, fs::File, io::Write, str::FromStr};
-
-use anyhow::{anyhow, Result};
-use lalrpop_util::lalrpop_mod;
-
-lalrpop_mod!(pub grammar);
+use std::{fmt::Debug, str::FromStr};
 
 // Wrap in a box so I don't have to write Box::new() 100 times
 pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
 }
 
-pub fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
+fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
     let mut str: Vec<char> = format!("{x:#?}").replace(",\n", "\n").chars().collect();
     let len = str.len() - 1;
     str[0] = '{';
@@ -21,27 +16,8 @@ pub fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
     str.iter().collect()
 }
 
-pub fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
+fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
     format!("{x:?}").replace('[', "(").replace(']', ")")
-}
-
-pub fn parser(file_contents: &str, unparse: Option<String>) -> Result<Vec<Declaration>> {
-    let result = grammar::ProgramParser::new().parse(&file_contents);
-
-    if let Ok(program) = result {
-        if let Some(path) = unparse {
-            let mut file = File::create(path)?;
-
-            for declaration in &program {
-                let string = format!("{declaration:#?}\n\n");
-                file.write_all(string.as_bytes())?;
-            }
-        }
-
-        Ok(program)
-    } else {
-        Err(anyhow!("syntax error\nParse failed"))
-    }
 }
 
 // Enums
