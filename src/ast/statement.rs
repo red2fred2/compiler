@@ -62,14 +62,36 @@ impl Debug for Statement {
 
 impl SemanticNode for Statement {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        todo!()
+        match self {
+            Self::Assignment(loc, exp) => todo!(),
+            Self::CallExpression(x) => todo!(),
+            Self::Decrement(x) => todo!(),
+            Self::Exit => todo!(),
+            Self::Give(x) => todo!(),
+            Self::If {
+                condition,
+                body,
+                else_body,
+            } => todo!(),
+            Self::Increment(x) => todo!(),
+            Self::Return(x) => todo!(),
+            Self::Take(x) => todo!(),
+            Self::VariableDeclaration(x) => Some(vec![x]),
+            Self::While { condition, body } => todo!(),
+        }
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) {
-        todo!()
+        match self {
+            Self::VariableDeclaration(_) => (),
+            _ => todo!(),
+        }
     }
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) {
-        todo!()
+        match self {
+            Self::VariableDeclaration(_) => (),
+            _ => todo!(),
+        }
     }
 }

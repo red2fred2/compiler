@@ -75,7 +75,8 @@ impl SymbolTable {
 
     /// Called when exiting a scope
     pub fn exit_scope(&mut self) {
-        self.table.pop();
+        // Disabled scope popping to see what's going on
+        // self.table.pop();
     }
 
     fn in_scope(&self, name: &String) -> Result<bool> {

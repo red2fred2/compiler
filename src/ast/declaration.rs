@@ -61,12 +61,22 @@ impl SemanticNode for Declaration {
                 fn_input,
                 fn_output,
                 body,
-            } => todo!(),
+            } => Some(
+                body.iter_mut()
+                    .map(|e| e as &mut dyn SemanticNode)
+                    .collect(),
+            ),
             Self::Variable {
                 name,
                 t,
                 assignment,
-            } => None,
+            } => {
+                if let Some(exp) = assignment {
+                    Some(vec![exp])
+                } else {
+                    None
+                }
+            }
         }
     }
 
@@ -78,7 +88,11 @@ impl SemanticNode for Declaration {
                 fn_input,
                 fn_output,
                 body,
-            } => todo!(),
+            } => {
+                let entry = semantic_analysis::Entry::Function(fn_input.clone(), fn_output.clone());
+                symbol_table.add(&id.name, entry);
+                symbol_table.enter_scope();
+            }
             Self::Variable {
                 name,
                 t,
@@ -91,6 +105,21 @@ impl SemanticNode for Declaration {
     }
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) {
-        todo!()
+        match self {
+            Self::Class { id, body } => todo!(),
+            Self::Function {
+                id,
+                fn_input,
+                fn_output,
+                body,
+            } => {
+                symbol_table.exit_scope();
+            }
+            Self::Variable {
+                name,
+                t,
+                assignment,
+            } => (),
+        }
     }
 }
