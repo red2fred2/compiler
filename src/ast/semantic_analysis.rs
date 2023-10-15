@@ -54,11 +54,13 @@ impl SymbolTable {
         if entry == Entry::Variable(Type::Primitive(Primitive::Void))
             || entry == Entry::Variable(Type::PerfectPrimitive(Primitive::Void))
         {
-            return Err(anyhow!("Invalid type in declaration"));
+            eprintln!("Invalid type in declaration: {name}: void");
+            return Err(anyhow!("Invalid type in declaration: {name}: void"));
         }
 
         if self.in_scope(name)? {
-            return Err(anyhow!("Multiply declared identifier"));
+            eprintln!("Multiply declared identifier: {name}");
+            return Err(anyhow!("Multiply declared identifier: {name}"));
         }
 
         let scope = self.table.last_mut().unwrap();
@@ -100,7 +102,8 @@ impl SymbolTable {
         if let Some(scope) = scope {
             Ok(scope.get(name).unwrap().clone())
         } else {
-            Err(anyhow!("Undeclared identifier"))
+            eprintln!("Undeclared identifier: {name}");
+            Err(anyhow!("Undeclared identifier: {name}"))
         }
     }
 }
