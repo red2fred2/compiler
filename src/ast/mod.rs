@@ -64,6 +64,15 @@ pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>
     }
 }
 
+fn pre_order_traverse(tree: &mut dyn TreeNode, f: fn(node: &mut dyn TreeNode)) {
+    f(tree);
+    if let Some(children) = tree.get_children() {
+        for child in children {
+            pre_order_traverse(child, f);
+        }
+    }
+}
+
 pub trait TreeNode: Debug {
     fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>>;
 }
