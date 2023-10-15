@@ -4,7 +4,6 @@
 //! [language Specification](https://compilers.cool/language/)
 
 use anyhow::Result;
-use ast::TreeNode;
 use clap::Parser;
 
 pub mod ast;
@@ -29,10 +28,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path)? + "\n";
-    let mut ast = ast::parse(&contents, &args)?;
-
-    let children = ast[0].get_children();
-    println!("{children:#?}");
+    ast::parse(&contents, &args)?;
 
     Ok(())
 }
