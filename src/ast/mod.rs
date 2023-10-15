@@ -45,11 +45,11 @@ fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
     format!("{x:?}").replace('[', "(").replace(']', ")")
 }
 
-pub fn parse(file_contents: &str, unparse: Option<String>) -> Result<Vec<Declaration>> {
+pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>> {
     let result = grammar::ProgramParser::new().parse(&file_contents);
 
     if let Ok(program) = result {
-        if let Some(path) = unparse {
+        if let Some(path) = &args.unparse {
             let mut file = File::create(path)?;
 
             for declaration in &program {

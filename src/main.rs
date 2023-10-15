@@ -12,7 +12,7 @@ pub mod ast;
 /// Drewno Mars language compiler
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {
+pub struct Args {
     /// File to be compiled
     input_file: String,
 
@@ -27,15 +27,12 @@ struct Args {
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    let path = args.input_file;
+    let path = &args.input_file;
     let contents = std::fs::read_to_string(path)? + "\n";
+    let mut ast = ast::parse(&contents, &args)?;
 
-    if args.parse || args.unparse.is_some() {
-        let mut ast = ast::parse(&contents, args.unparse)?;
-        let children = ast[0].get_children();
-
-        println!("{children:#?}")
-    }
+    let children = ast[0].get_children();
+    println!("{children:#?}");
 
     Ok(())
 }
