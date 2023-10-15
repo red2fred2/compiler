@@ -11,3 +11,17 @@ impl Debug for CallExpression {
         write!(f, "{:?}{}", self.id, fmt_list(&self.actuals))
     }
 }
+
+impl SemanticNode for CallExpression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+        todo!()
+    }
+
+    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
+
+    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
+}

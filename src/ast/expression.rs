@@ -67,3 +67,17 @@ impl Debug for Expression {
         }
     }
 }
+
+impl SemanticNode for Expression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+        todo!()
+    }
+
+    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
+
+    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
+}
