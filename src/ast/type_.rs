@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Type {
     Primitive(Primitive),
     PerfectPrimitive(Primitive),
