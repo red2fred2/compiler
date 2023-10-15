@@ -71,6 +71,25 @@ impl SemanticNode for Declaration {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) {
-        todo!()
+        match self {
+            Self::Class { id, body } => todo!(),
+            Self::Function {
+                id,
+                fn_input,
+                fn_output,
+                body,
+            } => todo!(),
+            Self::Variable {
+                name,
+                t,
+                assignment,
+            } => {
+                let entry = semantic_analysis::Entry {
+                    kind: Kind::Variable,
+                    t: t.clone(),
+                };
+                symbol_table.add(&name.name, entry);
+            }
+        }
     }
 }
