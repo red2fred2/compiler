@@ -20,6 +20,10 @@ fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
     format!("{x:?}").replace('[', "(").replace(']', ")")
 }
 
+pub trait TreeNode: Debug {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>>;
+}
+
 // Enums
 
 pub enum Declaration {
@@ -66,6 +70,24 @@ impl Debug for Declaration {
                 Some(a) => write!(f, "{name:?}: {t:?} = {a:?};"),
                 None => write!(f, "{name:?}: {t:?};"),
             },
+        }
+    }
+}
+impl TreeNode for Declaration {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+        match self {
+            Self::Class { id, body } => None,
+            Self::Function {
+                id,
+                fn_input,
+                fn_output,
+                body,
+            } => None,
+            Self::Variable {
+                name,
+                t,
+                assignment,
+            } => Some(vec![name, t]),
         }
     }
 }
@@ -150,6 +172,11 @@ impl Debug for Primitive {
         }
     }
 }
+impl TreeNode for Primitive {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+        None
+    }
+}
 
 pub enum Statement {
     Assignment(Location, Expression),
@@ -225,6 +252,14 @@ impl Debug for Type {
         }
     }
 }
+impl TreeNode for Type {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+        match self {
+            Self::Primitive(x) | Self::PerfectPrimitive(x) => Some(vec![x]),
+            Self::Class(x) | Self::PerfectClass(x) => Some(vec![x]),
+        }
+    }
+}
 
 // Structs
 
@@ -248,6 +283,11 @@ impl Debug for Formal {
         write!(f, "{:?}: {:?}", self.id, self.t)
     }
 }
+impl TreeNode for Formal {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+        Some(vec![&mut self.id, &mut self.t])
+    }
+}
 
 #[derive(PartialEq)]
 pub struct Id {
@@ -256,6 +296,11 @@ pub struct Id {
 impl Debug for Id {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name)
+    }
+}
+impl TreeNode for Id {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+        None
     }
 }
 
@@ -277,5 +322,10 @@ impl Location {
 impl Debug for Location {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name)
+    }
+}
+impl TreeNode for Location {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+        None
     }
 }
