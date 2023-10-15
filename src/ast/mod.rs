@@ -15,6 +15,16 @@ mod statement;
 mod type_;
 mod variable_declaration;
 
+pub use call_expression::CallExpression;
+pub use declaration::Declaration;
+pub use expression::Expression;
+pub use formal::Formal;
+pub use id::Id;
+pub use location::Location;
+pub use primitive::Primitive;
+pub use statement::Statement;
+pub use type_::Type;
+
 use std::{
     fmt::{Debug, Formatter},
     fs::File,
@@ -25,18 +35,9 @@ use std::{
 use anyhow::{anyhow, Result};
 use lalrpop_util::lalrpop_mod;
 
-pub use call_expression::CallExpression;
 use class::Class;
-pub use declaration::Declaration;
-pub use expression::Expression;
-pub use formal::Formal;
 use function::Function;
-pub use id::Id;
-pub use location::Location;
-pub use primitive::Primitive;
 use semantic_analysis::{SemanticNode, SymbolTable};
-pub use statement::Statement;
-pub use type_::Type;
 use variable_declaration::VariableDeclaration;
 
 lalrpop_mod!(pub grammar);
