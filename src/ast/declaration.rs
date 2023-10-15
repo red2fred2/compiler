@@ -55,18 +55,18 @@ impl Debug for Declaration {
 impl SemanticNode for Declaration {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         match self {
-            Self::Class { id, body } => None,
+            Self::Class { id, body } => todo!(),
             Self::Function {
                 id,
                 fn_input,
                 fn_output,
                 body,
-            } => None,
+            } => todo!(),
             Self::Variable {
                 name,
                 t,
                 assignment,
-            } => Some(vec![name, t]),
+            } => None,
         }
     }
 
