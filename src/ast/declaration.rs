@@ -55,17 +55,13 @@ impl Debug for Declaration {
 impl SemanticNode for Declaration {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         match self {
-            Self::Class { id, body } => todo!(),
+            Self::Class { id, body } => dyn_body(body),
             Self::Function {
                 id,
                 fn_input,
                 fn_output,
                 body,
-            } => Some(
-                body.iter_mut()
-                    .map(|e| e as &mut dyn SemanticNode)
-                    .collect(),
-            ),
+            } => dyn_body(body),
             Self::Variable {
                 name,
                 t,
@@ -82,7 +78,11 @@ impl SemanticNode for Declaration {
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) {
         match self {
-            Self::Class { id, body } => todo!(),
+            Self::Class { id, body } => {
+                let entry = semantic_analysis::Entry::Class;
+                symbol_table.add(&id.name, entry);
+                symbol_table.enter_scope();
+            }
             Self::Function {
                 id,
                 fn_input,
@@ -106,15 +106,13 @@ impl SemanticNode for Declaration {
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) {
         match self {
-            Self::Class { id, body } => todo!(),
+            Self::Class { id, body } => symbol_table.exit_scope(),
             Self::Function {
                 id,
                 fn_input,
                 fn_output,
                 body,
-            } => {
-                symbol_table.exit_scope();
-            }
+            } => symbol_table.exit_scope(),
             Self::Variable {
                 name,
                 t,

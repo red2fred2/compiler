@@ -35,6 +35,14 @@ pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
 }
 
+fn dyn_body<T: SemanticNode>(body: &mut Vec<T>) -> Option<Vec<&mut dyn SemanticNode>> {
+    Some(
+        body.iter_mut()
+            .map(|e| e as &mut dyn SemanticNode)
+            .collect(),
+    )
+}
+
 fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
     let mut str: Vec<char> = format!("{x:#?}").replace(",\n", "\n").chars().collect();
     let len = str.len() - 1;
