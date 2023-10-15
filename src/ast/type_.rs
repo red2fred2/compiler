@@ -19,11 +19,15 @@ impl Debug for Type {
     }
 }
 
-impl TreeNode for Type {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+impl SemanticNode for Type {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         match self {
             Self::Primitive(x) | Self::PerfectPrimitive(x) => Some(vec![x]),
             Self::Class(x) | Self::PerfectClass(x) => Some(vec![x]),
         }
+    }
+
+    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
     }
 }

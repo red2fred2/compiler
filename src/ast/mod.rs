@@ -8,6 +8,7 @@ mod formal;
 mod id;
 mod location;
 mod primitive;
+mod semantic_analysis;
 mod statement;
 mod type_;
 
@@ -23,6 +24,7 @@ pub use formal::Formal;
 pub use id::Id;
 pub use location::Location;
 pub use primitive::Primitive;
+use semantic_analysis::{SemanticNode, SymbolTable};
 pub use statement::Statement;
 pub use type_::Type;
 
@@ -48,15 +50,12 @@ fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
 pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>> {
     let result = grammar::ProgramParser::new().parse(&file_contents);
 
-    if let Ok(program) = result {
+    if let Ok(mut program) = result {
         if let Some(path) = &args.unparse {
-            let mut file = File::create(path)?;
-
-            for declaration in &program {
-                let string = format!("{declaration:#?}\n\n");
-                file.write_all(string.as_bytes())?;
-            }
+            unparse(path, &program)?;
         }
+
+        semantic_analysis::analyze(&mut program);
 
         Ok(program)
     } else {
@@ -64,15 +63,13 @@ pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>
     }
 }
 
-fn pre_order_traverse(tree: &mut dyn TreeNode, f: fn(node: &mut dyn TreeNode)) {
-    f(tree);
-    if let Some(children) = tree.get_children() {
-        for child in children {
-            pre_order_traverse(child, f);
-        }
-    }
-}
+fn unparse(path: &String, program: &Vec<Declaration>) -> Result<()> {
+    let mut file = File::create(path)?;
 
-pub trait TreeNode: Debug {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>>;
+    for declaration in program {
+        let string = format!("{declaration:#?}\n\n");
+        file.write_all(string.as_bytes())?;
+    }
+
+    Ok(())
 }

@@ -12,8 +12,12 @@ impl Debug for Formal {
     }
 }
 
-impl TreeNode for Formal {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+impl SemanticNode for Formal {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         Some(vec![&mut self.id, &mut self.t])
+    }
+
+    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
     }
 }

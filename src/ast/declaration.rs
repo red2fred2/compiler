@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use super::*;
 
 #[derive(Clone)]
@@ -50,8 +52,8 @@ impl Debug for Declaration {
     }
 }
 
-impl TreeNode for Declaration {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+impl SemanticNode for Declaration {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         match self {
             Self::Class { id, body } => None,
             Self::Function {
@@ -66,5 +68,9 @@ impl TreeNode for Declaration {
                 assignment,
             } => Some(vec![name, t]),
         }
+    }
+
+    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
     }
 }

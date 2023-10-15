@@ -17,8 +17,12 @@ impl Debug for Primitive {
     }
 }
 
-impl TreeNode for Primitive {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+impl SemanticNode for Primitive {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         None
+    }
+
+    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
     }
 }

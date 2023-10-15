@@ -11,8 +11,12 @@ impl Debug for Id {
     }
 }
 
-impl TreeNode for Id {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn TreeNode>> {
+impl SemanticNode for Id {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         None
+    }
+
+    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
     }
 }
