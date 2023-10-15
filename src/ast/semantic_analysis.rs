@@ -8,6 +8,8 @@ pub fn analyze(program: &mut Vec<Declaration>) {
     for declaration in program {
         pre_order_traverse(declaration, &mut |node| node.visit(&mut symbol_table));
     }
+
+    println!("{symbol_table:#?}");
 }
 
 fn pre_order_traverse(tree: &mut dyn SemanticNode, f: &mut dyn FnMut(&mut dyn SemanticNode)) {
@@ -24,12 +26,14 @@ pub trait SemanticNode: Debug {
     fn visit(&mut self, symbol_table: &mut SymbolTable);
 }
 
+#[derive(Debug)]
 pub enum Kind {
     Class,
     Function,
     Variable,
 }
 
+#[derive(Debug)]
 pub struct Entry {
     pub kind: Kind,
     pub t: Type,
@@ -38,6 +42,7 @@ pub struct Entry {
 type Scope = HashMap<String, Rc<Entry>>;
 type Stack<T> = Vec<T>;
 
+#[derive(Debug)]
 pub struct SymbolTable {
     table: Stack<Scope>,
 }
@@ -49,19 +54,19 @@ impl SymbolTable {
     }
 
     /// Adds a newly declared symbol to the table
-    fn add(&mut self, name: String, entry: Entry) -> Result<()> {
+    pub fn add(&mut self, name: &String, entry: Entry) -> Result<()> {
         if entry.t == Type::Primitive(Primitive::Void)
             || entry.t == Type::PerfectPrimitive(Primitive::Void)
         {
             return Err(anyhow!("Invalid type in declaration"));
         }
 
-        if self.in_scope(&name)? {
+        if self.in_scope(name)? {
             return Err(anyhow!("Multiply declared identifier"));
         }
 
         let scope = self.table.last_mut().unwrap();
-        scope.insert(name, Rc::new(entry));
+        scope.insert(name.clone(), Rc::new(entry));
 
         Ok(())
     }
