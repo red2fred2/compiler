@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum Expression {
     Add(Box<Expression>, Box<Expression>),
     And(Box<Expression>, Box<Expression>),

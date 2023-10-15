@@ -1,5 +1,6 @@
 use super::*;
 
+#[derive(Clone)]
 pub enum Primitive {
     Bool,
     Int,

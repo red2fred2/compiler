@@ -1,5 +1,6 @@
 use super::*;
 
+#[derive(Clone)]
 pub struct Formal {
     pub id: Id,
     pub t: Type,

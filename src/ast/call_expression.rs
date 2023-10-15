@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct CallExpression {
     pub id: Id,
     pub actuals: Vec<Expression>,
