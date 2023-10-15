@@ -89,4 +89,8 @@ impl SemanticNode for Declaration {
             }
         }
     }
+
+    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
 }

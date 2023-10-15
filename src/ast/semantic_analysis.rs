@@ -6,24 +6,26 @@ pub fn analyze(program: &mut Vec<Declaration>) {
     let mut symbol_table = SymbolTable::new();
 
     for declaration in program {
-        pre_order_traverse(declaration, &mut |node| node.visit(&mut symbol_table));
+        traverse(declaration, &mut symbol_table);
     }
 
     println!("{symbol_table:#?}");
 }
 
-fn pre_order_traverse(tree: &mut dyn SemanticNode, f: &mut dyn FnMut(&mut dyn SemanticNode)) {
-    f(tree);
+fn traverse(tree: &mut dyn SemanticNode, symbol_table: &mut SymbolTable) {
+    tree.visit(symbol_table);
     if let Some(children) = tree.get_children() {
         for child in children {
-            pre_order_traverse(child, f);
+            traverse(child, symbol_table);
         }
     }
+    tree.exit(symbol_table);
 }
 
 pub trait SemanticNode: Debug {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>>;
     fn visit(&mut self, symbol_table: &mut SymbolTable);
+    fn exit(&mut self, symbol_table: &mut SymbolTable);
 }
 
 #[derive(Debug, PartialEq)]

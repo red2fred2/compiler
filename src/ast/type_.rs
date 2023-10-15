@@ -30,4 +30,8 @@ impl SemanticNode for Type {
     fn visit(&mut self, symbol_table: &mut SymbolTable) {
         todo!()
     }
+
+    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
 }

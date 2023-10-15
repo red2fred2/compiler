@@ -31,4 +31,8 @@ impl SemanticNode for Location {
     fn visit(&mut self, symbol_table: &mut SymbolTable) {
         todo!()
     }
+
+    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
 }

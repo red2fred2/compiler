@@ -17,4 +17,8 @@ impl SemanticNode for Id {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) {}
+
+    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
 }

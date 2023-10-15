@@ -25,4 +25,8 @@ impl SemanticNode for Primitive {
     fn visit(&mut self, symbol_table: &mut SymbolTable) {
         todo!()
     }
+
+    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+        todo!()
+    }
 }
