@@ -73,11 +73,11 @@ impl SemanticNode for Expression {
         todo!()
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         todo!()
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         todo!()
     }
 }

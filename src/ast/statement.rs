@@ -81,16 +81,16 @@ impl SemanticNode for Statement {
         }
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
-            Self::VariableDeclaration(_) => (),
+            Self::VariableDeclaration(_) => Ok(()),
             _ => todo!(),
         }
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
-            Self::VariableDeclaration(_) => (),
+            Self::VariableDeclaration(_) => Ok(()),
             _ => todo!(),
         }
     }

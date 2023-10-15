@@ -22,11 +22,11 @@ impl SemanticNode for Primitive {
         None
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         todo!()
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         todo!()
     }
 }

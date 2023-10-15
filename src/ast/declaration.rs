@@ -1,53 +1,46 @@
-#![allow(unused)]
-
 use super::*;
 
 #[derive(Clone)]
 pub enum Declaration {
-    Class {
-        id: Id,
-        body: Vec<Declaration>,
-    },
-    Function {
+    Class(Class),
+    Function(Function),
+    Variable(VariableDeclaration),
+}
+
+impl Declaration {
+    pub fn new_class(id: Id, body: Vec<Declaration>) -> Declaration {
+        Declaration::Class(Class { id, body })
+    }
+
+    pub fn new_function(
         id: Id,
         fn_input: Vec<Formal>,
         fn_output: Type,
         body: Vec<Statement>,
-    },
-    Variable {
-        name: Id,
-        t: Type,
-        assignment: Option<Expression>,
-    },
+    ) -> Declaration {
+        Declaration::Function(Function {
+            id,
+            fn_input,
+            fn_output,
+            body,
+        })
+    }
+
+    pub fn new_variable(name: Id, t: Type, assignment: Option<Expression>) -> Declaration {
+        Declaration::Variable(VariableDeclaration {
+            name,
+            t,
+            assignment,
+        })
+    }
 }
 
 impl Debug for Declaration {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Class { id, body } => {
-                write!(f, "{id:?}: class ")?;
-                write!(f, "{}", fmt_body(body))?;
-                write!(f, ";")
-            }
-            Self::Function {
-                id,
-                fn_input,
-                fn_output,
-                body,
-            } => {
-                let in_list = fmt_list(fn_input);
-
-                write!(f, "{id:?}: {in_list} {fn_output:?} ")?;
-                write!(f, "{}", fmt_body(body))
-            }
-            Self::Variable {
-                name,
-                t,
-                assignment,
-            } => match assignment {
-                Some(a) => write!(f, "{name:?}: {t:?} = {a:?};"),
-                None => write!(f, "{name:?}: {t:?};"),
-            },
+            Declaration::Class(x) => write!(f, "{x:?}"),
+            Declaration::Function(x) => write!(f, "{x:?}"),
+            Declaration::Variable(x) => write!(f, "{x:?}"),
         }
     }
 }
@@ -55,69 +48,25 @@ impl Debug for Declaration {
 impl SemanticNode for Declaration {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         match self {
-            Self::Class { id, body } => dyn_body(body),
-            Self::Function {
-                id,
-                fn_input,
-                fn_output,
-                body,
-            } => dyn_body(body),
-            Self::Variable {
-                name,
-                t,
-                assignment,
-            } => {
-                if let Some(exp) = assignment {
-                    Some(vec![exp])
-                } else {
-                    None
-                }
-            }
+            Self::Class(x) => x.get_children(),
+            Self::Function(x) => x.get_children(),
+            Self::Variable(x) => x.get_children(),
         }
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
-            Self::Class { id, body } => {
-                let entry = semantic_analysis::Entry::Class;
-                symbol_table.add(&id.name, entry);
-                symbol_table.enter_scope();
-            }
-            Self::Function {
-                id,
-                fn_input,
-                fn_output,
-                body,
-            } => {
-                let entry = semantic_analysis::Entry::Function(fn_input.clone(), fn_output.clone());
-                symbol_table.add(&id.name, entry);
-                symbol_table.enter_scope();
-            }
-            Self::Variable {
-                name,
-                t,
-                assignment,
-            } => {
-                let entry = semantic_analysis::Entry::Variable(t.clone());
-                symbol_table.add(&name.name, entry);
-            }
+            Self::Class(x) => x.visit(symbol_table),
+            Self::Function(x) => x.visit(symbol_table),
+            Self::Variable(x) => x.visit(symbol_table),
         }
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
-            Self::Class { id, body } => symbol_table.exit_scope(),
-            Self::Function {
-                id,
-                fn_input,
-                fn_output,
-                body,
-            } => symbol_table.exit_scope(),
-            Self::Variable {
-                name,
-                t,
-                assignment,
-            } => (),
+            Self::Class(x) => x.exit(symbol_table),
+            Self::Function(x) => x.exit(symbol_table),
+            Self::Variable(x) => x.exit(symbol_table),
         }
     }
 }

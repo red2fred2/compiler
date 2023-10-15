@@ -2,31 +2,42 @@
 //! if it turns into a nightmare.
 
 mod call_expression;
+mod class;
 mod declaration;
 mod expression;
 mod formal;
+mod function;
 mod id;
 mod location;
 mod primitive;
 mod semantic_analysis;
 mod statement;
 mod type_;
+mod variable_declaration;
 
-use std::{fmt::Debug, fs::File, io::Write, str::FromStr};
+use std::{
+    fmt::{Debug, Formatter},
+    fs::File,
+    io::Write,
+    str::FromStr,
+};
 
 use anyhow::{anyhow, Result};
 use lalrpop_util::lalrpop_mod;
 
 pub use call_expression::CallExpression;
+use class::Class;
 pub use declaration::Declaration;
 pub use expression::Expression;
 pub use formal::Formal;
+use function::Function;
 pub use id::Id;
 pub use location::Location;
 pub use primitive::Primitive;
 use semantic_analysis::{SemanticNode, SymbolTable};
 pub use statement::Statement;
 pub use type_::Type;
+use variable_declaration::VariableDeclaration;
 
 lalrpop_mod!(pub grammar);
 
@@ -63,7 +74,7 @@ pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>
             unparse(path, &program)?;
         }
 
-        semantic_analysis::analyze(&mut program);
+        semantic_analysis::analyze(&mut program).unwrap();
 
         Ok(program)
     } else {
