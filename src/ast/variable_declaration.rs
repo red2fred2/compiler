@@ -30,7 +30,7 @@ impl SemanticNode for VariableDeclaration {
         Ok(())
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
     }
 }
