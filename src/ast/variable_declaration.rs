@@ -25,7 +25,7 @@ impl SemanticNode for VariableDeclaration {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let entry = semantic_analysis::Entry::Variable(self.t.clone());
+        let entry = symbol_table::Entry::Variable(self.t.clone());
         symbol_table.add(&self.name.name, entry)?;
         Ok(())
     }

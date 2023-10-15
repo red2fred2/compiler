@@ -20,7 +20,7 @@ impl SemanticNode for Class {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let entry = semantic_analysis::Entry::Class;
+        let entry = symbol_table::Entry::Class;
         symbol_table.add(&self.id.name, entry)?;
         symbol_table.enter_scope();
         Ok(())

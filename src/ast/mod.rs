@@ -9,6 +9,7 @@ mod location;
 mod primitive;
 mod semantic_analysis;
 mod statement;
+mod symbol_table;
 mod type_;
 mod variable_declaration;
 
@@ -34,7 +35,8 @@ use lalrpop_util::lalrpop_mod;
 
 use class::Class;
 use function::Function;
-use semantic_analysis::{SemanticNode, SymbolTable};
+use semantic_analysis::SemanticNode;
+use symbol_table::SymbolTable;
 use variable_declaration::VariableDeclaration;
 
 lalrpop_mod!(pub grammar);
