@@ -1,6 +1,3 @@
-//! Since Rust doesn't have inheritance, I'm going to use traits and we'll see
-//! if it turns into a nightmare.
-
 mod call_expression;
 mod class;
 mod declaration;
