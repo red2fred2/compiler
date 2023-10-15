@@ -26,17 +26,11 @@ pub trait SemanticNode: Debug {
     fn visit(&mut self, symbol_table: &mut SymbolTable);
 }
 
-#[derive(Debug)]
-pub enum Kind {
+#[derive(Debug, PartialEq)]
+pub enum Entry {
     Class,
-    Function,
-    Variable,
-}
-
-#[derive(Debug)]
-pub struct Entry {
-    pub kind: Kind,
-    pub t: Type,
+    Function(Vec<Formal>, Type),
+    Variable(Type),
 }
 
 type Scope = HashMap<String, Rc<Entry>>;
@@ -55,8 +49,8 @@ impl SymbolTable {
 
     /// Adds a newly declared symbol to the table
     pub fn add(&mut self, name: &String, entry: Entry) -> Result<()> {
-        if entry.t == Type::Primitive(Primitive::Void)
-            || entry.t == Type::PerfectPrimitive(Primitive::Void)
+        if entry == Entry::Variable(Type::Primitive(Primitive::Void))
+            || entry == Entry::Variable(Type::PerfectPrimitive(Primitive::Void))
         {
             return Err(anyhow!("Invalid type in declaration"));
         }

@@ -24,7 +24,7 @@ pub use formal::Formal;
 pub use id::Id;
 pub use location::Location;
 pub use primitive::Primitive;
-use semantic_analysis::{Kind, SemanticNode, SymbolTable};
+use semantic_analysis::{SemanticNode, SymbolTable};
 pub use statement::Statement;
 pub use type_::Type;
 

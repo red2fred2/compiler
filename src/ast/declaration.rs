@@ -84,10 +84,7 @@ impl SemanticNode for Declaration {
                 t,
                 assignment,
             } => {
-                let entry = semantic_analysis::Entry {
-                    kind: Kind::Variable,
-                    t: t.clone(),
-                };
+                let entry = semantic_analysis::Entry::Variable(t.clone());
                 symbol_table.add(&name.name, entry);
             }
         }
