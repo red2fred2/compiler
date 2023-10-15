@@ -14,7 +14,7 @@ impl Debug for Formal {
 
 impl SemanticNode for Formal {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        Some(vec![&mut self.id, &mut self.t])
+        None
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) {
