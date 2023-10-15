@@ -8,7 +8,6 @@ use ast::TreeNode;
 use clap::Parser;
 
 pub mod ast;
-pub mod parser;
 
 /// Drewno Mars language compiler
 #[derive(Parser, Debug)]
@@ -32,7 +31,7 @@ fn main() -> Result<()> {
     let contents = std::fs::read_to_string(path)? + "\n";
 
     if args.parse || args.unparse.is_some() {
-        let mut ast = parser::parse(&contents, args.unparse)?;
+        let mut ast = ast::parse(&contents, args.unparse)?;
         let children = ast[0].get_children();
 
         println!("{children:#?}")
