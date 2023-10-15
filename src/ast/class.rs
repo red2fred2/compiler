@@ -16,7 +16,7 @@ impl Debug for Class {
 
 impl SemanticNode for Class {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        dyn_body(&mut self.body)
+        Some(dyn_vec(&mut self.body))
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {

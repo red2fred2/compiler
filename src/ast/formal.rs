@@ -18,10 +18,12 @@ impl SemanticNode for Formal {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        todo!()
+        let entry = symbol_table::Entry::Variable(self.t.clone());
+        symbol_table.add(&self.id.name, entry)?;
+        Ok(())
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        todo!()
+    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+        Ok(())
     }
 }

@@ -46,12 +46,8 @@ pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
 }
 
-fn dyn_body<T: SemanticNode>(body: &mut Vec<T>) -> Option<Vec<&mut dyn SemanticNode>> {
-    Some(
-        body.iter_mut()
-            .map(|e| e as &mut dyn SemanticNode)
-            .collect(),
-    )
+fn dyn_vec<T: SemanticNode>(vec: &mut Vec<T>) -> Vec<&mut dyn SemanticNode> {
+    vec.iter_mut().map(|e| e as &mut dyn SemanticNode).collect()
 }
 
 fn fmt_body<T: Debug>(x: &Vec<T>) -> String {

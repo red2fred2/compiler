@@ -19,7 +19,9 @@ impl Debug for Function {
 
 impl SemanticNode for Function {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        dyn_body(&mut self.body)
+        let mut children = dyn_vec(&mut self.fn_input);
+        children.append(&mut dyn_vec(&mut self.body));
+        Some(children)
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
