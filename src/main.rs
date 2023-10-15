@@ -9,7 +9,6 @@ use clap::Parser;
 
 pub mod ast;
 pub mod parser;
-mod parser_test;
 
 /// Drewno Mars language compiler
 #[derive(Parser, Debug)]
