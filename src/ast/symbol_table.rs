@@ -9,7 +9,7 @@ fn rc<T>(x: T) -> Rc<RefCell<T>> {
 
 #[derive(Debug, PartialEq)]
 pub enum Entry {
-    Class,
+    Class(Rc<RefCell<Scope>>),
     Function(Vec<Formal>, Type),
     Variable(Type),
 }
@@ -37,7 +37,7 @@ impl SymbolTable {
             return Err(anyhow!("Invalid type in declaration: {name}: void"));
         }
 
-        if self.in_scope(name)? {
+        if self.in_scope(name) {
             eprintln!("Multiply declared identifier: {name}");
             return Err(anyhow!("Multiply declared identifier: {name}"));
         }
@@ -45,6 +45,14 @@ impl SymbolTable {
         let scope = self.table.last_mut().unwrap();
         scope.borrow_mut().insert(name.clone(), Rc::new(entry));
 
+        Ok(())
+    }
+
+    pub fn add_class(&mut self, name: &String) -> Result<()> {
+        let scope = rc(HashMap::new());
+        let entry = symbol_table::Entry::Class(scope.clone());
+        self.add(name, entry)?;
+        self.table.push(scope);
         Ok(())
     }
 
@@ -60,13 +68,10 @@ impl SymbolTable {
         // self.table.pop();
     }
 
-    fn in_scope(&self, name: &String) -> Result<bool> {
-        if let Some(scope) = self.table.last() {
-            Ok(scope.borrow().get(name).is_some())
-        } else {
-            Err(anyhow!(
-                "Somehow lost the global scope during semantic analysis"
-            ))
+    fn in_scope(&self, name: &String) -> bool {
+        match self.table.last() {
+            Some(scope) => scope.borrow().get(name).is_some(),
+            None => panic!(),
         }
     }
 
