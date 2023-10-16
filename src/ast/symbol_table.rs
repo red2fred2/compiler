@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, rc::Rc};
 
 use super::*;
 
@@ -20,6 +20,11 @@ fn type_error(name: &String) -> Result<()> {
 fn undeclared_error(name: &String) -> Result<Rc<Entry>> {
     eprintln!("Undeclared identifier: {name}");
     Err(anyhow!("Undeclared identifier: {name}"))
+}
+
+fn undefined_type() -> Result<Rc<Entry>> {
+    eprintln!("Undefined type");
+    Err(anyhow!("Undefined type"))
 }
 
 #[derive(Debug, PartialEq)]
@@ -55,8 +60,12 @@ impl SymbolTable {
             return multiple_define_error(name);
         }
 
-        let scope = self.table.last_mut().unwrap();
-        scope.borrow_mut().insert(name.clone(), Rc::new(entry));
+        self.table
+            .last_mut()
+            .unwrap()
+            .try_borrow_mut()
+            .unwrap()
+            .insert(name.clone(), Rc::new(entry));
 
         Ok(())
     }
@@ -81,14 +90,25 @@ impl SymbolTable {
     }
 
     pub fn get_class_member(&self, class: Rc<Entry>, name: &String) -> Result<Rc<Entry>> {
-        let Entry::Class(scope) = class.as_ref() else {
+        // Get associated class
+        let Entry::Variable(t) = class.as_ref() else {
+            return undefined_type();
+        };
+        let t = format!("{t:?}");
+        let c = self.link(&t)?;
+
+        // Get class's scope
+        let Entry::Class(scope) = c.as_ref() else {
             return undeclared_error(name);
         };
 
-        match scope.borrow().get(name) {
+        // Grab the entry
+        let result = match scope.borrow().get(name) {
             Some(entry) => Ok(entry.clone()),
             None => undeclared_error(name),
-        }
+        };
+
+        result
     }
 
     fn in_scope(&self, name: &String) -> bool {
