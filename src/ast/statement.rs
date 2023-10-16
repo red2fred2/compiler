@@ -63,19 +63,22 @@ impl Debug for Statement {
 impl SemanticNode for Statement {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         match self {
-            Self::Assignment(loc, exp) => todo!(),
-            Self::CallExpression(x) => todo!(),
-            Self::Decrement(x) => todo!(),
-            Self::Exit => todo!(),
-            Self::Give(x) => todo!(),
+            Self::Assignment(x, y) => Some(vec![x, y]),
+            Self::CallExpression(x) => Some(vec![x]),
+            Self::Decrement(x) => Some(vec![x]),
+            Self::Exit => None,
+            Self::Give(x) => Some(vec![x]),
             Self::If {
                 condition,
                 body,
                 else_body,
             } => todo!(),
-            Self::Increment(x) => todo!(),
-            Self::Return(x) => todo!(),
-            Self::Take(x) => todo!(),
+            Self::Increment(x) => Some(vec![x]),
+            Self::Return(x) => match x {
+                Some(x) => Some(vec![x]),
+                None => None,
+            },
+            Self::Take(x) => Some(vec![x]),
             Self::VariableDeclaration(x) => Some(vec![x]),
             Self::While { condition, body } => todo!(),
         }
@@ -83,15 +86,25 @@ impl SemanticNode for Statement {
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
-            Self::VariableDeclaration(_) => Ok(()),
-            _ => todo!(),
+            Self::If {
+                condition,
+                body,
+                else_body,
+            } => todo!(),
+            Self::While { condition, body } => todo!(),
+            _ => Ok(()),
         }
     }
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
-            Self::VariableDeclaration(_) => Ok(()),
-            _ => todo!(),
+            Self::If {
+                condition,
+                body,
+                else_body,
+            } => todo!(),
+            Self::While { condition, body } => todo!(),
+            _ => Ok(()),
         }
     }
 }
