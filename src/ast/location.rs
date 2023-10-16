@@ -32,7 +32,7 @@ impl SemanticNode for Location {
         todo!()
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        todo!()
+    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+        Ok(())
     }
 }
