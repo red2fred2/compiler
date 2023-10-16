@@ -2,24 +2,30 @@ use super::*;
 
 #[derive(Clone, PartialEq)]
 pub struct Location {
-    pub name: String,
+    pub links: Vec<String>,
 }
 
 impl Location {
     pub fn new_from_id(id: Id) -> Self {
-        let name = id.name;
-        Self { name }
+        let links = vec![id.name];
+        Self { links }
     }
 
     pub fn new_from_location(location: Location, id: Id) -> Self {
-        let name = format!("{}--{}", location.name, id.name);
-        Self { name }
+        let mut links = location.links;
+        links.push(id.name);
+        Self { links }
     }
 }
 
 impl Debug for Location {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name)
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.links[0])?;
+
+        for link in self.links.iter().skip(1) {
+            write!(f, "--{link}")?;
+        }
+        write!(f, "")
     }
 }
 
