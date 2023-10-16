@@ -10,17 +10,3 @@ impl Debug for Id {
         write!(f, "{}", self.name)
     }
 }
-
-impl SemanticNode for Id {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        None
-    }
-
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        Ok(())
-    }
-
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        todo!()
-    }
-}
