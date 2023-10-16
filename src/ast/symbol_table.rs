@@ -2,9 +2,24 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use super::*;
 
+fn multiple_define_error(name: &String) -> Result<()> {
+    eprintln!("Multiply declared identifier: {name}");
+    return Err(anyhow!("Multiply declared identifier: {name}"));
+}
+
 // I don't want to type Rc::new(RefCell::new(v)) 100 times
 fn rc<T>(x: T) -> Rc<RefCell<T>> {
     Rc::new(RefCell::new(x))
+}
+
+fn type_error(name: &String) -> Result<()> {
+    eprintln!("Invalid type in declaration: {name}: void");
+    Err(anyhow!("Invalid type in declaration: {name}: void"))
+}
+
+fn undeclared_error(name: &String) -> Result<Rc<Entry>> {
+    eprintln!("Undeclared identifier: {name}");
+    Err(anyhow!("Undeclared identifier: {name}"))
 }
 
 #[derive(Debug, PartialEq)]
@@ -33,13 +48,11 @@ impl SymbolTable {
         if entry == Entry::Variable(Type::Primitive(Primitive::Void))
             || entry == Entry::Variable(Type::PerfectPrimitive(Primitive::Void))
         {
-            eprintln!("Invalid type in declaration: {name}: void");
-            return Err(anyhow!("Invalid type in declaration: {name}: void"));
+            return type_error(name);
         }
 
         if self.in_scope(name) {
-            eprintln!("Multiply declared identifier: {name}");
-            return Err(anyhow!("Multiply declared identifier: {name}"));
+            return multiple_define_error(name);
         }
 
         let scope = self.table.last_mut().unwrap();
@@ -67,6 +80,17 @@ impl SymbolTable {
         self.table.pop();
     }
 
+    pub fn get_class_member(&self, class: Rc<Entry>, name: &String) -> Result<Rc<Entry>> {
+        let Entry::Class(scope) = class.as_ref() else {
+            return undeclared_error(name);
+        };
+
+        match scope.borrow().get(name) {
+            Some(entry) => Ok(entry.clone()),
+            None => undeclared_error(name),
+        }
+    }
+
     fn in_scope(&self, name: &String) -> bool {
         match self.table.last() {
             Some(scope) => scope.borrow().get(name).is_some(),
@@ -84,10 +108,7 @@ impl SymbolTable {
 
         match scope {
             Some(scope) => Ok(scope.borrow().get(name).unwrap().clone()),
-            None => {
-                eprintln!("Undeclared identifier: {name}");
-                Err(anyhow!("Undeclared identifier: {name}"))
-            }
+            None => undeclared_error(name),
         }
     }
 }

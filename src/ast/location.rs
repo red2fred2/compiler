@@ -1,20 +1,29 @@
+use std::rc::Rc;
+
 use super::*;
 
 #[derive(Clone, PartialEq)]
 pub struct Location {
     pub links: Vec<String>,
+    pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
 impl Location {
     pub fn new_from_id(id: Id) -> Self {
         let links = vec![id.name];
-        Self { links }
+        Self {
+            links,
+            symbol_table_entry: None,
+        }
     }
 
     pub fn new_from_location(location: Location, id: Id) -> Self {
         let mut links = location.links;
         links.push(id.name);
-        Self { links }
+        Self {
+            links,
+            symbol_table_entry: None,
+        }
     }
 }
 
@@ -35,7 +44,15 @@ impl SemanticNode for Location {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        todo!()
+        let mut entry = symbol_table.link(&self.links[0])?;
+
+        for link in self.links.iter().skip(1) {
+            entry = symbol_table.get_class_member(entry, link)?;
+        }
+
+        self.symbol_table_entry = Some(entry);
+
+        Ok(())
     }
 
     fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
