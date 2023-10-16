@@ -24,13 +24,13 @@ impl SemanticNode for VariableDeclaration {
         }
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let entry = symbol_table::Entry::Variable(self.t.clone());
-        symbol_table.add(&self.name.name, entry)?;
+    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
     }
 
-    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+        let entry = symbol_table::Entry::Variable(self.t.clone());
+        symbol_table.add(&self.name.name, entry)?;
         Ok(())
     }
 }
