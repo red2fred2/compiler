@@ -1,6 +1,11 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use super::*;
+
+// I don't want to type Rc::new(RefCell::new(v)) 100 times
+fn rc<T>(x: T) -> Rc<RefCell<T>> {
+    Rc::new(RefCell::new(x))
+}
 
 #[derive(Debug, PartialEq)]
 pub enum Entry {
@@ -14,12 +19,12 @@ type Stack<T> = Vec<T>;
 
 #[derive(Debug)]
 pub struct SymbolTable {
-    table: Stack<Scope>,
+    table: Stack<Rc<RefCell<Scope>>>,
 }
 impl SymbolTable {
     pub fn new() -> Self {
         let mut table = Vec::new();
-        table.push(HashMap::new());
+        table.push(rc(HashMap::new()));
         Self { table }
     }
 
@@ -38,14 +43,14 @@ impl SymbolTable {
         }
 
         let scope = self.table.last_mut().unwrap();
-        scope.insert(name.clone(), Rc::new(entry));
+        scope.borrow_mut().insert(name.clone(), Rc::new(entry));
 
         Ok(())
     }
 
     /// Called when entering a new scope
     pub fn enter_scope(&mut self) {
-        let scope = HashMap::new();
+        let scope = rc(HashMap::new());
         self.table.push(scope);
     }
 
@@ -57,7 +62,7 @@ impl SymbolTable {
 
     fn in_scope(&self, name: &String) -> Result<bool> {
         if let Some(scope) = self.table.last() {
-            Ok(scope.get(name).is_some())
+            Ok(scope.borrow().get(name).is_some())
         } else {
             Err(anyhow!(
                 "Somehow lost the global scope during semantic analysis"
@@ -71,13 +76,14 @@ impl SymbolTable {
             .table
             .iter()
             .rev()
-            .find(|scope| scope.get(name).is_some());
+            .find(|scope| scope.borrow().get(name).is_some());
 
-        if let Some(scope) = scope {
-            Ok(scope.get(name).unwrap().clone())
-        } else {
-            eprintln!("Undeclared identifier: {name}");
-            Err(anyhow!("Undeclared identifier: {name}"))
+        match scope {
+            Some(scope) => Ok(scope.borrow().get(name).unwrap().clone()),
+            None => {
+                eprintln!("Undeclared identifier: {name}");
+                Err(anyhow!("Undeclared identifier: {name}"))
+            }
         }
     }
 }
