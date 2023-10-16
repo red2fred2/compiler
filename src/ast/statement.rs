@@ -72,7 +72,13 @@ impl SemanticNode for Statement {
                 condition,
                 body,
                 else_body,
-            } => todo!(),
+            } => {
+                let mut children = vec![condition as &mut dyn SemanticNode];
+                children.append(&mut dyn_vec(body));
+                children.append(&mut dyn_vec(else_body));
+
+                Some(children)
+            }
             Self::Increment(x) => Some(vec![x]),
             Self::Return(x) => match x {
                 Some(x) => Some(vec![x]),
@@ -80,31 +86,44 @@ impl SemanticNode for Statement {
             },
             Self::Take(x) => Some(vec![x]),
             Self::VariableDeclaration(x) => Some(vec![x]),
-            Self::While { condition, body } => todo!(),
+            Self::While { condition, body } => {
+                let mut children = vec![condition as &mut dyn SemanticNode];
+                children.append(&mut dyn_vec(body));
+
+                Some(children)
+            }
         }
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
             Self::If {
-                condition,
-                body,
-                else_body,
-            } => todo!(),
-            Self::While { condition, body } => todo!(),
-            _ => Ok(()),
-        }
+                condition: _,
+                body: _,
+                else_body: _,
+            }
+            | Self::While {
+                condition: _,
+                body: _,
+            } => symbol_table.enter_scope(),
+            _ => (),
+        };
+        Ok(())
     }
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match self {
             Self::If {
-                condition,
-                body,
-                else_body,
-            } => todo!(),
-            Self::While { condition, body } => todo!(),
-            _ => Ok(()),
-        }
+                condition: _,
+                body: _,
+                else_body: _,
+            }
+            | Self::While {
+                condition: _,
+                body: _,
+            } => symbol_table.exit_scope(),
+            _ => (),
+        };
+        Ok(())
     }
 }
