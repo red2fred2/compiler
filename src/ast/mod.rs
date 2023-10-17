@@ -46,6 +46,14 @@ lalrpop_mod!(pub grammar);
 // Multiple display types has caused a massive headache. I had to use static globals!
 // Rust is disappointed in me now.
 static mut DISPLAY_INDENTATION: usize = 0;
+static mut UNPARSE_MODE: UnparseMode = UnparseMode::None;
+
+#[derive(Debug, PartialEq)]
+enum UnparseMode {
+    Named(String),
+    None,
+    Normal(String),
+}
 
 // Wrap in a box so I don't have to write Box::new() 100 times
 pub fn b<T>(x: T) -> Box<T> {
@@ -82,20 +90,39 @@ fn fmt_list<T: Display>(list: &Vec<T>) -> String {
     format!("{string})")
 }
 
+fn get_unparse_mode(args: &super::Args) -> UnparseMode {
+    let super::Args {
+        input_file: _,
+        parse: _,
+        unparse,
+        named_unparse,
+    } = args;
+
+    match (unparse, named_unparse) {
+        (None, None) => UnparseMode::None,
+        (Some(path), _) => UnparseMode::Normal(path.clone()),
+        (_, Some(path)) => UnparseMode::Named(path.clone()),
+    }
+}
+
 pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>> {
     let result = grammar::ProgramParser::new().parse(&file_contents);
 
-    if let Ok(mut program) = result {
-        if let Some(path) = &args.unparse {
-            unparse(path, &program)?;
+    let Ok(mut program) = result else {
+        return Err(anyhow!("syntax error\nParse failed"));
+    };
+
+    semantic_analysis::analyze(&mut program).unwrap();
+
+    unsafe { UNPARSE_MODE = get_unparse_mode(args) };
+    match unsafe { &UNPARSE_MODE } {
+        UnparseMode::Named(path) | UnparseMode::Normal(path) => {
+            unparse(&path, &program)?;
         }
-
-        semantic_analysis::analyze(&mut program).unwrap();
-
-        Ok(program)
-    } else {
-        Err(anyhow!("syntax error\nParse failed"))
+        UnparseMode::None => (),
     }
+
+    Ok(program)
 }
 
 fn unparse(path: &String, program: &Vec<Declaration>) -> Result<()> {
