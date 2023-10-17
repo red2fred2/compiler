@@ -1,27 +1,26 @@
-use std::rc::Rc;
-
 use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CallExpression {
-    pub id: Id,
+    pub location: Location,
     pub actuals: Vec<Expression>,
-    pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
 impl Display for CallExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}", self.id, fmt_list(&self.actuals))
+        write!(f, "{}{}", self.location, fmt_list(&self.actuals))
     }
 }
 
 impl SemanticNode for CallExpression {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        Some(dyn_vec(&mut self.actuals))
+        let mut children = vec![&mut self.location as &mut dyn SemanticNode];
+        children.append(&mut dyn_vec(&mut self.actuals));
+
+        Some(children)
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        self.symbol_table_entry = Some(symbol_table.link(&self.id.name)?);
+    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
     }
 
