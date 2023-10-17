@@ -12,7 +12,8 @@ impl Display for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let in_list = fmt_list(&self.fn_input);
 
-        write!(f, "{}: {in_list} {} ", self.id, self.fn_output)?;
+        unparse_fn(f, &self.id.name, &self.fn_input, &self.fn_output)?;
+        write!(f, ": {in_list} {} ", self.fn_output)?;
         fmt_body(&self.body, f)
     }
 }
