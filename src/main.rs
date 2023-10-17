@@ -38,7 +38,9 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path)? + "\n";
-    ast::parse(&contents, &args)?;
+    let ast = ast::parse(&contents, &args)?;
+
+    println!("{ast:#?}");
 
     Ok(())
 }

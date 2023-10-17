@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Function {
     pub id: Id,
     pub fn_input: Vec<Formal>,
@@ -8,7 +8,7 @@ pub struct Function {
     pub body: Vec<Statement>,
 }
 
-impl Debug for Function {
+impl Display for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let in_list = fmt_list(&self.fn_input);
 

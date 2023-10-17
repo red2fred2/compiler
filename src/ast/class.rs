@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Class {
     pub id: Id,
     pub body: Vec<Declaration>,

@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Statement {
     Assignment(Location, Expression),
     CallExpression(CallExpression),

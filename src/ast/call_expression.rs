@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use super::*;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CallExpression {
     pub id: Id,
     pub actuals: Vec<Expression>,

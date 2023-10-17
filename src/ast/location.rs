@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use super::*;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Location {
     pub links: Vec<String>,
     pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,

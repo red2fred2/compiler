@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Formal {
     pub id: Id,
     pub t: Type,

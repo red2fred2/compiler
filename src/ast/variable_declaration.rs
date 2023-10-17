@@ -1,13 +1,13 @@
 use super::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct VariableDeclaration {
     pub name: Id,
     pub t: Type,
     pub assignment: Option<Expression>,
 }
 
-impl Debug for VariableDeclaration {
+impl Display for VariableDeclaration {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.assignment {
             Some(a) => write!(f, "{}: {} = {a};", self.name, self.t),
