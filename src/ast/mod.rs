@@ -136,6 +136,24 @@ fn unparse(path: &String, program: &Vec<Declaration>) -> Result<()> {
     Ok(())
 }
 
+fn unparse_fn(
+    f: &mut Formatter<'_>,
+    name: &String,
+    formals: &Vec<Formal>,
+    output: &Type,
+) -> std::fmt::Result {
+    match unsafe { &UNPARSE_MODE } {
+        UnparseMode::Named(_) => {
+            write!(
+                f,
+                "{name}{{{}->{output}}}",
+                fmt_list(&formals.iter().map(|e| &e.t).collect())
+            )
+        }
+        _ => write!(f, "{name}"),
+    }
+}
+
 fn unparse_id(f: &mut Formatter<'_>, id: &String, t: &Type) -> std::fmt::Result {
     match unsafe { &UNPARSE_MODE } {
         UnparseMode::Named(_) => write!(f, "{id}{{{t}}}"),
