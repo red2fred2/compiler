@@ -7,7 +7,6 @@ pub fn analyze(program: &mut Vec<Declaration>) -> Result<()> {
         traverse(declaration, &mut symbol_table)?;
     }
 
-    println!("{symbol_table:#?}");
     Ok(())
 }
 
