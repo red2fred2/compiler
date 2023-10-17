@@ -1,3 +1,4 @@
+mod block_body;
 mod call_expression;
 mod class;
 mod declaration;
@@ -13,6 +14,7 @@ mod symbol_table;
 mod type_;
 mod variable_declaration;
 
+pub use block_body::Body;
 pub use call_expression::CallExpression;
 pub use declaration::Declaration;
 pub use expression::Expression;

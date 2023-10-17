@@ -9,8 +9,8 @@ pub enum Statement {
     Give(Expression),
     If {
         condition: Expression,
-        body: Vec<Statement>,
-        else_body: Vec<Statement>,
+        body: Body,
+        else_body: Body,
     },
     Increment(Location),
     Return(Option<Expression>),
@@ -18,7 +18,7 @@ pub enum Statement {
     VariableDeclaration(Declaration),
     While {
         condition: Expression,
-        body: Vec<Statement>,
+        body: Body,
     },
 }
 
@@ -36,10 +36,15 @@ impl Debug for Statement {
                 else_body,
             } => {
                 write!(f, "if({condition:?}) ")?;
-                if else_body.len() == 0 {
-                    write!(f, "{}", fmt_body(body))
+                if else_body.statements.len() == 0 {
+                    write!(f, "{}", fmt_body(&body.statements))
                 } else {
-                    write!(f, "{} else {}", fmt_body(body), fmt_body(else_body))
+                    write!(
+                        f,
+                        "{} else {}",
+                        fmt_body(&body.statements),
+                        fmt_body(&else_body.statements)
+                    )
                 }
             }
             Self::Increment(x) => write!(f, "{x:?}++"),
@@ -54,7 +59,7 @@ impl Debug for Statement {
             Self::VariableDeclaration(x) => write!(f, "{x:?}"),
             Self::While { condition, body } => {
                 write!(f, "while({condition:?}) ")?;
-                write!(f, "{}", fmt_body(body))
+                write!(f, "{}", fmt_body(&body.statements))
             }
         }
     }
@@ -72,13 +77,7 @@ impl SemanticNode for Statement {
                 condition,
                 body,
                 else_body,
-            } => {
-                let mut children = vec![condition as &mut dyn SemanticNode];
-                children.append(&mut dyn_vec(body));
-                children.append(&mut dyn_vec(else_body));
-
-                Some(children)
-            }
+            } => Some(vec![condition as &mut dyn SemanticNode, body, else_body]),
             Self::Increment(x) => Some(vec![x]),
             Self::Return(x) => match x {
                 Some(x) => Some(vec![x]),
@@ -86,44 +85,15 @@ impl SemanticNode for Statement {
             },
             Self::Take(x) => Some(vec![x]),
             Self::VariableDeclaration(x) => Some(vec![x]),
-            Self::While { condition, body } => {
-                let mut children = vec![condition as &mut dyn SemanticNode];
-                children.append(&mut dyn_vec(body));
-
-                Some(children)
-            }
+            Self::While { condition, body } => Some(vec![condition as &mut dyn SemanticNode, body]),
         }
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        match self {
-            Self::If {
-                condition: _,
-                body: _,
-                else_body: _,
-            }
-            | Self::While {
-                condition: _,
-                body: _,
-            } => symbol_table.enter_scope(),
-            _ => (),
-        };
+    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        match self {
-            Self::If {
-                condition: _,
-                body: _,
-                else_body: _,
-            }
-            | Self::While {
-                condition: _,
-                body: _,
-            } => symbol_table.exit_scope(),
-            _ => (),
-        };
+    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
     }
 }

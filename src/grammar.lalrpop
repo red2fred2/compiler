@@ -77,14 +77,14 @@ StatementList: Vec<Statement> = {
 
 BlockStatement: Statement = {
     WHILE LPAREN <condition: Expression> RPAREN LCURLY <body: StatementList> RCURLY =>
-        Statement::While { condition, body },
+        Statement::While { condition, body: Body{ statements: body } },
     IF LPAREN <condition: Expression> RPAREN LCURLY <body: StatementList> RCURLY <else_body: (ELSE LCURLY <StatementList> RCURLY)?> => {
         let else_body = match else_body {
             Some(x) => x,
             None => Vec::new(),
         };
 
-        Statement::If {condition, body, else_body }
+        Statement::If {condition, body: Body{ statements: body }, else_body: Body{ statements: else_body } }
     },
 }
 
