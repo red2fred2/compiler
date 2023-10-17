@@ -2,6 +2,11 @@
 //! The [language specification is here]
 //!
 //! [language Specification](https://compilers.cool/language/)
+#![feature(test)]
+
+extern crate test;
+
+use test::Bencher;
 
 use anyhow::Result;
 use clap::Parser;
@@ -35,4 +40,18 @@ fn main() -> Result<()> {
     ast::parse(&contents, &args)?;
 
     Ok(())
+}
+
+#[bench]
+fn parser_benchmark(b: &mut Bencher) {
+    let args = Args {
+        input_file: "test.dm".to_string(),
+        parse: false,
+        unparse: None,
+        named_unparse: None,
+    };
+    let path = &args.input_file;
+    let contents = std::fs::read_to_string(path).unwrap() + "\n";
+
+    b.iter(|| ast::parse(&contents, &args).unwrap())
 }
