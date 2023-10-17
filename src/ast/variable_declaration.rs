@@ -9,7 +9,7 @@ pub struct VariableDeclaration {
 
 impl Display for VariableDeclaration {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write_id(f, &self.name.name, &self.t)?;
+        unparse_id(f, &self.name.name, &self.t)?;
 
         match &self.assignment {
             Some(a) => write!(f, ": {} = {a};", self.t),

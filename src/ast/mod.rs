@@ -136,7 +136,7 @@ fn unparse(path: &String, program: &Vec<Declaration>) -> Result<()> {
     Ok(())
 }
 
-fn write_id(f: &mut Formatter<'_>, id: &String, t: &Type) -> std::fmt::Result {
+fn unparse_id(f: &mut Formatter<'_>, id: &String, t: &Type) -> std::fmt::Result {
     match unsafe { &UNPARSE_MODE } {
         UnparseMode::Named(_) => write!(f, "{id}{{{t}}}"),
         _ => write!(f, "{id}"),
