@@ -6,10 +6,10 @@ pub struct Class {
     pub body: Vec<Declaration>,
 }
 
-impl Debug for Class {
+impl Display for Class {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}: class ", self.id)?;
-        write!(f, "{}", fmt_body(&self.body))?;
+        write!(f, "{}: class ", self.id)?;
+        fmt_body(&self.body, f)?;
         write!(f, ";")
     }
 }

@@ -27,7 +27,7 @@ impl Location {
     }
 }
 
-impl Debug for Location {
+impl Display for Location {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.links[0])?;
 

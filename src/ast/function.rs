@@ -12,8 +12,8 @@ impl Debug for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let in_list = fmt_list(&self.fn_input);
 
-        write!(f, "{:?}: {in_list} {:?} ", self.id, self.fn_output)?;
-        write!(f, "{}", fmt_body(&self.body))
+        write!(f, "{}: {in_list} {} ", self.id, self.fn_output)?;
+        fmt_body(&self.body, f)
     }
 }
 

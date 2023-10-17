@@ -35,10 +35,10 @@ impl Declaration {
     }
 }
 
-impl Debug for Declaration {
+impl Display for Declaration {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Declaration::Class(x) => write!(f, "{x:?}"),
+            Declaration::Class(x) => write!(f, "{x}"),
             Declaration::Function(x) => write!(f, "{x:?}"),
             Declaration::Variable(x) => write!(f, "{x:?}"),
         }

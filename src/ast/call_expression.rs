@@ -9,9 +9,9 @@ pub struct CallExpression {
     pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
-impl Debug for CallExpression {
+impl Display for CallExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}{}", self.id, fmt_list(&self.actuals))
+        write!(f, "{}{}", self.id, fmt_list(&self.actuals))
     }
 }
 

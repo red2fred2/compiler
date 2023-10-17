@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Body {
     pub statements: Vec<Statement>,
 }

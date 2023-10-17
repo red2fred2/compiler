@@ -7,7 +7,7 @@ pub enum Primitive {
     Void,
 }
 
-impl Debug for Primitive {
+impl Display for Primitive {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Bool => write!(f, "bool"),

@@ -6,9 +6,9 @@ pub struct Formal {
     pub t: Type,
 }
 
-impl Debug for Formal {
+impl Display for Formal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}: {:?}", self.id, self.t)
+        write!(f, "{}: {}", self.id, self.t)
     }
 }
 

@@ -22,44 +22,41 @@ pub enum Statement {
     },
 }
 
-impl Debug for Statement {
+impl Display for Statement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Assignment(loc, exp) => write!(f, "{loc:?} = {exp:?};"),
-            Self::CallExpression(x) => write!(f, "{x:?};"),
-            Self::Decrement(x) => write!(f, "{x:?}--"),
+            Self::Assignment(loc, exp) => write!(f, "{loc} = {exp};"),
+            Self::CallExpression(x) => write!(f, "{x};"),
+            Self::Decrement(x) => write!(f, "{x}--"),
             Self::Exit => write!(f, "today I don't feel like doing any work;"),
-            Self::Give(x) => write!(f, "give {x:?};"),
+            Self::Give(x) => write!(f, "give {x};"),
             Self::If {
                 condition,
                 body,
                 else_body,
             } => {
-                write!(f, "if({condition:?}) ")?;
+                write!(f, "if({condition}) ")?;
                 if else_body.statements.len() == 0 {
-                    write!(f, "{}", fmt_body(&body.statements))
+                    fmt_body(&body.statements, f)
                 } else {
-                    write!(
-                        f,
-                        "{} else {}",
-                        fmt_body(&body.statements),
-                        fmt_body(&else_body.statements)
-                    )
+                    fmt_body(&body.statements, f)?;
+                    write!(f, " else ")?;
+                    fmt_body(&else_body.statements, f)
                 }
             }
-            Self::Increment(x) => write!(f, "{x:?}++"),
+            Self::Increment(x) => write!(f, "{x}++"),
             Self::Return(x) => {
                 if let Some(x) = x {
-                    write!(f, "return {x:?};")
+                    write!(f, "return {x};")
                 } else {
                     write!(f, "return;")
                 }
             }
-            Self::Take(x) => write!(f, "take {x:?};"),
-            Self::VariableDeclaration(x) => write!(f, "{x:?}"),
+            Self::Take(x) => write!(f, "take {x};"),
+            Self::VariableDeclaration(x) => write!(f, "{x}"),
             Self::While { condition, body } => {
-                write!(f, "while({condition:?}) ")?;
-                write!(f, "{}", fmt_body(&body.statements))
+                write!(f, "while({condition}) ")?;
+                fmt_body(&body.statements, f)
             }
         }
     }

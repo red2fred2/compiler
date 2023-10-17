@@ -5,7 +5,7 @@ pub struct Id {
     pub name: String,
 }
 
-impl Debug for Id {
+impl Display for Id {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name)
     }

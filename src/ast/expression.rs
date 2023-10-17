@@ -40,29 +40,29 @@ impl Expression {
     }
 }
 
-impl Debug for Expression {
+impl Display for Expression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Add(l, r) => write!(f, "({l:?} + {r:?})"),
-            Self::And(l, r) => write!(f, "({l:?} and {r:?})"),
-            Self::CallExpression(x) => write!(f, "{x:?}"),
-            Self::Divide(l, r) => write!(f, "({l:?} / {r:?})"),
-            Self::Equals(l, r) => write!(f, "({l:?} == {r:?})"),
+            Self::Add(l, r) => write!(f, "({l} + {r})"),
+            Self::And(l, r) => write!(f, "({l} and {r})"),
+            Self::CallExpression(x) => write!(f, "{x}"),
+            Self::Divide(l, r) => write!(f, "({l} / {r})"),
+            Self::Equals(l, r) => write!(f, "({l} == {r})"),
             Self::False => write!(f, "false"),
-            Self::Greater(l, r) => write!(f, "({l:?} > {r:?})"),
-            Self::GreaterEq(l, r) => write!(f, "({l:?} >= {r:?})"),
+            Self::Greater(l, r) => write!(f, "({l} > {r})"),
+            Self::GreaterEq(l, r) => write!(f, "({l} >= {r})"),
             Self::IntegerLiteral(x) => write!(f, "{x}"),
-            Self::Less(l, r) => write!(f, "({l:?} < {r:?})"),
-            Self::LessEq(l, r) => write!(f, "({l:?} <= {r:?})"),
-            Self::Location(x) => write!(f, "{x:?}"),
+            Self::Less(l, r) => write!(f, "({l} < {r})"),
+            Self::LessEq(l, r) => write!(f, "({l} <= {r})"),
+            Self::Location(x) => write!(f, "{x}"),
             Self::Magic => write!(f, "24Kmagic"),
-            Self::Multiply(l, r) => write!(f, "({l:?} * {r:?})"),
-            Self::Negative(x) => write!(f, "-{x:?}"),
-            Self::Not(x) => write!(f, "!{x:?}"),
-            Self::NotEquals(l, r) => write!(f, "({l:?} != {r:?})"),
-            Self::Or(l, r) => write!(f, "({l:?} or {r:?})"),
+            Self::Multiply(l, r) => write!(f, "({l} * {r})"),
+            Self::Negative(x) => write!(f, "-{x}"),
+            Self::Not(x) => write!(f, "!{x}"),
+            Self::NotEquals(l, r) => write!(f, "({l} != {r})"),
+            Self::Or(l, r) => write!(f, "({l} or {r})"),
             Self::StringLiteral(x) => write!(f, "\"{x}\""),
-            Self::Subtract(l, r) => write!(f, "({l:?} - {r:?})"),
+            Self::Subtract(l, r) => write!(f, "({l} - {r})"),
             Self::True => write!(f, "true"),
         }
     }

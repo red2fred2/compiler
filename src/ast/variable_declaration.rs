@@ -10,8 +10,8 @@ pub struct VariableDeclaration {
 impl Debug for VariableDeclaration {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.assignment {
-            Some(a) => write!(f, "{:?}: {:?} = {a:?};", self.name, self.t),
-            None => write!(f, "{:?}: {:?};", self.name, self.t),
+            Some(a) => write!(f, "{}: {} = {a};", self.name, self.t),
+            None => write!(f, "{}: {};", self.name, self.t),
         }
     }
 }

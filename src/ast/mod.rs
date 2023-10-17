@@ -26,7 +26,7 @@ pub use statement::Statement;
 pub use type_::Type;
 
 use std::{
-    fmt::{Debug, Formatter},
+    fmt::{Debug, Display, Formatter},
     fs::File,
     io::Write,
     str::FromStr,
@@ -43,6 +43,10 @@ use variable_declaration::VariableDeclaration;
 
 lalrpop_mod!(pub grammar);
 
+// Multiple display types has caused a massive headache. I had to use static globals!
+// Rust is disappointed in me now.
+static mut DISPLAY_INDENTATION: usize = 0;
+
 // Wrap in a box so I don't have to write Box::new() 100 times
 pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
@@ -52,16 +56,30 @@ fn dyn_vec<T: SemanticNode>(vec: &mut Vec<T>) -> Vec<&mut dyn SemanticNode> {
     vec.iter_mut().map(|e| e as &mut dyn SemanticNode).collect()
 }
 
-fn fmt_body<T: Debug>(x: &Vec<T>) -> String {
-    let mut str: Vec<char> = format!("{x:#?}").replace(",\n", "\n").chars().collect();
-    let len = str.len() - 1;
-    str[0] = '{';
-    str[len] = '}';
-    str.iter().collect()
+fn fmt_body<T: Display>(list: &Vec<T>, f: &mut Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{{\n")?;
+    for e in list {
+        unsafe {
+            DISPLAY_INDENTATION += 1;
+            write!(f, "{}{e}\n", "\t".repeat(DISPLAY_INDENTATION))?;
+            DISPLAY_INDENTATION -= 1;
+        }
+    }
+    unsafe { write!(f, "{}}}", "\t".repeat(DISPLAY_INDENTATION)) }
 }
 
-fn fmt_list<T: Debug>(x: &Vec<T>) -> String {
-    format!("{x:?}").replace('[', "(").replace(']', ")")
+fn fmt_list<T: Display>(list: &Vec<T>) -> String {
+    if list.len() == 0 {
+        return format!("()");
+    }
+
+    let mut string = format!("({}", list[0]);
+
+    for element in list.iter().skip(1) {
+        string = format!("{string}, {element}")
+    }
+
+    format!("{string})")
 }
 
 pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>> {
@@ -84,7 +102,7 @@ fn unparse(path: &String, program: &Vec<Declaration>) -> Result<()> {
     let mut file = File::create(path)?;
 
     for declaration in program {
-        let string = format!("{declaration:#?}\n\n");
+        let string = format!("{declaration}\n\n");
         file.write_all(string.as_bytes())?;
     }
 

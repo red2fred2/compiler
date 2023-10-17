@@ -27,7 +27,7 @@ fn undefined_type() -> Result<Rc<Entry>> {
     Err(anyhow!("Undefined type"))
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub enum Entry {
     Class(Rc<RefCell<Scope>>),
     Function(Vec<Formal>, Type),
@@ -37,7 +37,6 @@ pub enum Entry {
 type Scope = HashMap<String, Rc<Entry>>;
 type Stack<T> = Vec<T>;
 
-#[derive(Debug)]
 pub struct SymbolTable {
     table: Stack<Rc<RefCell<Scope>>>,
 }
@@ -94,7 +93,7 @@ impl SymbolTable {
         let Entry::Variable(t) = class.as_ref() else {
             return undefined_type();
         };
-        let t = format!("{t:?}");
+        let t = format!("{t}");
         let c = self.link(&t)?;
 
         // Get class's scope
