@@ -12,16 +12,20 @@ pub mod ast;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
-    /// File to be compiled
+    /// File to compile
     input_file: String,
 
-    /// Parse flag
+    /// Parse
     #[arg(short, long)]
     parse: bool,
 
-    /// Unparse flag
+    /// Unparse
     #[arg(short, long)]
     unparse: Option<String>,
+
+    /// Named unparse
+    #[arg(short, long)]
+    named_unparse: Option<String>,
 }
 
 fn main() -> Result<()> {
