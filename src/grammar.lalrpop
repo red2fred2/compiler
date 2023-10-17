@@ -140,11 +140,11 @@ Expression6 = {
 
 CallExpression: CallExpression = {
     <id: Id> LPAREN <actuals: ActualsList> RPAREN => {
-        CallExpression { id, actuals }
+        CallExpression { id, actuals, symbol_table_entry: None }
     },
     <id: Id> LPAREN  RPAREN => {
         let actuals = Vec::new();
-        CallExpression { id, actuals }
+        CallExpression { id, actuals, symbol_table_entry: None }
     },
 }
 

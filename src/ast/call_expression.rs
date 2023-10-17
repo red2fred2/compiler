@@ -1,9 +1,12 @@
+use std::rc::Rc;
+
 use super::*;
 
 #[derive(Clone, PartialEq)]
 pub struct CallExpression {
     pub id: Id,
     pub actuals: Vec<Expression>,
+    pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
 impl Debug for CallExpression {
@@ -14,14 +17,15 @@ impl Debug for CallExpression {
 
 impl SemanticNode for CallExpression {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        todo!()
+        Some(dyn_vec(&mut self.actuals))
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        todo!()
+        self.symbol_table_entry = Some(symbol_table.link(&self.id.name)?);
+        Ok(())
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        todo!()
+    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+        Ok(())
     }
 }
