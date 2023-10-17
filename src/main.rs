@@ -6,6 +6,7 @@
 
 extern crate test;
 
+#[allow(unused)]
 use test::Bencher;
 
 use anyhow::Result;
