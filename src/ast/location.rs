@@ -5,8 +5,8 @@ use super::*;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Location {
     pub current_link: String,
-    pub next_link: Option<Box<Location>>,
     pub enclosing_class: Option<Rc<symbol_table::Entry>>,
+    pub next_link: Option<Box<Location>>,
     pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
