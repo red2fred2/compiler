@@ -165,8 +165,8 @@ Term: Expression = {
 }
 
 Loc: Location = {
-    <id: Id> => Location { current_link: id.name, enclosing_class: None, next_link: None, symbol_table_entry: None },
-    <location: Loc> POSTDEC <id: Id> => location.add_link(id),
+    <id: Id> 						 => Location { current_link: id.name, enclosing_class: None, next_link: None, symbol_table_entry: None },
+    <location: Loc> POSTDEC <id: Id> => location.append(Location { current_link: id.name, enclosing_class: None, next_link: None, symbol_table_entry: None }),
 }
 
 Id: Id = {

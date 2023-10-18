@@ -11,18 +11,12 @@ pub struct Location {
 }
 
 impl Location {
-    pub fn add_link(mut self, id: Id) -> Self {
+    pub fn append(mut self, next_link: Self) -> Self {
         let mut link = &mut self;
         while link.next_link.is_some() {
             link = link.next_link.as_mut().unwrap();
         }
-        link.next_link = Some(b(Self {
-            current_link: id.name,
-            enclosing_class: None,
-            next_link: None,
-            symbol_table_entry: None,
-        }));
-
+        link.next_link = Some(b(next_link));
         self
     }
 }
