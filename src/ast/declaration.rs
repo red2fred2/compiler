@@ -7,34 +7,6 @@ pub enum Declaration {
     Variable(VariableDeclaration),
 }
 
-impl Declaration {
-    pub fn new_class(id: Id, body: Vec<Declaration>) -> Declaration {
-        Declaration::Class(Class { id, body })
-    }
-
-    pub fn new_function(
-        id: Id,
-        fn_input: Vec<Formal>,
-        fn_output: Type,
-        body: Vec<Statement>,
-    ) -> Declaration {
-        Declaration::Function(Function {
-            id,
-            fn_input,
-            fn_output,
-            body,
-        })
-    }
-
-    pub fn new_variable(name: Id, t: Type, assignment: Option<Expression>) -> Declaration {
-        Declaration::Variable(VariableDeclaration {
-            name,
-            t,
-            assignment,
-        })
-    }
-}
-
 impl Display for Declaration {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {

@@ -23,7 +23,7 @@ Declaration = {
 
 VariableDeclaration: Declaration = {
     <name: Id> COLON <t: Type> <assignment: (ASSIGN <Expression>)?> SEMICOLON =>
-        Declaration::new_variable(name, t, assignment),
+        Declaration::Variable(VariableDeclaration { name, t, assignment }),
 }
 
 Type: Type = {
@@ -41,7 +41,7 @@ Primitive: Primitive = {
 
 ClassDeclaration: Declaration = {
     <id: Id> COLON CLASS LCURLY <body: ClassBody> RCURLY SEMICOLON =>
-        Declaration::new_class(id, body),
+        Declaration::Class(Class { id, body }),
 }
 
 ClassBody: Vec<Declaration> = {
@@ -52,7 +52,7 @@ ClassBody: Vec<Declaration> = {
 
 FunctionDeclaration: Declaration = {
     <id: Id> COLON LPAREN <fn_input: Formals> RPAREN <fn_output: Type> LCURLY <body: StatementList> RCURLY =>
-        Declaration::new_function(id, fn_input, fn_output, body),
+        Declaration::Function(Function { id, fn_input, fn_output, body }),
 }
 
 Formals = {
