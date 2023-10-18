@@ -31,12 +31,8 @@ impl Expression {
         Self::IntegerLiteral(value)
     }
 
-    pub fn new_string(value: &str) -> Self {
-        let mut value = value.chars();
-        value.next();
-        value.next_back();
-        let value = value.as_str().to_string();
-        Self::StringLiteral(value)
+    pub fn new_string(string: &str) -> Self {
+        Self::StringLiteral(string.chars().skip(1).take(string.len() - 2).collect())
     }
 }
 
