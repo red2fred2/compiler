@@ -34,10 +34,8 @@ impl Display for Statement {
                 }
             }
             Self::Increment(x) => write!(f, "{x}++"),
-            Self::Return(x) => match x {
-                Some(x) => write!(f, "return {x};"),
-                None => write!(f, "return;"),
-            },
+            Self::Return(Some(x)) => write!(f, "return {x};"),
+            Self::Return(None) => write!(f, "return;"),
             Self::Take(x) => write!(f, "take {x};"),
             Self::VariableDeclaration(x) => write!(f, "{x}"),
             Self::While(condition, body) => {
