@@ -11,15 +11,6 @@ pub struct Location {
 }
 
 impl Location {
-    pub fn new_from_id(id: Id) -> Self {
-        Self {
-            current_link: id.name,
-            enclosing_class: None,
-            next_link: None,
-            symbol_table_entry: None,
-        }
-    }
-
     pub fn new_from_location(mut location: Location, id: Id) -> Self {
         location.next_link = Some(b(Self {
             current_link: id.name,

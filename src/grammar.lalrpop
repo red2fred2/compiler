@@ -165,7 +165,7 @@ Term: Expression = {
 }
 
 Loc: Location = {
-    <id: Id>                         => Location::new_from_id(id),
+    <id: Id> => Location { current_link: id.name, enclosing_class: None, next_link: None, symbol_table_entry: None },
     <location: Loc> POSTDEC <id: Id> => Location::new_from_location(location, id),
 }
 
