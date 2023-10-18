@@ -12,7 +12,7 @@ pub enum UnparseMode {
     Normal(String),
 }
 
-pub fn fmt_body<T: Display>(list: &Vec<T>, f: &mut Formatter<'_>) -> std::fmt::Result {
+pub fn fmt_body<T: Display>(f: &mut Formatter<'_>, list: &Vec<T>) -> std::fmt::Result {
     write!(f, "{{\n")?;
     for e in list {
         unsafe {

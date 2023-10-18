@@ -26,11 +26,11 @@ impl Display for Statement {
             Self::If(condition, body, else_body) => {
                 write!(f, "if({condition}) ")?;
                 if else_body.statements.len() == 0 {
-                    fmt_body(&body.statements, f)
+                    fmt_body(f, &body.statements)
                 } else {
-                    fmt_body(&body.statements, f)?;
+                    fmt_body(f, &body.statements)?;
                     write!(f, " else ")?;
-                    fmt_body(&else_body.statements, f)
+                    fmt_body(f, &else_body.statements)
                 }
             }
             Self::Increment(x) => write!(f, "{x}++"),
@@ -40,7 +40,7 @@ impl Display for Statement {
             Self::VariableDeclaration(x) => write!(f, "{x}"),
             Self::While(condition, body) => {
                 write!(f, "while({condition}) ")?;
-                fmt_body(&body.statements, f)
+                fmt_body(f, &body.statements)
             }
         }
     }

@@ -11,7 +11,7 @@ impl Display for Class {
         unparse_id(f, &self.id.name, &Type::Class(self.id.clone()))?;
 
         write!(f, " : class ")?;
-        fmt_body(&self.body, f)?;
+        fmt_body(f, &self.body)?;
         write!(f, ";")
     }
 }
