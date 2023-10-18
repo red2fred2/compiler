@@ -63,7 +63,7 @@ pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>
         return Err(anyhow!("syntax error\nParse failed"));
     };
 
-    semantic_analysis::analyze(&mut program).unwrap();
+    semantic_analysis::analyze(&mut program)?;
 
     let mode = get_unparse_mode(args);
     set_unparse_mode(&mode);
