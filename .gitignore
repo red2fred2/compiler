@@ -2,5 +2,5 @@
 dmc
 errors.txt
 out.txt
-test.dm
+test*.dm
 tokens.txt
