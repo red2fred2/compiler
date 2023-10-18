@@ -27,9 +27,11 @@ pub use statement::Statement;
 pub use type_::Type;
 
 use std::{
+    cell::RefCell,
     fmt::{Debug, Display, Formatter},
     fs::File,
     io::Write,
+    rc::Rc,
     str::FromStr,
 };
 
@@ -73,4 +75,9 @@ pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>
     }
 
     Ok(program)
+}
+
+// I don't want to type Rc::new(RefCell::new(v)) 100 times
+fn rc<T>(x: T) -> Rc<RefCell<T>> {
+    Rc::new(RefCell::new(x))
 }

@@ -1,15 +1,10 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::collections::HashMap;
 
 use super::*;
 
 fn multiple_define_error(name: &String) -> Result<()> {
     eprintln!("Multiply declared identifier: {name}");
     return Err(anyhow!("Multiply declared identifier: {name}"));
-}
-
-// I don't want to type Rc::new(RefCell::new(v)) 100 times
-fn rc<T>(x: T) -> Rc<RefCell<T>> {
-    Rc::new(RefCell::new(x))
 }
 
 fn type_error(name: &String) -> Result<()> {
