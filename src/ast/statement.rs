@@ -51,16 +51,12 @@ impl SemanticNode for Statement {
         match self {
             Self::Assignment(x, y) => Some(vec![x, y]),
             Self::CallExpression(x) => Some(vec![x]),
-            Self::Decrement(x) => Some(vec![x]),
-            Self::Exit => None,
-            Self::Give(x) => Some(vec![x]),
+            Self::Decrement(x) | Self::Increment(x) | Self::Take(x) => Some(vec![x]),
             Self::If(condition, body, else_body) => Some(vec![condition, body, else_body]),
-            Self::Increment(x) => Some(vec![x]),
-            Self::Return(Some(x)) => Some(vec![x]),
-            Self::Return(None) => None,
-            Self::Take(x) => Some(vec![x]),
+            Self::Return(Some(x)) | Self::Give(x) => Some(vec![x]),
+            Self::Return(None) | Self::Exit => None,
             Self::VariableDeclaration(x) => Some(vec![x]),
-            Self::While(condition, body) => Some(vec![condition as &mut dyn SemanticNode, body]),
+            Self::While(condition, body) => Some(vec![condition, body]),
         }
     }
 
