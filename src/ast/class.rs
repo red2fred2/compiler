@@ -10,7 +10,7 @@ impl Display for Class {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         unparse_id(f, &self.id.name, &Type::Class(self.id.clone()))?;
 
-        write!(f, ": class ")?;
+        write!(f, " : class ")?;
         fmt_body(&self.body, f)?;
         write!(f, ";")
     }

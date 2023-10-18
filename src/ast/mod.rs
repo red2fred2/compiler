@@ -129,7 +129,7 @@ fn unparse(path: &String, program: &Vec<Declaration>) -> Result<()> {
     let mut file = File::create(path)?;
 
     for declaration in program {
-        let string = format!("{declaration}\n\n");
+        let string = format!("{declaration}\n");
         file.write_all(string.as_bytes())?;
     }
 

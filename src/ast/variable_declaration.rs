@@ -12,8 +12,8 @@ impl Display for VariableDeclaration {
         unparse_id(f, &self.name.name, &self.t)?;
 
         match &self.assignment {
-            Some(a) => write!(f, ": {} = {a};", self.t),
-            None => write!(f, ": {};", self.t),
+            Some(a) => write!(f, " : {} = {a};", self.t),
+            None => write!(f, " : {};", self.t),
         }
     }
 }

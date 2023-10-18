@@ -13,7 +13,7 @@ impl Display for Function {
         let in_list = fmt_list(&self.fn_input);
 
         unparse_fn(f, &self.id.name, &self.fn_input, &self.fn_output)?;
-        write!(f, ": {in_list} {} ", self.fn_output)?;
+        write!(f, " : {in_list} {} ", self.fn_output)?;
         fmt_body(&self.body, f)
     }
 }
