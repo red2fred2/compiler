@@ -54,9 +54,7 @@ impl SemanticNode for Statement {
             Self::Decrement(x) => Some(vec![x]),
             Self::Exit => None,
             Self::Give(x) => Some(vec![x]),
-            Self::If(condition, body, else_body) => {
-                Some(vec![condition as &mut dyn SemanticNode, body, else_body])
-            }
+            Self::If(condition, body, else_body) => Some(vec![condition, body, else_body]),
             Self::Increment(x) => Some(vec![x]),
             Self::Return(Some(x)) => Some(vec![x]),
             Self::Return(None) => None,
