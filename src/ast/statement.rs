@@ -1,5 +1,20 @@
 use super::*;
 
+fn fmt_if(f: &mut std::fmt::Formatter<'_>, statement: &Statement) -> std::fmt::Result {
+    let Statement::If(condition, body, else_body) = statement else {
+        return write!(f, "");
+    };
+
+    write!(f, "if({condition}) ")?;
+    if else_body.statements.len() == 0 {
+        fmt_body(f, &body.statements)
+    } else {
+        fmt_body(f, &body.statements)?;
+        write!(f, " else ")?;
+        fmt_body(f, &else_body.statements)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Statement {
     Assignment(Location, Expression),
@@ -23,16 +38,7 @@ impl Display for Statement {
             Self::Decrement(x) => write!(f, "{x}--"),
             Self::Exit => write!(f, "today I don't feel like doing any work;"),
             Self::Give(x) => write!(f, "give {x};"),
-            Self::If(condition, body, else_body) => {
-                write!(f, "if({condition}) ")?;
-                if else_body.statements.len() == 0 {
-                    fmt_body(f, &body.statements)
-                } else {
-                    fmt_body(f, &body.statements)?;
-                    write!(f, " else ")?;
-                    fmt_body(f, &else_body.statements)
-                }
-            }
+            Self::If(_, _, _) => fmt_if(f, self),
             Self::Increment(x) => write!(f, "{x}++"),
             Self::Return(Some(x)) => write!(f, "return {x};"),
             Self::Return(None) => write!(f, "return;"),
