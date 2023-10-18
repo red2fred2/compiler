@@ -48,17 +48,15 @@ impl SemanticNode for Location {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let entry = match &self.enclosing_class {
-            Some(class) => symbol_table.get_class_member(class.clone(), &self.current_link)?,
+        let name = &self.current_link;
+        self.symbol_table_entry = Some(match &self.enclosing_class {
+            Some(class) => symbol_table.get_class_member(class.clone(), name)?,
             None => symbol_table.link(&self.current_link)?,
-        };
-
-        self.symbol_table_entry = Some(entry.clone());
+        });
 
         if let Some(link) = &mut self.next_link {
-            link.enclosing_class = Some(entry);
+            link.enclosing_class = self.symbol_table_entry.clone();
         }
-
         Ok(())
     }
 
