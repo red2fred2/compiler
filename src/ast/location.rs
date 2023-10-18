@@ -11,15 +11,19 @@ pub struct Location {
 }
 
 impl Location {
-    pub fn new_from_location(mut location: Location, id: Id) -> Self {
-        location.next_link = Some(b(Self {
+    pub fn add_link(mut self, id: Id) -> Self {
+        let mut link = &mut self;
+        while link.next_link.is_some() {
+            link = link.next_link.as_mut().unwrap();
+        }
+        link.next_link = Some(b(Self {
             current_link: id.name,
             enclosing_class: None,
             next_link: None,
             symbol_table_entry: None,
         }));
 
-        location
+        self
     }
 }
 
