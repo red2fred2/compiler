@@ -7,19 +7,12 @@ pub enum Statement {
     Decrement(Location),
     Exit,
     Give(Expression),
-    If {
-        condition: Expression,
-        body: Body,
-        else_body: Body,
-    },
+    If(Expression, Body, Body),
     Increment(Location),
     Return(Option<Expression>),
     Take(Location),
     VariableDeclaration(Declaration),
-    While {
-        condition: Expression,
-        body: Body,
-    },
+    While(Expression, Body),
 }
 
 impl Display for Statement {
@@ -30,11 +23,7 @@ impl Display for Statement {
             Self::Decrement(x) => write!(f, "{x}--"),
             Self::Exit => write!(f, "today I don't feel like doing any work;"),
             Self::Give(x) => write!(f, "give {x};"),
-            Self::If {
-                condition,
-                body,
-                else_body,
-            } => {
+            Self::If(condition, body, else_body) => {
                 write!(f, "if({condition}) ")?;
                 if else_body.statements.len() == 0 {
                     fmt_body(&body.statements, f)
@@ -54,7 +43,7 @@ impl Display for Statement {
             }
             Self::Take(x) => write!(f, "take {x};"),
             Self::VariableDeclaration(x) => write!(f, "{x}"),
-            Self::While { condition, body } => {
+            Self::While(condition, body) => {
                 write!(f, "while({condition}) ")?;
                 fmt_body(&body.statements, f)
             }
@@ -70,11 +59,9 @@ impl SemanticNode for Statement {
             Self::Decrement(x) => Some(vec![x]),
             Self::Exit => None,
             Self::Give(x) => Some(vec![x]),
-            Self::If {
-                condition,
-                body,
-                else_body,
-            } => Some(vec![condition as &mut dyn SemanticNode, body, else_body]),
+            Self::If(condition, body, else_body) => {
+                Some(vec![condition as &mut dyn SemanticNode, body, else_body])
+            }
             Self::Increment(x) => Some(vec![x]),
             Self::Return(x) => match x {
                 Some(x) => Some(vec![x]),
@@ -82,7 +69,7 @@ impl SemanticNode for Statement {
             },
             Self::Take(x) => Some(vec![x]),
             Self::VariableDeclaration(x) => Some(vec![x]),
-            Self::While { condition, body } => Some(vec![condition as &mut dyn SemanticNode, body]),
+            Self::While(condition, body) => Some(vec![condition as &mut dyn SemanticNode, body]),
         }
     }
 
