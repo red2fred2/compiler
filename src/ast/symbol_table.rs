@@ -29,7 +29,7 @@ fn undefined_type() -> Result<Rc<Entry>> {
 
 #[derive(Debug, PartialEq)]
 pub enum Entry {
-    Class(Rc<RefCell<Scope>>),
+    Class(Type, Rc<RefCell<Scope>>),
     Function(Vec<Formal>, Type),
     Variable(Type),
 }
@@ -70,10 +70,11 @@ impl SymbolTable {
         Ok(())
     }
 
-    pub fn add_class(&mut self, name: &String) -> Result<()> {
+    pub fn add_class(&mut self, id: &Id) -> Result<()> {
         let scope = rc(HashMap::new());
-        let entry = symbol_table::Entry::Class(scope.clone());
-        self.add(name, entry)?;
+        let t = Type::Class(id.clone());
+        let entry = symbol_table::Entry::Class(t, scope.clone());
+        self.add(&id.name, entry)?;
         self.table.push(scope);
         Ok(())
     }
@@ -98,7 +99,7 @@ impl SymbolTable {
         let c = self.link(&t)?;
 
         // Get class's scope
-        let Entry::Class(scope) = c.as_ref() else {
+        let Entry::Class(_, scope) = c.as_ref() else {
             return undeclared_error(name);
         };
 

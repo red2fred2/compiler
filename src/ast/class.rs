@@ -22,7 +22,7 @@ impl SemanticNode for Class {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        symbol_table.add_class(&self.id.name)?;
+        symbol_table.add_class(&self.id)?;
         Ok(())
     }
 

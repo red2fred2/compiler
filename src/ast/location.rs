@@ -4,53 +4,71 @@ use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Location {
-    pub links: Vec<String>,
+    pub current_link: String,
+    pub next_link: Option<Box<Location>>,
+    pub enclosing_class: Option<Rc<symbol_table::Entry>>,
     pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
 impl Location {
     pub fn new_from_id(id: Id) -> Self {
-        let links = vec![id.name];
         Self {
-            links,
+            current_link: id.name,
+            next_link: None,
+            enclosing_class: None,
             symbol_table_entry: None,
         }
     }
 
-    pub fn new_from_location(location: Location, id: Id) -> Self {
-        let mut links = location.links;
-        links.push(id.name);
-        Self {
-            links,
+    pub fn new_from_location(mut location: Location, id: Id) -> Self {
+        location.next_link = Some(b(Self {
+            current_link: id.name,
+            next_link: None,
+            enclosing_class: None,
             symbol_table_entry: None,
-        }
+        }));
+
+        location
     }
 }
 
 impl Display for Location {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.links[0])?;
+        let entry = self.symbol_table_entry.as_ref().unwrap().clone();
+        let name = &self.current_link;
 
-        for link in self.links.iter().skip(1) {
-            write!(f, "--{link}")?;
+        match entry.as_ref() {
+            symbol_table::Entry::Function(formals, output) => unparse_fn(f, name, formals, output)?,
+            symbol_table::Entry::Variable(t) => unparse_id(f, name, t)?,
+            _ => (),
+        };
+
+        match &self.next_link {
+            Some(link) => write!(f, "--{link}"),
+            _ => write!(f, ""),
         }
-        write!(f, "")
     }
 }
 
 impl SemanticNode for Location {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        None
+        match &mut self.next_link {
+            Some(link) => Some(vec![link.as_mut()]),
+            None => None,
+        }
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let mut entry = symbol_table.link(&self.links[0])?;
+        let entry = match &self.enclosing_class {
+            Some(class) => symbol_table.get_class_member(class.clone(), &self.current_link)?,
+            None => symbol_table.link(&self.current_link)?,
+        };
 
-        for link in self.links.iter().skip(1) {
-            entry = symbol_table.get_class_member(entry, link)?;
+        self.symbol_table_entry = Some(entry.clone());
+
+        if let Some(link) = &mut self.next_link {
+            link.enclosing_class = Some(entry);
         }
-
-        self.symbol_table_entry = Some(entry);
 
         Ok(())
     }
