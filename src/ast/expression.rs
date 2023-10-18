@@ -27,8 +27,7 @@ pub enum Expression {
 
 impl Expression {
     pub fn new_int(value: &str) -> Self {
-        let value = u32::from_str(value).unwrap();
-        Self::IntegerLiteral(value)
+        Self::IntegerLiteral(u32::from_str(value).unwrap())
     }
 
     pub fn new_string(string: &str) -> Self {
