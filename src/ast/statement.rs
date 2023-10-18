@@ -58,10 +58,8 @@ impl SemanticNode for Statement {
                 Some(vec![condition as &mut dyn SemanticNode, body, else_body])
             }
             Self::Increment(x) => Some(vec![x]),
-            Self::Return(x) => match x {
-                Some(x) => Some(vec![x]),
-                None => None,
-            },
+            Self::Return(Some(x)) => Some(vec![x]),
+            Self::Return(None) => None,
             Self::Take(x) => Some(vec![x]),
             Self::VariableDeclaration(x) => Some(vec![x]),
             Self::While(condition, body) => Some(vec![condition as &mut dyn SemanticNode, body]),
