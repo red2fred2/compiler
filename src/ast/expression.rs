@@ -66,27 +66,26 @@ impl Display for Expression {
 impl SemanticNode for Expression {
     fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
         match self {
-            Expression::Add(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::And(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
             Expression::CallExpression(x) => Some(vec![x]),
-            Expression::Divide(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::Equals(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::False => None,
-            Expression::Greater(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::GreaterEq(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::IntegerLiteral(_) => None,
-            Expression::Less(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::LessEq(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
             Expression::Location(x) => Some(vec![x]),
-            Expression::Magic => None,
-            Expression::Multiply(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::Negative(x) => Some(vec![x.as_mut()]),
-            Expression::Not(x) => Some(vec![x.as_mut()]),
-            Expression::NotEquals(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::Or(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::StringLiteral(_) => None,
-            Expression::Subtract(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-            Expression::True => None,
+            Expression::Negative(x) | Expression::Not(x) => Some(vec![x.as_mut()]),
+            Expression::True
+            | Expression::False
+            | Expression::IntegerLiteral(_)
+            | Expression::StringLiteral(_)
+            | Expression::Magic => None,
+            Expression::Add(x, y)
+            | Expression::And(x, y)
+            | Expression::Divide(x, y)
+            | Expression::Equals(x, y)
+            | Expression::Greater(x, y)
+            | Expression::GreaterEq(x, y)
+            | Expression::Less(x, y)
+            | Expression::LessEq(x, y)
+            | Expression::Multiply(x, y)
+            | Expression::NotEquals(x, y)
+            | Expression::Or(x, y)
+            | Expression::Subtract(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
         }
     }
 
