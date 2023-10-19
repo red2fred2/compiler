@@ -4,6 +4,10 @@ type BytePosition = usize;
 
 static mut SOURCE_DOCUMENT: Option<String> = None;
 
+pub trait SourcePosition {
+    fn source_position(&self) -> SourcePositionData;
+}
+
 pub fn set_document(contents: &String) {
     unsafe { SOURCE_DOCUMENT = Some(contents.clone()) }
 }
@@ -42,12 +46,12 @@ fn get_line_start(pos: BytePosition) -> BytePosition {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct SourcePosition {
+pub struct SourcePositionData {
     pub s: BytePosition,
     pub e: BytePosition,
 }
 
-impl Display for SourcePosition {
+impl Display for SourcePositionData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,

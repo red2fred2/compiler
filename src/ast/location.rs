@@ -3,15 +3,14 @@ use super::*;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Location {
     pub current_link: String,
-    pub source_position: SourcePosition,
+    pub source_position: SourcePositionData,
     pub enclosing_class: Option<Rc<symbol_table::Entry>>,
     pub next_link: Option<Box<Location>>,
     pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
 impl Location {
-    pub fn new(name: String, source_position: SourcePosition) -> Self {
-        println!("{source_position}");
+    pub fn new(name: String, source_position: SourcePositionData) -> Self {
         Self {
             current_link: name,
             source_position,
@@ -63,8 +62,10 @@ impl SemanticNode for Location {
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         let name = &self.current_link;
         self.symbol_table_entry = Some(match &self.enclosing_class {
-            Some(class) => symbol_table.get_class_member(class.clone(), name)?,
-            None => symbol_table.link(&self.current_link)?,
+            Some(class) => {
+                symbol_table.get_class_member(class.clone(), name, self.source_position())?
+            }
+            None => symbol_table.link(&self.current_link, self.source_position())?,
         });
 
         if let Some(link) = &mut self.next_link {
@@ -75,5 +76,11 @@ impl SemanticNode for Location {
 
     fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
+    }
+}
+
+impl SourcePosition for Location {
+    fn source_position(&self) -> SourcePositionData {
+        self.source_position.clone()
     }
 }

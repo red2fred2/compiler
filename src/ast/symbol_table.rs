@@ -2,11 +2,6 @@ use std::collections::HashMap;
 
 use super::*;
 
-pub fn invalid_type_declaration() -> Result<()> {
-    eprintln!("FATAL : Invalid type in declaration");
-    Err(anyhow!("FATAL : Invalid type in declaration"))
-}
-
 #[derive(Debug, PartialEq)]
 pub enum Entry {
     Class(Rc<RefCell<Scope>>),
@@ -29,16 +24,21 @@ impl SymbolTable {
     }
 
     /// Adds a newly declared symbol to the table
-    pub fn add(&mut self, name: &String, entry: Entry) -> Result<()> {
-        if entry == Entry::Variable(Type::Primitive(Primitive::Void))
-            || entry == Entry::Variable(Type::PerfectPrimitive(Primitive::Void))
-        {
-            return invalid_type_declaration();
-        }
+    pub fn add(&mut self, name: &String, entry: Entry, pos: SourcePositionData) -> Result<()> {
+        match entry {
+            Entry::Variable(Type::Primitive(Primitive::Void, _))
+            | Entry::Variable(Type::PerfectPrimitive(Primitive::Void, _)) => {
+                let err = format!("FATAL {pos}: Invalid type in declaration");
+                eprintln!("{err}");
+                return Err(anyhow!("{err}"));
+            }
+            _ => (),
+        };
 
         if self.in_scope(name) {
-            eprintln!("FATAL : Multiply declared identifier");
-            return Err(anyhow!("FATAL : Multiply declared identifier"));
+            let err = format!("FATAL {pos}: Multiply declared identifier");
+            eprintln!("{err}");
+            return Err(anyhow!("{err}"));
         }
 
         self.table
@@ -54,7 +54,7 @@ impl SymbolTable {
     pub fn add_class(&mut self, id: &Id) -> Result<()> {
         let scope = rc(HashMap::new());
         let entry = symbol_table::Entry::Class(scope.clone());
-        self.add(&id.name, entry)?;
+        self.add(&id.name, entry, id.source_position())?;
         self.table.push(scope);
         Ok(())
     }
@@ -70,27 +70,35 @@ impl SymbolTable {
         self.table.pop();
     }
 
-    pub fn get_class_member(&self, class: Rc<Entry>, name: &String) -> Result<Rc<Entry>> {
+    pub fn get_class_member(
+        &self,
+        class: Rc<Entry>,
+        name: &String,
+        pos: SourcePositionData,
+    ) -> Result<Rc<Entry>> {
         // Get associated class
         let Entry::Variable(t) = class.as_ref() else {
-            eprintln!("FATAL : Undefined type");
-            return Err(anyhow!("FATAL : Undefined type"));
+            let err = format!("FATAL {pos}: Undefined type");
+            eprintln!("{err}");
+            return Err(anyhow!("{err}"));
         };
         let t = format!("{t}");
-        let c = self.link(&t)?;
+        let c = self.link(&t, pos.clone())?;
 
         // Get class's scope
         let Entry::Class(scope) = c.as_ref() else {
-            eprintln!("FATAL : Undeclared identifier");
-            return Err(anyhow!("FATAL : Undeclared identifier"));
+            let err = format!("FATAL {pos}: Undeclared identifier");
+            eprintln!("{err}");
+            return Err(anyhow!("{err}"));
         };
 
         // Grab the entry
         let result = match scope.borrow().get(name) {
             Some(entry) => Ok(entry.clone()),
             None => {
-                eprintln!("FATAL : Undeclared identifier");
-                Err(anyhow!("FATAL : Undeclared identifier"))
+                let err = format!("FATAL {pos}: Undeclared identifier");
+                eprintln!("{err}");
+                return Err(anyhow!("{err}"));
             }
         };
 
@@ -105,7 +113,7 @@ impl SymbolTable {
     }
 
     /// Gets a link to the symbol table entry for this symbol
-    pub fn link(&self, name: &String) -> Result<Rc<Entry>> {
+    pub fn link(&self, name: &String, pos: SourcePositionData) -> Result<Rc<Entry>> {
         let scope = self
             .table
             .iter()
@@ -114,7 +122,7 @@ impl SymbolTable {
 
         match scope {
             Some(scope) => Ok(scope.borrow().get(name).unwrap().clone()),
-            None => Err(anyhow!("FATAL : Undeclared identifier")),
+            None => Err(anyhow!("FATAL {pos}: Undeclared identifier")),
         }
     }
 }

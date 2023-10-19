@@ -8,7 +8,11 @@ pub struct Class {
 
 impl Display for Class {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        unparse_id(f, &self.id.name, &Type::Class(self.id.clone()))?;
+        unparse_id(
+            f,
+            &self.id.name,
+            &Type::Class(self.id.clone(), self.id.source_position()),
+        )?;
 
         write!(f, " : class ")?;
         fmt_body(f, &self.body)?;

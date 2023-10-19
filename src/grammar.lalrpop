@@ -1,5 +1,4 @@
 use crate::ast::*;
-use crate::source_position::SourcePosition;
 
 grammar;
 
@@ -28,10 +27,10 @@ VariableDeclaration: Declaration = {
 }
 
 Type: Type = {
-    <t: Primitive>         => Type::Primitive(t),
-    PERFECT <t: Primitive> => Type::PerfectPrimitive(t),
-    <t: Id>                => Type::Class(t),
-    PERFECT <t: Id>        => Type::PerfectClass(t),
+    <s:@L><t: Primitive><e:@R>         => Type::Primitive(t, SourcePositionData { s, e }),
+    <s:@L>PERFECT <t: Primitive><e:@R> => Type::PerfectPrimitive(t, SourcePositionData { s, e }),
+    <s:@L><t: Id><e:@R>                => Type::Class(t, SourcePositionData { s, e }),
+    <s:@L>PERFECT <t: Id><e:@R>        => Type::PerfectClass(t, SourcePositionData { s, e }),
 }
 
 Primitive: Primitive = {
@@ -166,12 +165,12 @@ Term: Expression = {
 }
 
 Loc: Location = {
-    <s:@L><id: Id><e:@R>                         => Location::new(id.name, SourcePosition { s, e }),
-    <location: Loc> POSTDEC <s:@L><id: Id><e:@R> => location.append(Location::new(id.name, SourcePosition { s, e })),
+    <s:@L><id: Id><e:@R>                         => Location::new(id.name, SourcePositionData { s, e }),
+    <location: Loc> POSTDEC <s:@L><id: Id><e:@R> => location.append(Location::new(id.name, SourcePositionData { s, e })),
 }
 
 Id: Id = {
-    <name: ID> => Id {name: name.to_string()},
+    <s:@L><name: ID><e:@R> => Id {name: name.to_string(), source_position: SourcePositionData { s, e }},
 }
 
 // Terminal symbols

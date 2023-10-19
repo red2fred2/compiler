@@ -20,7 +20,7 @@ impl SemanticNode for Formal {
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         let entry = symbol_table::Entry::Variable(self.t.clone());
-        symbol_table.add(&self.id.name, entry)?;
+        symbol_table.add(&self.id.name, entry, self.id.source_position())?;
         Ok(())
     }
 

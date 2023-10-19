@@ -1,4 +1,4 @@
-use super::{symbol_table::invalid_type_declaration, *};
+use super::*;
 
 #[derive(Clone, Debug)]
 pub struct VariableDeclaration {
@@ -9,24 +9,50 @@ pub struct VariableDeclaration {
 
 impl VariableDeclaration {
     fn exit_class(&self, symbol_table: &mut SymbolTable) -> Result<()> {
-        match symbol_table.link(&format!("{}", &self.t)) {
+        match symbol_table.link(&format!("{}", &self.t), self.t.source_position()) {
             Ok(entry) => match entry.as_ref() {
                 symbol_table::Entry::Class(_) => {
                     let entry = symbol_table::Entry::Variable(self.t.clone());
-                    symbol_table.add(&self.name.name, entry)
+                    symbol_table.add(&self.name.name, entry, self.name.source_position())
                 }
-                _ => invalid_type_declaration(),
+                _ => {
+                    let err = format!(
+                        "FATAL {}: Invalid type in declaration",
+                        self.name.source_position()
+                    );
+                    eprintln!("{err}");
+                    Err(anyhow!("{err}"))
+                }
             },
-            _ => invalid_type_declaration(),
+            _ => {
+                let err = format!(
+                    "FATAL {}: Invalid type in declaration",
+                    self.name.source_position()
+                );
+                eprintln!("{err}");
+                Err(anyhow!("{err}"))
+            }
         }
     }
 
-    fn exit_primitive(&self, symbol_table: &mut SymbolTable, t: &Primitive) -> Result<()> {
+    fn exit_primitive(
+        &self,
+        symbol_table: &mut SymbolTable,
+        t: &Primitive,
+        pos: SourcePositionData,
+    ) -> Result<()> {
         match t {
-            Primitive::Void => invalid_type_declaration(),
+            Primitive::Void => {
+                let err = format!(
+                    "FATAL {}: Invalid type in declaration",
+                    self.name.source_position()
+                );
+                eprintln!("{err}");
+                Err(anyhow!("{err}"))
+            }
             _ => {
                 let entry = symbol_table::Entry::Variable(self.t.clone());
-                symbol_table.add(&self.name.name, entry)
+                symbol_table.add(&self.name.name, entry, pos)
             }
         }
     }
@@ -57,8 +83,10 @@ impl SemanticNode for VariableDeclaration {
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match &self.t {
-            Type::Primitive(t) | Type::PerfectPrimitive(t) => self.exit_primitive(symbol_table, t),
-            Type::Class(_) | Type::PerfectClass(_) => self.exit_class(symbol_table),
+            Type::Primitive(t, _) | Type::PerfectPrimitive(t, _) => {
+                self.exit_primitive(symbol_table, t, self.t.source_position())
+            }
+            Type::Class(_, _) | Type::PerfectClass(_, _) => self.exit_class(symbol_table),
         }
     }
 }

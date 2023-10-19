@@ -27,7 +27,7 @@ impl SemanticNode for Function {
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         let entry = symbol_table::Entry::Function(self.fn_input.clone(), self.fn_output.clone());
-        symbol_table.add(&self.id.name, entry)?;
+        symbol_table.add(&self.id.name, entry, self.id.source_position())?;
         symbol_table.enter_scope();
         Ok(())
     }
