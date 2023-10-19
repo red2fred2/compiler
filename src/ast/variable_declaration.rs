@@ -21,10 +21,13 @@ impl VariableDeclaration {
         }
     }
 
-    fn exit_primitive(&self, t: &Primitive) -> Result<()> {
+    fn exit_primitive(&self, symbol_table: &mut SymbolTable, t: &Primitive) -> Result<()> {
         match t {
             Primitive::Void => invalid_type_declaration(),
-            _ => Ok(()),
+            _ => {
+                let entry = symbol_table::Entry::Variable(self.t.clone());
+                symbol_table.add(&self.name.name, entry)
+            }
         }
     }
 }
@@ -54,7 +57,7 @@ impl SemanticNode for VariableDeclaration {
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         match &self.t {
-            Type::Primitive(t) | Type::PerfectPrimitive(t) => self.exit_primitive(t),
+            Type::Primitive(t) | Type::PerfectPrimitive(t) => self.exit_primitive(symbol_table, t),
             Type::Class(_) | Type::PerfectClass(_) => self.exit_class(symbol_table),
         }
     }
