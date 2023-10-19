@@ -3,12 +3,24 @@ use super::*;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Location {
     pub current_link: String,
+    pub source_position: SourcePosition,
     pub enclosing_class: Option<Rc<symbol_table::Entry>>,
     pub next_link: Option<Box<Location>>,
     pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
 impl Location {
+    pub fn new(name: String, source_position: SourcePosition) -> Self {
+        println!("{source_position}");
+        Self {
+            current_link: name,
+            source_position,
+            enclosing_class: None,
+            next_link: None,
+            symbol_table_entry: None,
+        }
+    }
+
     pub fn append(mut self, next_link: Self) -> Self {
         let mut link = &mut self;
         while link.next_link.is_some() {

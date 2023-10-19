@@ -38,6 +38,7 @@ use std::{
 use anyhow::{anyhow, Result};
 use lalrpop_util::lalrpop_mod;
 
+use crate::source_position::SourcePosition;
 use class::Class;
 use display::*;
 use function::Function;

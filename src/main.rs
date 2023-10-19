@@ -13,6 +13,7 @@ use anyhow::Result;
 use clap::Parser;
 
 pub mod ast;
+pub mod source_position;
 
 /// Drewno Mars language compiler
 #[derive(Parser, Debug)]
@@ -38,6 +39,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path)? + "\n";
+    source_position::set_document(&contents);
     let _ = ast::parse(&contents, &args);
 
     Ok(())

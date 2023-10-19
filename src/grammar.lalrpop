@@ -1,4 +1,5 @@
 use crate::ast::*;
+use crate::source_position::SourcePosition;
 
 grammar;
 
@@ -165,8 +166,8 @@ Term: Expression = {
 }
 
 Loc: Location = {
-    <id: Id> 						 => Location { current_link: id.name, enclosing_class: None, next_link: None, symbol_table_entry: None },
-    <location: Loc> POSTDEC <id: Id> => location.append(Location { current_link: id.name, enclosing_class: None, next_link: None, symbol_table_entry: None }),
+    <s:@L><id: Id><e:@R>                         => Location::new(id.name, SourcePosition { s, e }),
+    <location: Loc> POSTDEC <s:@L><id: Id><e:@R> => location.append(Location::new(id.name, SourcePosition { s, e })),
 }
 
 Id: Id = {
