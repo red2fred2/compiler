@@ -1,10 +1,32 @@
-use super::*;
+use super::{symbol_table::invalid_type_declaration, *};
 
 #[derive(Clone, Debug)]
 pub struct VariableDeclaration {
     pub name: Id,
     pub t: Type,
     pub assignment: Option<Expression>,
+}
+
+impl VariableDeclaration {
+    fn exit_class(&self, symbol_table: &mut SymbolTable) -> Result<()> {
+        match symbol_table.link(&format!("{}", &self.t)) {
+            Ok(entry) => match entry.as_ref() {
+                symbol_table::Entry::Class(_) => {
+                    let entry = symbol_table::Entry::Variable(self.t.clone());
+                    symbol_table.add(&self.name.name, entry)
+                }
+                _ => invalid_type_declaration(),
+            },
+            _ => invalid_type_declaration(),
+        }
+    }
+
+    fn exit_primitive(&self, t: &Primitive) -> Result<()> {
+        match t {
+            Primitive::Void => invalid_type_declaration(),
+            _ => Ok(()),
+        }
+    }
 }
 
 impl Display for VariableDeclaration {
@@ -31,8 +53,9 @@ impl SemanticNode for VariableDeclaration {
     }
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let entry = symbol_table::Entry::Variable(self.t.clone());
-        symbol_table.add(&self.name.name, entry)?;
-        Ok(())
+        match &self.t {
+            Type::Primitive(t) | Type::PerfectPrimitive(t) => self.exit_primitive(t),
+            Type::Class(_) | Type::PerfectClass(_) => self.exit_class(symbol_table),
+        }
     }
 }

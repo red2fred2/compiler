@@ -21,7 +21,10 @@ impl Location {
 
 impl Display for Location {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let entry = self.symbol_table_entry.as_ref().unwrap().clone();
+        let Some(entry) = self.symbol_table_entry.as_ref() else {
+            return Ok(());
+        };
+
         let name = &self.current_link;
 
         match entry.as_ref() {
@@ -32,7 +35,7 @@ impl Display for Location {
 
         match &self.next_link {
             Some(link) => write!(f, "--{link}"),
-            _ => write!(f, ""),
+            _ => Ok(()),
         }
     }
 }

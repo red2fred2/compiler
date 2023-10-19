@@ -12,7 +12,7 @@ pub fn analyze(program: &mut Vec<Declaration>) -> Result<()> {
     }
 
     if failed {
-        Err(anyhow!("Failure in semantic analysis"))
+        Err(anyhow!("Name Analysis Failed"))
     } else {
         Ok(())
     }

@@ -60,10 +60,14 @@ pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>
     let result = grammar::ProgramParser::new().parse(&file_contents);
 
     let Ok(mut program) = result else {
+        eprintln!("syntax error\nParse failed");
         return Err(anyhow!("syntax error\nParse failed"));
     };
 
-    semantic_analysis::analyze(&mut program)?;
+    if let Err(e) = semantic_analysis::analyze(&mut program) {
+        eprintln!("{e}");
+        return Err(e);
+    }
 
     let mode = get_unparse_mode(args);
     set_unparse_mode(&mode);
