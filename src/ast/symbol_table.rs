@@ -122,7 +122,11 @@ impl SymbolTable {
 
         match scope {
             Some(scope) => Ok(scope.borrow().get(name).unwrap().clone()),
-            None => Err(anyhow!("FATAL {pos}: Undeclared identifier")),
+            None => {
+                let err = format!("FATAL {pos}: Undeclared identifier");
+                eprintln!("{err}");
+                return Err(anyhow!("{err}"));
+            }
         }
     }
 }
