@@ -97,3 +97,120 @@ impl SemanticNode for Expression {
         Ok(())
     }
 }
+
+impl Typed for Expression {
+    fn get_type(&self) -> Result<Type> {
+        match self {
+            Self::False | Self::Magic | Self::True => Ok(Type::Primitive(
+                Primitive::Bool,
+                SourcePositionData { s: 0, e: 0 },
+            )),
+            Self::And(a, b) | Self::Or(a, b) => check_binary_primitive(
+                a,
+                b,
+                Primitive::Bool,
+                " Logical operator applied to non-bool operand",
+            ),
+            Self::Not(a) => check_unary_primitive(
+                a,
+                Primitive::Bool,
+                " Logical operator applied to non-bool operand",
+            ),
+            Self::IntegerLiteral(_) => Ok(Type::Primitive(
+                Primitive::Int,
+                SourcePositionData { s: 0, e: 0 },
+            )),
+            Self::Add(a, b) | Self::Divide(a, b) | Self::Multiply(a, b) | Self::Subtract(a, b) => {
+                check_binary_primitive(
+                    a,
+                    b,
+                    Primitive::Int,
+                    "Arithmetic operator applied to invalid operand",
+                )
+            }
+            Self::Greater(a, b) | Self::GreaterEq(a, b) | Self::Less(a, b) | Self::LessEq(a, b) => {
+                check_binary_primitive(
+                    a,
+                    b,
+                    Primitive::Int,
+                    "Relational operator applied to non-numeric operand",
+                )?;
+                Ok(Type::Primitive(
+                    Primitive::Bool,
+                    SourcePositionData { s: 0, e: 0 },
+                ))
+            }
+            Self::Negative(a) => check_unary_primitive(
+                a,
+                Primitive::Int,
+                "Arithmetic operator applied to invalid operand",
+            ),
+            Self::StringLiteral(_) => Ok(Type::Primitive(
+                Primitive::String,
+                SourcePositionData { s: 0, e: 0 },
+            )),
+            Self::Location(_) => todo!(),
+            Self::CallExpression(_) => todo!(),
+            Self::Equals(a, b) | Self::NotEquals(a, b) => {
+                check_equal_types(a, b, "Arithmetic operator applied to invalid operand")
+            }
+        }
+    }
+}
+
+fn check_binary_primitive(
+    a: &Box<Expression>,
+    b: &Box<Expression>,
+    expected: Primitive,
+    err_str: &str,
+) -> Result<Type> {
+    let Some(a_primitive) = get_primitive(&a.get_type()) else {
+        eprintln!("{err_str}");
+        return Err(anyhow!("{err_str}"));
+    };
+
+    let Some(b_primitive) = get_primitive(&b.get_type()) else {
+        eprintln!("{err_str}");
+        return Err(anyhow!("{err_str}"));
+    };
+
+    if a_primitive == expected && b_primitive == expected {
+        a.get_type()
+    } else {
+        eprintln!("{err_str}");
+        Err(anyhow!("{err_str}"))
+    }
+}
+
+fn check_unary_primitive(a: &Box<Expression>, expected: Primitive, err_str: &str) -> Result<Type> {
+    let Some(a_primitive) = get_primitive(&a.get_type()) else {
+        eprintln!("{err_str}");
+        return Err(anyhow!("{err_str}"));
+    };
+
+    if a_primitive == expected {
+        a.get_type()
+    } else {
+        eprintln!("{err_str}");
+        Err(anyhow!("{err_str}"))
+    }
+}
+
+fn get_primitive(t: &Result<Type>) -> Option<Primitive> {
+    match t.as_ref().unwrap() {
+        Type::Primitive(p, _) | Type::PerfectPrimitive(p, _) => Some(p.clone()),
+        _ => None,
+    }
+}
+
+fn check_equal_types(a: &Box<Expression>, b: &Box<Expression>, err_str: &str) -> Result<Type> {
+    let t1 = a.get_type()?;
+    let t2 = b.get_type()?;
+
+    if t1.equivalent(&t2) {
+        Ok(Type::Primitive(Primitive::Bool, t1.source_position()))
+    } else {
+        eprintln!("{err_str}");
+        return Err(anyhow!("{err_str}"));
+    }
+}
