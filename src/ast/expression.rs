@@ -149,7 +149,7 @@ impl Typed for Expression {
                 Primitive::String,
                 SourcePositionData { s: 0, e: 0 },
             )),
-            Self::Location(_) => todo!(),
+            Self::Location(x) => x.get_type(),
             Self::CallExpression(_) => todo!(),
             Self::Equals(a, b) | Self::NotEquals(a, b) => {
                 check_equal_types(a, b, "Arithmetic operator applied to invalid operand")

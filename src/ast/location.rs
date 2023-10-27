@@ -84,3 +84,22 @@ impl SourcePosition for Location {
         self.source_position.clone()
     }
 }
+
+impl Typed for Location {
+    fn get_type(&self) -> Result<Type> {
+        match (&self.next_link, &self.symbol_table_entry) {
+            (Some(l), _) => l.get_type(),
+            (None, Some(entry)) => match entry.as_ref() {
+                symbol_table::Entry::Variable(t) => Ok(t.clone()),
+                _ => Err(anyhow!(
+                    "Tried to get type of non variable {}",
+                    self.current_link
+                )),
+            },
+            _ => Err(anyhow!(
+                "No Symbol table entry when getting type of {}",
+                self.current_link
+            )),
+        }
+    }
+}
