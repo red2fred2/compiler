@@ -30,6 +30,24 @@ pub enum Statement {
     While(Expression, Body),
 }
 
+impl Statement {
+    pub fn get_type(&self) -> Result<()> {
+        match self {
+            Statement::Assignment(_, _) => todo!(),
+            Statement::CallExpression(_) => todo!(),
+            Statement::Decrement(_) => todo!(),
+            Statement::Exit => todo!(),
+            Statement::Give(x) => check_give(x),
+            Statement::If(_, _, _) => todo!(),
+            Statement::Increment(_) => todo!(),
+            Statement::Return(_) => todo!(),
+            Statement::Take(x) => check_take(x),
+            Statement::VariableDeclaration(_) => todo!(),
+            Statement::While(_, _) => todo!(),
+        }
+    }
+}
+
 impl Display for Statement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -73,4 +91,26 @@ impl SemanticNode for Statement {
     fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
     }
+}
+
+fn check_give(x: &Expression) -> Result<()> {
+    todo!()
+}
+
+fn check_take(x: &Location) -> Result<()> {
+    let location = x.get_last_link();
+
+    if location.is_class()? {
+        let err = "Attempt to assign user input to class";
+        eprintln!("{err}");
+        return Err(anyhow!("{err}"));
+    }
+
+    if location.is_function()? {
+        let err = "Attempt to assign user input to function";
+        eprintln!("{err}");
+        return Err(anyhow!("{err}"));
+    }
+
+    Ok(())
 }
