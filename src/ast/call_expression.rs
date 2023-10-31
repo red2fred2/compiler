@@ -28,3 +28,35 @@ impl SemanticNode for CallExpression {
         Ok(())
     }
 }
+
+impl Typed for CallExpression {
+    fn get_type(&self) -> Result<Type> {
+        let entry = self.location.get_last_link().get_entry()?;
+
+        let symbol_table::Entry::Function(formals, output) = entry.as_ref() else {
+            let err = "Attempt to call a non-function";
+            eprintln!("{err}");
+            return Err(anyhow!("{err}"));
+        };
+
+        if formals.len() != self.actuals.len() {
+            let err = "Function call with wrong number of args";
+            eprintln!("{err}");
+            return Err(anyhow!("{err}"));
+        }
+
+        // Closures don't like to be fallible, so this has to be a for loop
+        for i in 0..formals.len() {
+            let actual_type = self.actuals[i].get_type()?;
+            let formal_type = &formals[i].t;
+
+            if !actual_type.equivalent(formal_type) {
+                let err = "Type of actual does not match type of formal";
+                eprintln!("{err}");
+                return Err(anyhow!("{err}"));
+            }
+        }
+
+        Ok(output.clone())
+    }
+}

@@ -29,7 +29,7 @@ impl Location {
         self
     }
 
-    fn get_entry(&self) -> Result<Rc<symbol_table::Entry>> {
+    pub fn get_entry(&self) -> Result<Rc<symbol_table::Entry>> {
         match self.symbol_table_entry.clone() {
             Some(entry) => Ok(entry),
             None => {

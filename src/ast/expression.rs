@@ -150,7 +150,7 @@ impl Typed for Expression {
                 SourcePositionData { s: 0, e: 0 },
             )),
             Self::Location(x) => x.get_type(),
-            Self::CallExpression(_) => todo!(),
+            Self::CallExpression(x) => x.get_type(),
             Self::Equals(a, b) | Self::NotEquals(a, b) => {
                 check_equal_types(a, b, "Arithmetic operator applied to invalid operand")
             }
