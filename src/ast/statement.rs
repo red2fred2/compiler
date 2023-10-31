@@ -34,7 +34,10 @@ impl Statement {
     pub fn get_type(&self) -> Result<()> {
         match self {
             Statement::Assignment(_, _) => todo!(),
-            Statement::CallExpression(_) => todo!(),
+            Statement::CallExpression(x) => {
+                x.get_type()?;
+                Ok(())
+            }
             Statement::Decrement(_) => todo!(),
             Statement::Exit => todo!(),
             Statement::Give(x) => check_give(x),
