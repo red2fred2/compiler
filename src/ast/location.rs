@@ -40,6 +40,14 @@ impl Location {
         }
     }
 
+    pub fn get_last_link(&self) -> Box<Location> {
+        let mut link = Box::new(self.clone());
+        while link.next_link.is_some() {
+            link = link.next_link.unwrap();
+        }
+        link
+    }
+
     pub fn is_class(&self) -> Result<bool> {
         let entry = self.get_entry()?;
 
