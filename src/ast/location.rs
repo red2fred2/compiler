@@ -28,6 +28,44 @@ impl Location {
         link.next_link = Some(b(next_link));
         self
     }
+
+    fn get_entry(&self) -> Result<Rc<symbol_table::Entry>> {
+        match self.symbol_table_entry.clone() {
+            Some(entry) => Ok(entry),
+            None => {
+                let err = "Failed to read location's symbol table entry";
+                eprintln!("{err}");
+                Err(anyhow!("{err}"))
+            }
+        }
+    }
+
+    pub fn is_class(&self) -> Result<bool> {
+        let entry = self.get_entry()?;
+
+        match entry.as_ref() {
+            symbol_table::Entry::Class(_) => Ok(true),
+            _ => Ok(false),
+        }
+    }
+
+    pub fn is_function(&self) -> Result<bool> {
+        let entry = self.get_entry()?;
+
+        match entry.as_ref() {
+            symbol_table::Entry::Function(_, _) => Ok(true),
+            _ => Ok(false),
+        }
+    }
+
+    pub fn is_variable(&self) -> Result<bool> {
+        let entry = self.get_entry()?;
+
+        match entry.as_ref() {
+            symbol_table::Entry::Variable(_) => Ok(true),
+            _ => Ok(false),
+        }
+    }
 }
 
 impl Display for Location {
