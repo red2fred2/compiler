@@ -31,18 +31,25 @@ pub enum Statement {
 }
 
 impl Statement {
-    pub fn get_type(&self) -> Result<()> {
+    pub fn check_type(&self) -> Result<()> {
         match self {
             Statement::Assignment(_, _) => todo!(),
             Statement::CallExpression(x) => {
                 x.get_type()?;
                 Ok(())
             }
-            Statement::Decrement(_) => todo!(),
-            Statement::Exit => todo!(),
+            Statement::Decrement(x) | Statement::Increment(x) => {
+                if x.get_last_link().is_variable()? {
+                    Ok(())
+                } else {
+                    let err = "Arithmetic operator applied to invalid operand";
+                    eprintln!("{err}");
+                    Err(anyhow!("{err}"))
+                }
+            }
+            Statement::Exit => Ok(()),
             Statement::Give(x) => check_give(x),
             Statement::If(_, _, _) => todo!(),
-            Statement::Increment(_) => todo!(),
             Statement::Return(_) => todo!(),
             Statement::Take(x) => check_take(x),
             Statement::VariableDeclaration(_) => todo!(),
@@ -96,7 +103,7 @@ impl SemanticNode for Statement {
     }
 }
 
-fn check_give(x: &Expression) -> Result<()> {
+fn check_give(_: &Expression) -> Result<()> {
     todo!()
 }
 
