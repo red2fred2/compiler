@@ -33,7 +33,7 @@ pub enum Statement {
 impl Statement {
     pub fn check_type(&self) -> Result<()> {
         match self {
-            Statement::Assignment(_, _) => todo!(),
+            Statement::Assignment(l, r) => check_assignment(l, r),
             Statement::CallExpression(x) => {
                 x.get_kind()?;
                 Ok(())
@@ -52,7 +52,12 @@ impl Statement {
             Statement::If(x, _, _) | Statement::While(x, _) => check_condition(x),
             Statement::Return(_) => todo!(),
             Statement::Take(x) => check_take(x),
-            Statement::VariableDeclaration(_) => todo!(),
+            Statement::VariableDeclaration(Declaration::Variable(VariableDeclaration {
+                name: _,
+                t,
+                assignment,
+            })) => check_var_decl(t, assignment),
+            _ => unreachable!(),
         }
     }
 }
@@ -102,6 +107,28 @@ impl SemanticNode for Statement {
     }
 }
 
+fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
+    let l_entry = lval.get_last_link().get_entry()?.clone();
+
+    if let symbol_table::Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
+        l_entry.as_ref()
+    {
+        return err("Non-Lval assignment");
+    }
+
+    let (symbol_table::Entry::Variable(t1), Kind::Variable(t2)) =
+        (l_entry.as_ref(), &rval.get_kind()?)
+    else {
+        return err("Invalid assignment operand");
+    };
+
+    if !t1.equivalent(t2) {
+        return err("Invalid assignment operation");
+    }
+
+    Ok(())
+}
+
 fn check_condition(x: &Expression) -> Result<()> {
     match x.get_kind()? {
         Kind::Variable(
@@ -128,6 +155,20 @@ fn check_take(x: &Location) -> Result<()> {
         Kind::Function => err("Attempt to assign user input to function"),
         _ => Ok(()),
     }
+}
+
+fn check_var_decl(t: &Type, rval: &Option<Expression>) -> Result<()> {
+    let Some(rval) = rval else { return Ok(()) };
+
+    let Kind::Variable(t2) = &rval.get_kind()? else {
+        return err("Invalid assignment operand");
+    };
+
+    if !t.equivalent(t2) {
+        return err("Invalid assignment operation");
+    }
+
+    Ok(())
 }
 
 fn err(err_message: &str) -> Result<()> {
