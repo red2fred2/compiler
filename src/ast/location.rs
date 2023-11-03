@@ -136,8 +136,8 @@ impl Typed for Location {
         match (&self.next_link, &self.symbol_table_entry) {
             (Some(l), _) => l.get_kind(),
             (None, Some(entry)) => match entry.as_ref() {
-                symbol_table::Entry::Class(a) => Ok(Kind::Class),
-                symbol_table::Entry::Function(formals, output) => Ok(Kind::Function),
+                symbol_table::Entry::Class(_) => Ok(Kind::Class),
+                symbol_table::Entry::Function(_, _) => Ok(Kind::Function),
                 symbol_table::Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
             },
             _ => Err(anyhow!(

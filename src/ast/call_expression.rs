@@ -33,7 +33,7 @@ impl Typed for CallExpression {
     fn get_kind(&self) -> Result<Kind> {
         let entry = self.location.get_last_link().get_entry()?;
 
-        let symbol_table::Entry::Function(formals, output) = entry.as_ref() else {
+        let symbol_table::Entry::Function(formals, _) = entry.as_ref() else {
             return err("Attempt to call a non-function");
         };
 
