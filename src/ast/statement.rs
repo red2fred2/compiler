@@ -35,7 +35,7 @@ impl Statement {
         match self {
             Statement::Assignment(_, _) => todo!(),
             Statement::CallExpression(x) => {
-                x.get_type()?;
+                x.get_kind()?;
                 Ok(())
             }
             Statement::Decrement(x) | Statement::Increment(x) => {
@@ -107,20 +107,6 @@ fn check_give(_: &Expression) -> Result<()> {
     todo!()
 }
 
-fn check_take(x: &Location) -> Result<()> {
-    let location = x.get_last_link();
-
-    if location.is_class()? {
-        let err = "Attempt to assign user input to class";
-        eprintln!("{err}");
-        return Err(anyhow!("{err}"));
-    }
-
-    if location.is_function()? {
-        let err = "Attempt to assign user input to function";
-        eprintln!("{err}");
-        return Err(anyhow!("{err}"));
-    }
-
-    Ok(())
+fn check_take(_: &Location) -> Result<()> {
+    todo!()
 }

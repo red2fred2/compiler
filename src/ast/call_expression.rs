@@ -30,33 +30,36 @@ impl SemanticNode for CallExpression {
 }
 
 impl Typed for CallExpression {
-    fn get_type(&self) -> Result<Type> {
+    fn get_kind(&self) -> Result<Kind> {
         let entry = self.location.get_last_link().get_entry()?;
 
         let symbol_table::Entry::Function(formals, output) = entry.as_ref() else {
-            let err = "Attempt to call a non-function";
-            eprintln!("{err}");
-            return Err(anyhow!("{err}"));
+            return err("Attempt to call a non-function");
         };
 
         if formals.len() != self.actuals.len() {
-            let err = "Function call with wrong number of args";
-            eprintln!("{err}");
-            return Err(anyhow!("{err}"));
+            return err("Function call with wrong number of args");
         }
 
         // Closures don't like to be fallible, so this has to be a for loop
         for i in 0..formals.len() {
-            let actual_type = self.actuals[i].get_type()?;
+            let Kind::Variable(actual_type) = self.actuals[i].get_kind()? else {
+                return err("Type of actual does not match type of formal");
+            };
             let formal_type = &formals[i].t;
 
             if !actual_type.equivalent(formal_type) {
-                let err = "Type of actual does not match type of formal";
-                eprintln!("{err}");
-                return Err(anyhow!("{err}"));
+                return err("Type of actual does not match type of formal");
             }
         }
 
-        Ok(output.clone())
+        // Ok(Kind::Variable(output.clone()))
+
+        todo!()
     }
+}
+
+fn err(err_message: &str) -> Result<Kind> {
+    eprintln!("{err_message}");
+    Err(anyhow!("{err_message}"))
 }

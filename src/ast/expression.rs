@@ -99,12 +99,12 @@ impl SemanticNode for Expression {
 }
 
 impl Typed for Expression {
-    fn get_type(&self) -> Result<Type> {
+    fn get_kind(&self) -> Result<Kind> {
         match self {
-            Self::False | Self::Magic | Self::True => Ok(Type::Primitive(
+            Self::False | Self::Magic | Self::True => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::Bool,
                 SourcePositionData { s: 0, e: 0 },
-            )),
+            ))),
             Self::And(a, b) | Self::Or(a, b) => check_binary_primitive(
                 a,
                 b,
@@ -116,10 +116,10 @@ impl Typed for Expression {
                 Primitive::Bool,
                 " Logical operator applied to non-bool operand",
             ),
-            Self::IntegerLiteral(_) => Ok(Type::Primitive(
+            Self::IntegerLiteral(_) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::Int,
                 SourcePositionData { s: 0, e: 0 },
-            )),
+            ))),
             Self::Add(a, b) | Self::Divide(a, b) | Self::Multiply(a, b) | Self::Subtract(a, b) => {
                 check_binary_primitive(
                     a,
@@ -135,25 +135,23 @@ impl Typed for Expression {
                     Primitive::Int,
                     "Relational operator applied to non-numeric operand",
                 )?;
-                Ok(Type::Primitive(
+                Ok(Kind::Variable(Type::PerfectPrimitive(
                     Primitive::Bool,
                     SourcePositionData { s: 0, e: 0 },
-                ))
+                )))
             }
             Self::Negative(a) => check_unary_primitive(
                 a,
                 Primitive::Int,
                 "Arithmetic operator applied to invalid operand",
             ),
-            Self::StringLiteral(_) => Ok(Type::Primitive(
+            Self::StringLiteral(_) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::String,
                 SourcePositionData { s: 0, e: 0 },
-            )),
-            Self::Location(x) => x.get_type(),
-            Self::CallExpression(x) => x.get_type(),
-            Self::Equals(a, b) | Self::NotEquals(a, b) => {
-                check_equal_types(a, b, "Arithmetic operator applied to invalid operand")
-            }
+            ))),
+            Self::Location(x) => x.get_kind(),
+            Self::CallExpression(x) => x.get_kind(),
+            Self::Equals(a, b) | Self::NotEquals(a, b) => check_equals(a, b),
         }
     }
 }
@@ -163,54 +161,73 @@ fn check_binary_primitive(
     b: &Box<Expression>,
     expected: Primitive,
     err_str: &str,
-) -> Result<Type> {
-    let Some(a_primitive) = get_primitive(&a.get_type()) else {
+) -> Result<Kind> {
+    let Some(a_primitive) = get_primitive(&a.get_kind()) else {
         eprintln!("{err_str}");
         return Err(anyhow!("{err_str}"));
     };
 
-    let Some(b_primitive) = get_primitive(&b.get_type()) else {
+    let Some(b_primitive) = get_primitive(&b.get_kind()) else {
         eprintln!("{err_str}");
         return Err(anyhow!("{err_str}"));
     };
 
     if a_primitive == expected && b_primitive == expected {
-        a.get_type()
+        a.get_kind()
     } else {
         eprintln!("{err_str}");
         Err(anyhow!("{err_str}"))
     }
 }
 
-fn check_unary_primitive(a: &Box<Expression>, expected: Primitive, err_str: &str) -> Result<Type> {
-    let Some(a_primitive) = get_primitive(&a.get_type()) else {
+fn check_unary_primitive(a: &Box<Expression>, expected: Primitive, err_str: &str) -> Result<Kind> {
+    let Some(a_primitive) = get_primitive(&a.get_kind()) else {
         eprintln!("{err_str}");
         return Err(anyhow!("{err_str}"));
     };
 
     if a_primitive == expected {
-        a.get_type()
+        a.get_kind()
     } else {
         eprintln!("{err_str}");
         Err(anyhow!("{err_str}"))
     }
 }
 
-fn get_primitive(t: &Result<Type>) -> Option<Primitive> {
+fn get_primitive(t: &Result<Kind>) -> Option<Primitive> {
     match t.as_ref().unwrap() {
-        Type::Primitive(p, _) | Type::PerfectPrimitive(p, _) => Some(p.clone()),
+        Kind::Variable(Type::Primitive(p, _) | Type::PerfectPrimitive(p, _)) => Some(p.clone()),
         _ => None,
     }
 }
 
-fn check_equal_types(a: &Box<Expression>, b: &Box<Expression>, err_str: &str) -> Result<Type> {
-    let t1 = a.get_type()?;
-    let t2 = b.get_type()?;
+fn check_equals(a: &Box<Expression>, b: &Box<Expression>) -> Result<Kind> {
+    let t1 = a.get_kind()?;
+    let t2 = b.get_kind()?;
+
+    let t1_is_void = get_primitive(&Ok(t1.clone())) == Some(Primitive::Void);
+    let t2_is_void = get_primitive(&Ok(t2.clone())) == Some(Primitive::Void);
+
+    if t1_is_void || t2_is_void {
+        let err = "Invalid equality operand";
+        eprintln!("{err}");
+        return Err(anyhow!("{err}"));
+    }
+
+    let (Kind::Variable(t1), Kind::Variable(t2)) = (t1, t2) else {
+        let err = "Invalid equality operand";
+        eprintln!("{err}");
+        return Err(anyhow!("{err}"));
+    };
 
     if t1.equivalent(&t2) {
-        Ok(Type::Primitive(Primitive::Bool, t1.source_position()))
+        Ok(Kind::Variable(Type::PerfectPrimitive(
+            Primitive::Bool,
+            t1.source_position(),
+        )))
     } else {
-        eprintln!("{err_str}");
-        return Err(anyhow!("{err_str}"));
+        let err = "Arithmetic operator applied to invalid operand";
+        eprintln!("{err}");
+        return Err(anyhow!("{err}"));
     }
 }

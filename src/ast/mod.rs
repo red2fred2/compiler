@@ -13,7 +13,7 @@ mod semantic_analysis;
 mod statement;
 mod symbol_table;
 mod type_;
-mod typed;
+mod type_checking;
 mod variable_declaration;
 
 pub use block_body::Body;
@@ -45,7 +45,7 @@ use display::*;
 use function::Function;
 use semantic_analysis::SemanticNode;
 use symbol_table::SymbolTable;
-use typed::Typed;
+use type_checking::{Kind, Typed};
 use variable_declaration::VariableDeclaration;
 
 lalrpop_mod!(pub grammar);
