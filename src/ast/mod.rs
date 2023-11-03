@@ -39,6 +39,7 @@ use std::{
 use anyhow::{anyhow, Result};
 use lalrpop_util::lalrpop_mod;
 
+use super::Args;
 use crate::source_position::{SourcePosition, SourcePositionData};
 use class::Class;
 use display::*;
@@ -59,9 +60,24 @@ fn dyn_vec<T: SemanticNode>(vec: &mut Vec<T>) -> Vec<&mut dyn SemanticNode> {
     vec.iter_mut().map(|e| e as &mut dyn SemanticNode).collect()
 }
 
-pub fn build(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>> {
+pub fn build(file_contents: &str, args: &Args) -> Result<Vec<Declaration>> {
+    let should_type_check = args.check_types;
+    let should_name_check = should_type_check || args.named_unparse.is_some();
+    let should_parse = should_name_check || args.parse || args.unparse.is_some();
+
+    if !should_parse {
+        return Err(anyhow!("Never parsed"));
+    }
     let ast = parse(file_contents)?;
+
+    if !should_name_check {
+        return Ok(ast);
+    }
     let ast = name_analysis(ast, args)?;
+
+    if !should_name_check {
+        return Ok(ast);
+    }
 
     Ok(ast)
 }
@@ -82,7 +98,7 @@ fn rc<T>(x: T) -> Rc<RefCell<T>> {
     Rc::new(RefCell::new(x))
 }
 
-fn name_analysis(mut ast: Vec<Declaration>, args: &super::Args) -> Result<Vec<Declaration>> {
+fn name_analysis(mut ast: Vec<Declaration>, args: &Args) -> Result<Vec<Declaration>> {
     if let Err(e) = semantic_analysis::analyze(&mut ast) {
         eprintln!("{e}");
         return Err(e);
