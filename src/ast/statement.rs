@@ -114,8 +114,12 @@ fn check_give(x: &Expression) -> Result<()> {
     }
 }
 
-fn check_take(_: &Location) -> Result<()> {
-    todo!()
+fn check_take(x: &Location) -> Result<()> {
+    match x.get_kind()? {
+        Kind::Class => err("Attempt to assign user input to class"),
+        Kind::Function => err("Attempt to assign user input to function"),
+        _ => Ok(()),
+    }
 }
 
 fn err(err_message: &str) -> Result<()> {
