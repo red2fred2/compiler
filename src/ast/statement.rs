@@ -49,11 +49,10 @@ impl Statement {
             }
             Statement::Exit => Ok(()),
             Statement::Give(x) => check_give(x),
-            Statement::If(_, _, _) => todo!(),
+            Statement::If(x, _, _) | Statement::While(x, _) => check_condition(x),
             Statement::Return(_) => todo!(),
             Statement::Take(x) => check_take(x),
             Statement::VariableDeclaration(_) => todo!(),
-            Statement::While(_, _) => todo!(),
         }
     }
 }
@@ -100,6 +99,15 @@ impl SemanticNode for Statement {
 
     fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
+    }
+}
+
+fn check_condition(x: &Expression) -> Result<()> {
+    match x.get_kind()? {
+        Kind::Variable(
+            Type::Primitive(Primitive::Bool, _) | Type::PerfectPrimitive(Primitive::Bool, _),
+        ) => Ok(()),
+        _ => err("Non-bool expression used as a condition"),
     }
 }
 
