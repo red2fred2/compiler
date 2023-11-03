@@ -50,7 +50,7 @@ impl Statement {
             Statement::Exit => Ok(()),
             Statement::Give(x) => check_give(x),
             Statement::If(x, _, _) | Statement::While(x, _) => check_condition(x),
-            Statement::Return(_) => todo!(),
+            Statement::Return(_) => Ok(()), // Return checking is done in function declaration
             Statement::Take(x) => check_take(x),
             Statement::VariableDeclaration(Declaration::Variable(VariableDeclaration {
                 name: _,

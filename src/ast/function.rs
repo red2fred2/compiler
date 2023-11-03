@@ -14,7 +14,31 @@ impl Function {
             statement.check_type()?;
         }
 
+        self.check_returns()
+    }
+
+    fn check_returns(&self) -> Result<()> {
+        let returns = self.find_returns();
+
+        for ret in returns {
+            let Statement::Return(x) = ret else {
+                unreachable!()
+            };
+            check_return(&self.fn_output, x)?;
+        }
+
         Ok(())
+    }
+
+    fn find_returns(&self) -> Vec<Statement> {
+        self.body
+            .iter()
+            .filter(|s| match s {
+                Statement::Return(_) => true,
+                _ => false,
+            })
+            .map(|e| e.clone())
+            .collect()
     }
 }
 
@@ -46,4 +70,31 @@ impl SemanticNode for Function {
         symbol_table.exit_scope();
         Ok(())
     }
+}
+
+fn check_return(expected_output: &Type, x: Option<Expression>) -> Result<()> {
+    let void = Type::Primitive(Primitive::Void, SourcePositionData { s: 0, e: 0 });
+
+    if expected_output.equivalent(&void) && x.is_some() {
+        return err("Return with a value in void function");
+    }
+
+    let Some(x) = x else {
+        return err("Missing return value");
+    };
+
+    let Kind::Variable(t) = x.get_kind()? else {
+        return err("Bad return value");
+    };
+
+    if !expected_output.equivalent(&t) {
+        return err("Bad return value");
+    }
+
+    Ok(())
+}
+
+fn err(err_message: &str) -> Result<()> {
+    eprintln!("{err_message}");
+    Err(anyhow!("{err_message}"))
 }
