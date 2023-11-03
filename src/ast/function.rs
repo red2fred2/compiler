@@ -8,6 +8,16 @@ pub struct Function {
     pub body: Vec<Statement>,
 }
 
+impl Function {
+    pub fn check_type(&self) -> Result<()> {
+        for statement in &self.body {
+            statement.check_type()?;
+        }
+
+        Ok(())
+    }
+}
+
 impl Display for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let in_list = fmt_list(&self.fn_input);

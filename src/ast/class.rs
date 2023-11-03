@@ -6,6 +6,16 @@ pub struct Class {
     pub body: Vec<Declaration>,
 }
 
+impl Class {
+    pub fn check_type(&self) -> Result<()> {
+        for declaration in &self.body {
+            declaration.check_type()?;
+        }
+
+        Ok(())
+    }
+}
+
 impl Display for Class {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         unparse_id(

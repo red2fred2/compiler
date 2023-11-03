@@ -10,8 +10,8 @@ pub enum Declaration {
 impl Declaration {
     pub fn check_type(&self) -> Result<()> {
         match self {
-            Self::Class(_) => todo!(),
-            Self::Function(_) => todo!(),
+            Self::Class(x) => x.check_type(),
+            Self::Function(x) => x.check_type(),
             Self::Variable(x) => x.check_type(),
         }
     }
