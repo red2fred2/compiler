@@ -76,25 +76,30 @@ fn check_return(expected_output: &Type, x: Option<Expression>) -> Result<()> {
     let void = Type::Primitive(Primitive::Void, SourcePositionData { s: 0, e: 0 });
 
     if expected_output.equivalent(&void) && x.is_some() {
-        return err("Return with a value in void function");
+        return err("Return with a value in void function".to_string());
     }
 
     let Some(x) = x else {
-        return err("Missing return value");
+        return err("Missing return value".to_string());
     };
 
     let Kind::Variable(t) = x.get_kind()? else {
-        return err("Bad return value");
+        return err("Bad return value".to_string());
     };
 
     if !expected_output.equivalent(&t) {
-        return err("Bad return value");
+        return match &t {
+            Type::Primitive(_, pos) | Type::PerfectPrimitive(_, pos) => {
+                err(format!("FATAL {pos}: Bad return value"))
+            }
+            _ => unreachable!(),
+        };
     }
 
     Ok(())
 }
 
-fn err(err_message: &str) -> Result<()> {
+fn err(err_message: String) -> Result<()> {
     eprintln!("{err_message}");
     Err(anyhow!("{err_message}"))
 }

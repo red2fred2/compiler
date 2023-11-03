@@ -4,6 +4,7 @@ use super::*;
 pub struct CallExpression {
     pub location: Location,
     pub actuals: Vec<Expression>,
+    pub source_position: SourcePositionData,
 }
 
 impl Display for CallExpression {
@@ -26,6 +27,12 @@ impl SemanticNode for CallExpression {
 
     fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
         Ok(())
+    }
+}
+
+impl SourcePosition for CallExpression {
+    fn source_position(&self) -> SourcePositionData {
+        self.source_position.clone()
     }
 }
 
@@ -53,7 +60,15 @@ impl Typed for CallExpression {
             }
         }
 
-        Ok(Kind::Variable(output.clone()))
+        match output {
+            Type::Primitive(t, _) | Type::PerfectPrimitive(t, _) => Ok(Kind::Variable(
+                Type::PerfectPrimitive(t.clone(), self.source_position()),
+            )),
+            Type::Class(t, _) | Type::PerfectClass(t, _) => Ok(Kind::Variable(Type::PerfectClass(
+                t.clone(),
+                self.source_position(),
+            ))),
+        }
     }
 }
 

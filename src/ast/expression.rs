@@ -7,31 +7,34 @@ pub enum Expression {
     CallExpression(CallExpression),
     Divide(Box<Expression>, Box<Expression>),
     Equals(Box<Expression>, Box<Expression>),
-    False,
+    False(SourcePositionData),
     Greater(Box<Expression>, Box<Expression>),
     GreaterEq(Box<Expression>, Box<Expression>),
-    IntegerLiteral(u32),
+    IntegerLiteral(u64, SourcePositionData),
     Less(Box<Expression>, Box<Expression>),
     LessEq(Box<Expression>, Box<Expression>),
     Location(Location),
-    Magic,
+    Magic(SourcePositionData),
     Multiply(Box<Expression>, Box<Expression>),
     Negative(Box<Expression>),
     Not(Box<Expression>),
     NotEquals(Box<Expression>, Box<Expression>),
     Or(Box<Expression>, Box<Expression>),
-    StringLiteral(String),
+    StringLiteral(String, SourcePositionData),
     Subtract(Box<Expression>, Box<Expression>),
-    True,
+    True(SourcePositionData),
 }
 
 impl Expression {
-    pub fn new_int(value: &str) -> Self {
-        Self::IntegerLiteral(u32::from_str(value).unwrap())
+    pub fn new_int(value: &str, position: SourcePositionData) -> Self {
+        Self::IntegerLiteral(u64::from_str(value).unwrap(), position)
     }
 
-    pub fn new_string(string: &str) -> Self {
-        Self::StringLiteral(string.chars().skip(1).take(string.len() - 2).collect())
+    pub fn new_string(string: &str, position: SourcePositionData) -> Self {
+        Self::StringLiteral(
+            string.chars().skip(1).take(string.len() - 2).collect(),
+            position,
+        )
     }
 }
 
@@ -43,22 +46,22 @@ impl Display for Expression {
             Self::CallExpression(x) => write!(f, "{x}"),
             Self::Divide(l, r) => write!(f, "({l} / {r})"),
             Self::Equals(l, r) => write!(f, "({l} == {r})"),
-            Self::False => write!(f, "false"),
+            Self::False(_) => write!(f, "false"),
             Self::Greater(l, r) => write!(f, "({l} > {r})"),
             Self::GreaterEq(l, r) => write!(f, "({l} >= {r})"),
-            Self::IntegerLiteral(x) => write!(f, "{x}"),
+            Self::IntegerLiteral(x, _) => write!(f, "{x}"),
             Self::Less(l, r) => write!(f, "({l} < {r})"),
             Self::LessEq(l, r) => write!(f, "({l} <= {r})"),
             Self::Location(x) => write!(f, "{x}"),
-            Self::Magic => write!(f, "24Kmagic"),
+            Self::Magic(_) => write!(f, "24Kmagic"),
             Self::Multiply(l, r) => write!(f, "({l} * {r})"),
             Self::Negative(x) => write!(f, "-{x}"),
             Self::Not(x) => write!(f, "!{x}"),
             Self::NotEquals(l, r) => write!(f, "({l} != {r})"),
             Self::Or(l, r) => write!(f, "({l} or {r})"),
-            Self::StringLiteral(x) => write!(f, "\"{x}\""),
+            Self::StringLiteral(x, _) => write!(f, "\"{x}\""),
             Self::Subtract(l, r) => write!(f, "({l} - {r})"),
-            Self::True => write!(f, "true"),
+            Self::True(_) => write!(f, "true"),
         }
     }
 }
@@ -69,11 +72,11 @@ impl SemanticNode for Expression {
             Expression::CallExpression(x) => Some(vec![x]),
             Expression::Location(x) => Some(vec![x]),
             Expression::Negative(x) | Expression::Not(x) => Some(vec![x.as_mut()]),
-            Expression::True
-            | Expression::False
-            | Expression::IntegerLiteral(_)
-            | Expression::StringLiteral(_)
-            | Expression::Magic => None,
+            Expression::True(_)
+            | Expression::False(_)
+            | Expression::IntegerLiteral(_, _)
+            | Expression::StringLiteral(_, _)
+            | Expression::Magic(_) => None,
             Expression::Add(x, y)
             | Expression::And(x, y)
             | Expression::Divide(x, y)
@@ -98,13 +101,42 @@ impl SemanticNode for Expression {
     }
 }
 
+impl SourcePosition for Expression {
+    fn source_position(&self) -> SourcePositionData {
+        match self {
+            Expression::Add(a, b)
+            | Expression::And(a, b)
+            | Expression::Divide(a, b)
+            | Expression::Equals(a, b)
+            | Expression::Greater(a, b)
+            | Expression::GreaterEq(a, b)
+            | Expression::Less(a, b)
+            | Expression::LessEq(a, b)
+            | Expression::Multiply(a, b)
+            | Expression::NotEquals(a, b)
+            | Expression::Or(a, b)
+            | Expression::Subtract(a, b) => SourcePositionData {
+                s: a.source_position().s,
+                e: b.source_position().e,
+            },
+            Expression::False(p)
+            | Expression::IntegerLiteral(_, p)
+            | Expression::Magic(p)
+            | Expression::StringLiteral(_, p)
+            | Expression::True(p) => p.clone(),
+            Expression::Negative(x) | Expression::Not(x) => x.source_position(),
+            Expression::CallExpression(x) => x.source_position(),
+            Expression::Location(x) => x.source_position(),
+        }
+    }
+}
+
 impl Typed for Expression {
     fn get_kind(&self) -> Result<Kind> {
         match self {
-            Self::False | Self::Magic | Self::True => Ok(Kind::Variable(Type::PerfectPrimitive(
-                Primitive::Bool,
-                SourcePositionData { s: 0, e: 0 },
-            ))),
+            Self::False(p) | Self::Magic(p) | Self::True(p) => Ok(Kind::Variable(
+                Type::PerfectPrimitive(Primitive::Bool, p.clone()),
+            )),
             Self::And(a, b) | Self::Or(a, b) => check_binary_primitive(
                 a,
                 b,
@@ -116,9 +148,9 @@ impl Typed for Expression {
                 Primitive::Bool,
                 " Logical operator applied to non-bool operand",
             ),
-            Self::IntegerLiteral(_) => Ok(Kind::Variable(Type::PerfectPrimitive(
+            Self::IntegerLiteral(_, position) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::Int,
-                SourcePositionData { s: 0, e: 0 },
+                position.clone(),
             ))),
             Self::Add(a, b) | Self::Divide(a, b) | Self::Multiply(a, b) | Self::Subtract(a, b) => {
                 check_binary_primitive(
@@ -145,9 +177,9 @@ impl Typed for Expression {
                 Primitive::Int,
                 "Arithmetic operator applied to invalid operand",
             ),
-            Self::StringLiteral(_) => Ok(Kind::Variable(Type::PerfectPrimitive(
+            Self::StringLiteral(_, position) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::String,
-                SourcePositionData { s: 0, e: 0 },
+                position.clone(),
             ))),
             Self::Location(x) => x.get_kind(),
             Self::CallExpression(x) => x.get_kind(),

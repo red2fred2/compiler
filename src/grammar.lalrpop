@@ -139,12 +139,12 @@ Expression6 = {
 }
 
 CallExpression: CallExpression = {
-    <location: Loc> LPAREN <actuals: ActualsList> RPAREN => {
-        CallExpression { location, actuals }
+    <s:@L><location: Loc> LPAREN <actuals: ActualsList> <e: RPAREN> => {
+        CallExpression { location, actuals, source_position: SourcePositionData { s, e } }
     },
-    <location: Loc> LPAREN  RPAREN => {
+    <s:@L><location: Loc> LPAREN  <e: RPAREN> => {
         let actuals = Vec::new();
-        CallExpression { location, actuals }
+        CallExpression { location, actuals, source_position: SourcePositionData { s, e } }
     },
 }
 
@@ -154,13 +154,13 @@ ActualsList: Vec<Expression> = {
 }
 
 Term: Expression = {
-    <x: Loc>            => Expression::Location(x),
-    <x: INTLITERAL>     => Expression::new_int(x),
-    <x: STRINGLITERAL>  => Expression::new_string(x),
-    <x: CallExpression> => Expression::CallExpression(x),
-    TRUE                => Expression::True,
-    FALSE               => Expression::False,
-    MAGIC               => Expression::Magic,
+    <x: Loc>                        => Expression::Location(x),
+    <s:@L><x: INTLITERAL><e:@R>     => Expression::new_int(x, SourcePositionData { s, e }),
+    <s:@L><x: STRINGLITERAL><e:@R>  => Expression::new_string(x, SourcePositionData { s, e }),
+    <x: CallExpression>             => Expression::CallExpression(x),
+    <pos: TRUE>                     => Expression::True(pos),
+    <pos: FALSE>                    => Expression::False(pos),
+    <pos: MAGIC>                    => Expression::Magic(pos),
     LPAREN <Expression> RPAREN,
 }
 
@@ -186,7 +186,7 @@ ELSE = {"else"}
 EPSILON = {()}
 EQUALS = {"=="}
 EXIT = {"today I don't feel like doing any work"}
-FALSE = {"false"}
+FALSE: SourcePositionData = {<s:@L>"false"<e:@R> => SourcePositionData { s, e }}
 GIVE = {"give"}
 GREATER = {">"}
 GREATEREQ = {">="}
@@ -198,7 +198,7 @@ LCURLY = {"{"}
 LESS = {"<"}
 LESSEQ = {"<="}
 LPAREN = {"("}
-MAGIC = {"24Kmagic"}
+MAGIC: SourcePositionData = {<s:@L>"24Kmagic"<e:@R> => SourcePositionData { s, e }}
 NOT = {"!"}
 NOTEQUALS = {"!="}
 OR = {"or"}
@@ -207,12 +207,12 @@ POSTDEC = {"--"}
 POSTINC = {"++"}
 RCURLY = {"}"}
 RETURN = {"return"}
-RPAREN = {")"}
+RPAREN: usize = {")"<@R>}
 SEMICOLON = {";"}
 SLASH = {"/"}
 STAR = {"*"}
 STRINGLITERAL = {r#""(?:[^\\\"]|\\.)*""#}
 TAKE = {"take"}
-TRUE = {"true"}
+TRUE: SourcePositionData = {<s:@L>"true"<e:@R> => SourcePositionData { s, e }}
 VOID = {"void"}
 WHILE = {"while"}
