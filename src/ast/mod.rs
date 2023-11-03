@@ -59,15 +59,31 @@ fn dyn_vec<T: SemanticNode>(vec: &mut Vec<T>) -> Vec<&mut dyn SemanticNode> {
     vec.iter_mut().map(|e| e as &mut dyn SemanticNode).collect()
 }
 
-pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>> {
+pub fn build(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>> {
+    let ast = parse(file_contents)?;
+    let ast = name_analysis(ast, args)?;
+
+    Ok(ast)
+}
+
+fn parse(file_contents: &str) -> Result<Vec<Declaration>> {
     let result = grammar::ProgramParser::new().parse(&file_contents);
 
-    let Ok(mut program) = result else {
+    let Ok(ast) = result else {
         eprintln!("syntax error\nParse failed");
         return Err(anyhow!("syntax error\nParse failed"));
     };
 
-    if let Err(e) = semantic_analysis::analyze(&mut program) {
+    Ok(ast)
+}
+
+// I don't want to type Rc::new(RefCell::new(v)) 100 times
+fn rc<T>(x: T) -> Rc<RefCell<T>> {
+    Rc::new(RefCell::new(x))
+}
+
+fn name_analysis(mut ast: Vec<Declaration>, args: &super::Args) -> Result<Vec<Declaration>> {
+    if let Err(e) = semantic_analysis::analyze(&mut ast) {
         eprintln!("{e}");
         return Err(e);
     }
@@ -76,15 +92,10 @@ pub fn parse(file_contents: &str, args: &super::Args) -> Result<Vec<Declaration>
     set_unparse_mode(&mode);
     match mode {
         UnparseMode::Named(path) | UnparseMode::Normal(path) => {
-            unparse(&path, &program)?;
+            unparse(&path, &ast)?;
         }
         UnparseMode::None => (),
     }
 
-    Ok(program)
-}
-
-// I don't want to type Rc::new(RefCell::new(v)) 100 times
-fn rc<T>(x: T) -> Rc<RefCell<T>> {
-    Rc::new(RefCell::new(x))
+    Ok(ast)
 }

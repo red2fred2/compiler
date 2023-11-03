@@ -33,6 +33,10 @@ pub struct Args {
     /// Named unparse
     #[arg(short, long)]
     named_unparse: Option<String>,
+
+    /// Do type checking without output
+    #[arg(short, long)]
+    check_types: bool,
 }
 
 fn main() -> Result<()> {
@@ -40,7 +44,7 @@ fn main() -> Result<()> {
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path)? + "\n";
     source_position::set_document(&contents);
-    let _ = ast::parse(&contents, &args);
+    let _ = ast::build(&contents, &args);
 
     Ok(())
 }
@@ -52,9 +56,10 @@ fn parser_benchmark(b: &mut Bencher) {
         parse: false,
         unparse: None,
         named_unparse: None,
+        check_types: false,
     };
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path).unwrap() + "\n";
 
-    b.iter(|| ast::parse(&contents, &args).unwrap())
+    b.iter(|| ast::build(&contents, &args).unwrap())
 }

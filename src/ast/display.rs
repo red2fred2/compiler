@@ -44,6 +44,7 @@ pub fn get_unparse_mode(args: &crate::Args) -> UnparseMode {
         parse: _,
         unparse,
         named_unparse,
+        check_types: _,
     } = args;
 
     match (unparse, named_unparse) {
