@@ -78,6 +78,7 @@ pub fn build(file_contents: &str, args: &Args) -> Result<Vec<Declaration>> {
     if !should_name_check {
         return Ok(ast);
     }
+    type_analysis(&ast)?;
 
     Ok(ast)
 }
@@ -114,4 +115,12 @@ fn name_analysis(mut ast: Vec<Declaration>, args: &Args) -> Result<Vec<Declarati
     }
 
     Ok(ast)
+}
+
+fn type_analysis(ast: &Vec<Declaration>) -> Result<()> {
+    for declaration in ast {
+        declaration.check_type()?;
+    }
+
+    Ok(())
 }

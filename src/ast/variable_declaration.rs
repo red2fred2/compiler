@@ -8,6 +8,26 @@ pub struct VariableDeclaration {
 }
 
 impl VariableDeclaration {
+    pub fn check_type(&self) -> Result<()> {
+        let err = "Invalid assignment operation";
+
+        let Some(rval) = &self.assignment else {
+            return Ok(());
+        };
+
+        let Kind::Variable(t2) = &rval.get_kind()? else {
+            eprintln!("{err}");
+            return Err(anyhow!("{err}"));
+        };
+
+        if !self.t.equivalent(t2) {
+            eprintln!("{err}");
+            return Err(anyhow!("{err}"));
+        }
+
+        Ok(())
+    }
+
     fn exit_class(&self, symbol_table: &mut SymbolTable) -> Result<()> {
         match symbol_table.link(&format!("{}", &self.t), self.t.source_position()) {
             Ok(entry) => match entry.as_ref() {

@@ -7,6 +7,16 @@ pub enum Declaration {
     Variable(VariableDeclaration),
 }
 
+impl Declaration {
+    pub fn check_type(&self) -> Result<()> {
+        match self {
+            Self::Class(_) => todo!(),
+            Self::Function(_) => todo!(),
+            Self::Variable(x) => x.check_type(),
+        }
+    }
+}
+
 impl Display for Declaration {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
