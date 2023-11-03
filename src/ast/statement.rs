@@ -103,10 +103,22 @@ impl SemanticNode for Statement {
     }
 }
 
-fn check_give(_: &Expression) -> Result<()> {
-    todo!()
+fn check_give(x: &Expression) -> Result<()> {
+    match x.get_kind()? {
+        Kind::Class => err("Attempt to output a class"),
+        Kind::Function => err("Attempt to output a function"),
+        Kind::Variable(
+            Type::Primitive(Primitive::Void, _) | Type::PerfectPrimitive(Primitive::Void, _),
+        ) => err("Attempt to output void"),
+        _ => Ok(()),
+    }
 }
 
 fn check_take(_: &Location) -> Result<()> {
     todo!()
+}
+
+fn err(err_message: &str) -> Result<()> {
+    eprintln!("{err_message}");
+    Err(anyhow!("{err_message}"))
 }
