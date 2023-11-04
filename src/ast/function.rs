@@ -9,14 +9,6 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn check_type(&self) -> Result<()> {
-        for statement in &self.body {
-            statement.check_type()?;
-        }
-
-        self.check_returns()
-    }
-
     fn check_returns(&self) -> Result<()> {
         let returns = self.find_returns();
 
@@ -36,6 +28,16 @@ impl Function {
             })
             .map(|e| e.clone())
             .collect()
+    }
+}
+
+impl TypeCheck for Function {
+    fn type_check(&self) -> Result<()> {
+        for statement in &self.body {
+            statement.check_type()?;
+        }
+
+        self.check_returns()
     }
 }
 

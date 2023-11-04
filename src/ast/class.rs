@@ -6,10 +6,10 @@ pub struct Class {
     pub body: Vec<Declaration>,
 }
 
-impl Class {
-    pub fn check_type(&self) -> Result<()> {
+impl TypeCheck for Class {
+    fn type_check(&self) -> Result<()> {
         for declaration in &self.body {
-            declaration.check_type()?;
+            declaration.type_check()?;
         }
 
         Ok(())

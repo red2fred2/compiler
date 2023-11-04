@@ -7,8 +7,8 @@ pub struct VariableDeclaration {
     pub assignment: Option<Expression>,
 }
 
-impl VariableDeclaration {
-    pub fn check_type(&self) -> Result<()> {
+impl TypeCheck for VariableDeclaration {
+    fn type_check(&self) -> Result<()> {
         let Some(rval) = &self.assignment else {
             return Ok(());
         };
@@ -33,7 +33,9 @@ impl VariableDeclaration {
 
         Ok(())
     }
+}
 
+impl VariableDeclaration {
     fn exit_class(&self, symbol_table: &mut SymbolTable) -> Result<()> {
         match symbol_table.link(&format!("{}", &self.t), self.t.source_position()) {
             Ok(entry) => match entry.as_ref() {

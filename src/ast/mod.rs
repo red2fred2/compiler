@@ -8,12 +8,12 @@ mod formal;
 mod function;
 mod id;
 mod location;
+mod name_analysis;
 mod primitive;
-mod semantic_analysis;
 mod statement;
 mod symbol_table;
 mod type_;
-mod type_checking;
+mod type_analysis;
 mod variable_declaration;
 
 pub use block_body::Body;
@@ -44,9 +44,9 @@ use crate::source_position::{SourcePosition, SourcePositionData};
 use class::Class;
 use display::*;
 use function::Function;
-use semantic_analysis::SemanticNode;
+use name_analysis::SemanticNode;
 use symbol_table::SymbolTable;
-use type_checking::{Kind, Typed};
+use type_analysis::{Kind, Kinded, TypeCheck};
 use variable_declaration::VariableDeclaration;
 
 lalrpop_mod!(pub grammar);
@@ -100,7 +100,7 @@ fn rc<T>(x: T) -> Rc<RefCell<T>> {
 }
 
 fn name_analysis(mut ast: Vec<Declaration>, args: &Args) -> Result<Vec<Declaration>> {
-    if let Err(e) = semantic_analysis::analyze(&mut ast) {
+    if let Err(e) = name_analysis::analyze(&mut ast) {
         eprintln!("{e}");
         return Err(e);
     }
@@ -119,7 +119,7 @@ fn name_analysis(mut ast: Vec<Declaration>, args: &Args) -> Result<Vec<Declarati
 
 fn type_analysis(ast: &Vec<Declaration>) -> Result<()> {
     for declaration in ast {
-        declaration.check_type()?;
+        declaration.type_check()?;
     }
 
     Ok(())

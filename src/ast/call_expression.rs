@@ -36,7 +36,7 @@ impl SourcePosition for CallExpression {
     }
 }
 
-impl Typed for CallExpression {
+impl Kinded for CallExpression {
     fn get_kind(&self) -> Result<Kind> {
         let entry = self.location.get_last_link().get_entry()?;
 

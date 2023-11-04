@@ -7,6 +7,10 @@ pub enum Kind {
     Variable(Type),
 }
 
-pub trait Typed {
+pub trait Kinded {
     fn get_kind(&self) -> Result<Kind>;
+}
+
+pub trait TypeCheck {
+    fn type_check(&self) -> Result<()>;
 }

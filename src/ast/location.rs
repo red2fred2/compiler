@@ -131,7 +131,7 @@ impl SourcePosition for Location {
     }
 }
 
-impl Typed for Location {
+impl Kinded for Location {
     fn get_kind(&self) -> Result<Kind> {
         match (&self.next_link, &self.symbol_table_entry) {
             (Some(l), _) => l.get_kind(),

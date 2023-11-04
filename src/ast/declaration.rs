@@ -1,4 +1,4 @@
-use super::*;
+use super::{type_analysis::TypeCheck, *};
 
 #[derive(Clone, Debug)]
 pub enum Declaration {
@@ -7,12 +7,12 @@ pub enum Declaration {
     Variable(VariableDeclaration),
 }
 
-impl Declaration {
-    pub fn check_type(&self) -> Result<()> {
+impl TypeCheck for Declaration {
+    fn type_check(&self) -> Result<()> {
         match self {
-            Self::Class(x) => x.check_type(),
-            Self::Function(x) => x.check_type(),
-            Self::Variable(x) => x.check_type(),
+            Self::Class(x) => x.type_check(),
+            Self::Function(x) => x.type_check(),
+            Self::Variable(x) => x.type_check(),
         }
     }
 }

@@ -131,7 +131,7 @@ impl SourcePosition for Expression {
     }
 }
 
-impl Typed for Expression {
+impl Kinded for Expression {
     fn get_kind(&self) -> Result<Kind> {
         match self {
             Self::False(p) | Self::Magic(p) | Self::True(p) => Ok(Kind::Variable(
