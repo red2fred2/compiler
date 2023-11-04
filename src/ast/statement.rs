@@ -32,6 +32,8 @@ pub enum Statement {
 
 impl Statement {
     pub fn check_type(&self) -> Result<()> {
+        let int = Type::Primitive(Primitive::Int, SourcePositionData { s: 0, e: 0 });
+
         match self {
             Statement::Assignment(l, r) => check_assignment(l, r),
             Statement::CallExpression(x) => {
@@ -39,13 +41,25 @@ impl Statement {
                 Ok(())
             }
             Statement::Decrement(x) | Statement::Increment(x) => {
-                if x.get_last_link().is_variable()? {
-                    Ok(())
-                } else {
-                    let err = "Arithmetic operator applied to invalid operand";
+                let Kind::Variable(t) = x.get_last_link().get_kind()? else {
+                    let err = format!(
+                        "FATAL {}: Arithmetic operator applied to invalid operand",
+                        x.source_position()
+                    );
                     eprintln!("{err}");
-                    Err(anyhow!("{err}"))
+                    return Err(anyhow!("{err}"));
+                };
+
+                if !t.equivalent(&int) {
+                    let err = format!(
+                        "FATAL {}: Arithmetic operator applied to invalid operand",
+                        x.source_position()
+                    );
+                    eprintln!("{err}");
+                    return Err(anyhow!("{err}"));
                 }
+
+                Ok(())
             }
             Statement::Exit => Ok(()),
             Statement::Give(x) => check_give(x),

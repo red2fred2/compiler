@@ -137,45 +137,100 @@ impl Typed for Expression {
             Self::False(p) | Self::Magic(p) | Self::True(p) => Ok(Kind::Variable(
                 Type::PerfectPrimitive(Primitive::Bool, p.clone()),
             )),
-            Self::And(a, b) | Self::Or(a, b) => check_binary_primitive(
-                a,
-                b,
-                Primitive::Bool,
-                " Logical operator applied to non-bool operand",
-            ),
+            Self::And(a, b) | Self::Or(a, b) => {
+                let r1 = check_unary_primitive(
+                    a,
+                    Primitive::Bool,
+                    format!(
+                        "FATAL {}: Logical operator applied to non-bool operand",
+                        a.source_position()
+                    ),
+                );
+                let r2 = check_unary_primitive(
+                    b,
+                    Primitive::Bool,
+                    format!(
+                        "FATAL {}: Logical operator applied to non-bool operand",
+                        b.source_position()
+                    ),
+                );
+
+                match (r1, r2) {
+                    (Err(e), _) | (_, Err(e)) => Err(e),
+                    (Ok(k), Ok(_)) => Ok(k),
+                }
+            }
             Self::Not(a) => check_unary_primitive(
                 a,
                 Primitive::Bool,
-                " Logical operator applied to non-bool operand",
+                format!(
+                    "FATAL {}: Logical operator applied to non-bool operand",
+                    a.source_position()
+                ),
             ),
             Self::IntegerLiteral(_, position) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::Int,
                 position.clone(),
             ))),
             Self::Add(a, b) | Self::Divide(a, b) | Self::Multiply(a, b) | Self::Subtract(a, b) => {
-                check_binary_primitive(
+                let r1 = check_unary_primitive(
                     a,
+                    Primitive::Int,
+                    format!(
+                        "FATAL {}: Arithmetic operator applied to invalid operand",
+                        a.source_position()
+                    ),
+                );
+                let r2 = check_unary_primitive(
                     b,
                     Primitive::Int,
-                    "Arithmetic operator applied to invalid operand",
-                )
+                    format!(
+                        "FATAL {}: Arithmetic operator applied to invalid operand",
+                        b.source_position()
+                    ),
+                );
+
+                match (r1, r2) {
+                    (Err(e), _) | (_, Err(e)) => Err(e),
+                    (Ok(k), Ok(_)) => Ok(k),
+                }
             }
             Self::Greater(a, b) | Self::GreaterEq(a, b) | Self::Less(a, b) | Self::LessEq(a, b) => {
-                check_binary_primitive(
+                let r1 = check_unary_primitive(
                     a,
+                    Primitive::Int,
+                    format!(
+                        "FATAL {}: Arithmetic operator applied to invalid operand",
+                        a.source_position()
+                    ),
+                );
+                let r2 = check_unary_primitive(
                     b,
                     Primitive::Int,
-                    "Relational operator applied to non-numeric operand",
-                )?;
-                Ok(Kind::Variable(Type::PerfectPrimitive(
-                    Primitive::Bool,
-                    SourcePositionData { s: 0, e: 0 },
-                )))
+                    format!(
+                        "FATAL {}: Arithmetic operator applied to invalid operand",
+                        b.source_position()
+                    ),
+                );
+
+                match (r1, r2) {
+                    (Err(e), _) | (_, Err(e)) => Err(e),
+                    (Ok(_), Ok(_)) => Ok(Kind::Variable(Type::PerfectPrimitive(
+                        Primitive::Bool,
+                        SourcePositionData {
+                            s: a.source_position().s,
+                            e: b.source_position().e,
+                        },
+                    ))),
+                }
             }
             Self::Negative(a) => check_unary_primitive(
                 a,
                 Primitive::Int,
-                "Arithmetic operator applied to invalid operand",
+                format!(
+                    "FATAL {}: Arithmetic operator applied to invalid operand",
+                    a.source_position()
+                ),
             ),
             Self::StringLiteral(_, position) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::String,
@@ -188,31 +243,11 @@ impl Typed for Expression {
     }
 }
 
-fn check_binary_primitive(
+fn check_unary_primitive(
     a: &Box<Expression>,
-    b: &Box<Expression>,
     expected: Primitive,
-    err_str: &str,
+    err_str: String,
 ) -> Result<Kind> {
-    let Some(a_primitive) = get_primitive(&a.get_kind()) else {
-        eprintln!("{err_str}");
-        return Err(anyhow!("{err_str}"));
-    };
-
-    let Some(b_primitive) = get_primitive(&b.get_kind()) else {
-        eprintln!("{err_str}");
-        return Err(anyhow!("{err_str}"));
-    };
-
-    if a_primitive == expected && b_primitive == expected {
-        a.get_kind()
-    } else {
-        eprintln!("{err_str}");
-        Err(anyhow!("{err_str}"))
-    }
-}
-
-fn check_unary_primitive(a: &Box<Expression>, expected: Primitive, err_str: &str) -> Result<Kind> {
     let Some(a_primitive) = get_primitive(&a.get_kind()) else {
         eprintln!("{err_str}");
         return Err(anyhow!("{err_str}"));
@@ -241,13 +276,25 @@ fn check_equals(a: &Box<Expression>, b: &Box<Expression>) -> Result<Kind> {
     let t2_is_void = get_primitive(&Ok(t2.clone())) == Some(Primitive::Void);
 
     if t1_is_void || t2_is_void {
-        let err = "Invalid equality operand";
+        let err = format!(
+            "FATAL {}: Invalid equality operand",
+            SourcePositionData {
+                s: a.source_position().s,
+                e: b.source_position().e
+            }
+        );
         eprintln!("{err}");
         return Err(anyhow!("{err}"));
     }
 
     let (Kind::Variable(t1), Kind::Variable(t2)) = (t1, t2) else {
-        let err = "Invalid equality operand";
+        let err = format!(
+            "FATAL {}: Invalid equality operand",
+            SourcePositionData {
+                s: a.source_position().s,
+                e: b.source_position().e
+            }
+        );
         eprintln!("{err}");
         return Err(anyhow!("{err}"));
     };
@@ -258,7 +305,13 @@ fn check_equals(a: &Box<Expression>, b: &Box<Expression>) -> Result<Kind> {
             t1.source_position(),
         )))
     } else {
-        let err = "Arithmetic operator applied to invalid operand";
+        let err = format!(
+            "FATAL {}: Invalid equality operation",
+            SourcePositionData {
+                s: a.source_position().s,
+                e: b.source_position().e
+            }
+        );
         eprintln!("{err}");
         return Err(anyhow!("{err}"));
     }
