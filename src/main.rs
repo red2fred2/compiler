@@ -53,13 +53,14 @@ fn main() -> Result<()> {
 fn parser_benchmark(b: &mut Bencher) {
     let args = Args {
         input_file: "test.dm".to_string(),
-        parse: false,
+        parse: true,
         unparse: None,
         named_unparse: None,
-        check_types: false,
+        check_types: true,
     };
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path).unwrap() + "\n";
+    source_position::set_document(&contents);
 
     b.iter(|| ast::build(&contents, &args).unwrap())
 }
