@@ -1,5 +1,5 @@
 //! # Drewno Mars language compiler
-//! The [language specification is here]
+//! Here is the [language specification].
 //!
 //! [language Specification](https://compilers.cool/language/)
 #![feature(test)]
@@ -40,10 +40,15 @@ pub struct Args {
 }
 
 fn main() -> Result<()> {
+    // Get arguments
     let args = Args::parse();
+
+    // Read file
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path)? + "\n";
     source_position::set_document(&contents);
+
+    // Build AST
     let _ = ast::build(&contents, &args);
 
     Ok(())
