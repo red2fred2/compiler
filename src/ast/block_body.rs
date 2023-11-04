@@ -5,8 +5,8 @@ pub struct Body {
     pub statements: Vec<Statement>,
 }
 
-impl NameCheck for Body {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Body {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         Some(dyn_vec(&mut self.statements))
     }
 

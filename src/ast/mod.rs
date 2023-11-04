@@ -44,9 +44,9 @@ use crate::source_position::{SourcePosition, SourcePositionData};
 use class::Class;
 use display::*;
 use function::Function;
-use name_analysis::NameCheck;
+use name_analysis::NameAnalysis;
 use symbol_table::SymbolTable;
-use type_analysis::{Kind, Kinded, TypeCheck};
+use type_analysis::{Kind, Kinded, TypeAnalysis};
 use variable_declaration::VariableDeclaration;
 
 lalrpop_mod!(pub grammar);
@@ -56,8 +56,8 @@ pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
 }
 
-fn dyn_vec<T: NameCheck>(vec: &mut Vec<T>) -> Vec<&mut dyn NameCheck> {
-    vec.iter_mut().map(|e| e as &mut dyn NameCheck).collect()
+fn dyn_vec<T: NameAnalysis>(vec: &mut Vec<T>) -> Vec<&mut dyn NameAnalysis> {
+    vec.iter_mut().map(|e| e as &mut dyn NameAnalysis).collect()
 }
 
 pub fn build(file_contents: &str, args: &Args) -> Result<Vec<Declaration>> {

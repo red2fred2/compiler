@@ -41,8 +41,8 @@ impl Display for Function {
     }
 }
 
-impl NameCheck for Function {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Function {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         let mut children = dyn_vec(&mut self.fn_input);
         children.append(&mut dyn_vec(&mut self.body));
         Some(children)
@@ -61,7 +61,7 @@ impl NameCheck for Function {
     }
 }
 
-impl TypeCheck for Function {
+impl TypeAnalysis for Function {
     fn type_check(&self) -> Result<()> {
         for statement in &self.body {
             statement.check_type()?;

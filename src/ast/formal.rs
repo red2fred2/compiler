@@ -13,8 +13,8 @@ impl Display for Formal {
     }
 }
 
-impl NameCheck for Formal {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Formal {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         None
     }
 

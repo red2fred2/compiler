@@ -20,8 +20,8 @@ impl Display for Class {
     }
 }
 
-impl NameCheck for Class {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Class {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         Some(dyn_vec(&mut self.body))
     }
 
@@ -36,7 +36,7 @@ impl NameCheck for Class {
     }
 }
 
-impl TypeCheck for Class {
+impl TypeAnalysis for Class {
     fn type_check(&self) -> Result<()> {
         for declaration in &self.body {
             declaration.type_check()?;

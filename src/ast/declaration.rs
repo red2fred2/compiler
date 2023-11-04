@@ -17,8 +17,8 @@ impl Display for Declaration {
     }
 }
 
-impl NameCheck for Declaration {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Declaration {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         match self {
             Self::Class(x) => x.get_children(),
             Self::Function(x) => x.get_children(),
@@ -43,7 +43,7 @@ impl NameCheck for Declaration {
     }
 }
 
-impl TypeCheck for Declaration {
+impl TypeAnalysis for Declaration {
     fn type_check(&self) -> Result<()> {
         match self {
             Self::Class(x) => x.type_check(),

@@ -114,8 +114,8 @@ impl Kinded for Location {
     }
 }
 
-impl NameCheck for Location {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Location {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         match &mut self.next_link {
             Some(link) => Some(vec![link.as_mut()]),
             None => None,

@@ -178,8 +178,8 @@ impl Kinded for Expression {
     }
 }
 
-impl NameCheck for Expression {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Expression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         match self {
             Expression::CallExpression(x) => Some(vec![x]),
             Expression::Location(x) => Some(vec![x]),

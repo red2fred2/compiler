@@ -7,7 +7,7 @@ pub struct VariableDeclaration {
     pub assignment: Option<Expression>,
 }
 
-impl TypeCheck for VariableDeclaration {
+impl TypeAnalysis for VariableDeclaration {
     fn type_check(&self) -> Result<()> {
         let Some(rval) = &self.assignment else {
             return Ok(());
@@ -97,8 +97,8 @@ impl Display for VariableDeclaration {
     }
 }
 
-impl NameCheck for VariableDeclaration {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for VariableDeclaration {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         match &mut self.assignment {
             Some(exp) => Some(vec![exp]),
             None => None,

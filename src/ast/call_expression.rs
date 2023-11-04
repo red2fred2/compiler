@@ -61,9 +61,9 @@ impl Kinded for CallExpression {
     }
 }
 
-impl NameCheck for CallExpression {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
-        let mut children = vec![&mut self.location as &mut dyn NameCheck];
+impl NameAnalysis for CallExpression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
+        let mut children = vec![&mut self.location as &mut dyn NameAnalysis];
         children.append(&mut dyn_vec(&mut self.actuals));
 
         Some(children)

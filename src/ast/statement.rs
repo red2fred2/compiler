@@ -98,8 +98,8 @@ impl Display for Statement {
     }
 }
 
-impl NameCheck for Statement {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+impl NameAnalysis for Statement {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         match self {
             Self::Assignment(x, y) => Some(vec![x, y]),
             Self::CallExpression(x) => Some(vec![x]),

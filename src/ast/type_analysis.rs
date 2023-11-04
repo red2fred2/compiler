@@ -11,6 +11,6 @@ pub trait Kinded {
     fn get_kind(&self) -> Result<Kind>;
 }
 
-pub trait TypeCheck {
+pub trait TypeAnalysis {
     fn type_check(&self) -> Result<()>;
 }
