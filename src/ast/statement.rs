@@ -127,17 +127,26 @@ fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
     if let symbol_table::Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
         l_entry.as_ref()
     {
-        return err("Non-Lval assignment".to_string());
+        return err(format!(
+            "FATAL {}: Non-Lval assignment",
+            lval.source_position()
+        ));
     }
 
     let (symbol_table::Entry::Variable(t1), Kind::Variable(t2)) =
         (l_entry.as_ref(), &rval.get_kind()?)
     else {
-        return err("Invalid assignment operand".to_string());
+        return err(format!(
+            "FATAL {}: Invalid assignment operand",
+            rval.source_position()
+        ));
     };
 
     if !t1.equivalent(t2) {
-        return err("Invalid assignment operation".to_string());
+        return err(format!(
+            "FATAL {}: Invalid assignment operation",
+            rval.source_position()
+        ));
     }
 
     Ok(())
@@ -148,7 +157,10 @@ fn check_condition(x: &Expression) -> Result<()> {
         Kind::Variable(
             Type::Primitive(Primitive::Bool, _) | Type::PerfectPrimitive(Primitive::Bool, _),
         ) => Ok(()),
-        _ => err("Non-bool expression used as a condition".to_string()),
+        _ => err(format!(
+            "FATAL {}: Non-bool expression used as a condition",
+            x.source_position()
+        )),
     }
 }
 
@@ -190,11 +202,17 @@ fn check_var_decl(t: &Type, rval: &Option<Expression>) -> Result<()> {
     let Some(rval) = rval else { return Ok(()) };
 
     let Kind::Variable(t2) = &rval.get_kind()? else {
-        return err("Invalid assignment operand".to_string());
+        return err(format!(
+            "FATAL {}: Invalid assignment operand",
+            rval.source_position()
+        ));
     };
 
     if !t.equivalent(t2) {
-        return err("Invalid assignment operation".to_string());
+        return err(format!(
+            "FATAL {}: Invalid assignment operation",
+            rval.source_position()
+        ));
     }
 
     Ok(())

@@ -9,18 +9,24 @@ pub struct VariableDeclaration {
 
 impl VariableDeclaration {
     pub fn check_type(&self) -> Result<()> {
-        let err = "Invalid assignment operation";
-
         let Some(rval) = &self.assignment else {
             return Ok(());
         };
 
         let Kind::Variable(t2) = &rval.get_kind()? else {
+            let err = format!(
+                "FATAL {}: Invalid assignment operand",
+                rval.source_position()
+            );
             eprintln!("{err}");
             return Err(anyhow!("{err}"));
         };
 
         if !self.t.equivalent(t2) {
+            let err = format!(
+                "FATAL {}: Invalid assignment operation",
+                rval.source_position()
+            );
             eprintln!("{err}");
             return Err(anyhow!("{err}"));
         }
