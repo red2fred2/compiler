@@ -1,4 +1,9 @@
-use super::*;
+use super::{
+    dyn_vec, fmt_body, unparse_id, Declaration, Id, NameAnalysis, SourcePosition, SymbolTable,
+    Type, TypeAnalysis,
+};
+use anyhow::Result;
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug)]
 pub struct Class {

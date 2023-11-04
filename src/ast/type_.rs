@@ -1,4 +1,5 @@
-use super::*;
+use super::{Id, Primitive, SourcePosition, SourcePositionData};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
@@ -26,7 +27,7 @@ impl Type {
 }
 
 impl Display for Type {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Primitive(x, _) => write!(f, "{x}"),
             Self::PerfectPrimitive(x, _) => write!(f, "perfect {x}"),

@@ -1,4 +1,10 @@
-use super::*;
+use super::{Declaration, Formal, Type};
+use anyhow::Result;
+use std::{
+    fmt::{Display, Formatter},
+    fs::File,
+    io::Write,
+};
 
 // Multiple display types has caused a massive headache. I had to use static globals!
 // Rust is disappointed in me now.

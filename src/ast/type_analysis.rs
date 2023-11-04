@@ -1,4 +1,5 @@
-use super::*;
+use super::Type;
+use anyhow::Result;
 
 #[derive(Clone, Debug)]
 pub enum Kind {

@@ -1,4 +1,9 @@
-use super::*;
+use super::{
+    dyn_vec, fmt_list, symbol_table::Entry, Expression, Kind, Kinded, Location, NameAnalysis,
+    SourcePosition, SourcePositionData, SymbolTable, Type,
+};
+use anyhow::{anyhow, Result};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CallExpression {
@@ -8,7 +13,7 @@ pub struct CallExpression {
 }
 
 impl Display for CallExpression {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}{}", self.location, fmt_list(&self.actuals))
     }
 }
@@ -17,7 +22,7 @@ impl Kinded for CallExpression {
     fn get_kind(&self) -> Result<Kind> {
         let entry = self.location.get_last_link().get_entry()?;
 
-        let symbol_table::Entry::Function(formals, output) = entry.as_ref() else {
+        let Entry::Function(formals, output) = entry.as_ref() else {
             return err(format!(
                 "FATAL {}: Attempt to call a non-function",
                 self.location.source_position()

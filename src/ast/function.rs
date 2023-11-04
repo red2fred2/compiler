@@ -1,4 +1,10 @@
-use super::*;
+use super::{
+    dyn_vec, fmt_body, fmt_list, symbol_table::Entry, unparse_fn, Formal, Id, Kind, Kinded,
+    NameAnalysis, Primitive, SourcePosition, SourcePositionData, Statement, SymbolTable, Type,
+    TypeAnalysis,
+};
+use anyhow::{anyhow, Result};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug)]
 pub struct Function {
@@ -49,7 +55,7 @@ impl NameAnalysis for Function {
     }
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let entry = symbol_table::Entry::Function(self.fn_input.clone(), self.fn_output.clone());
+        let entry = Entry::Function(self.fn_input.clone(), self.fn_output.clone());
         symbol_table.add(&self.id.name, entry, self.id.source_position())?;
         symbol_table.enter_scope();
         Ok(())

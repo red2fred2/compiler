@@ -1,4 +1,5 @@
-use super::*;
+use super::{Declaration, SymbolTable};
+use anyhow::{anyhow, Result};
 
 pub trait NameAnalysis {
     fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>>;

@@ -1,4 +1,10 @@
-use super::*;
+use super::{
+    fmt_body, symbol_table::Entry, Body, CallExpression, Declaration, Expression, Kind, Kinded,
+    Location, NameAnalysis, Primitive, SourcePosition, SourcePositionData, SymbolTable, Type,
+    VariableDeclaration,
+};
+use anyhow::{anyhow, Result};
+use std::fmt::{Display, Formatter};
 
 fn fmt_if(f: &mut std::fmt::Formatter<'_>, statement: &Statement) -> std::fmt::Result {
     let Statement::If(condition, body, else_body) = statement else {
@@ -77,7 +83,7 @@ impl Statement {
 }
 
 impl Display for Statement {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Assignment(loc, exp) => write!(f, "{loc} = {exp};"),
             Self::CallExpression(x) => write!(f, "{x};"),
@@ -124,7 +130,7 @@ impl NameAnalysis for Statement {
 fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
     let l_entry = lval.get_last_link().get_entry()?.clone();
 
-    if let symbol_table::Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
+    if let Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
         l_entry.as_ref()
     {
         return err(format!(
@@ -133,9 +139,7 @@ fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
         ));
     }
 
-    let (symbol_table::Entry::Variable(t1), Kind::Variable(t2)) =
-        (l_entry.as_ref(), &rval.get_kind()?)
-    else {
+    let (Entry::Variable(t1), Kind::Variable(t2)) = (l_entry.as_ref(), &rval.get_kind()?) else {
         return err(format!(
             "FATAL {}: Invalid assignment operand",
             rval.source_position()

@@ -1,12 +1,20 @@
-use super::*;
+use super::{
+    b, symbol_table::Entry, unparse_fn, unparse_id, Kind, Kinded, NameAnalysis, SourcePosition,
+    SourcePositionData, SymbolTable,
+};
+use anyhow::{anyhow, Result};
+use std::{
+    fmt::{Display, Formatter},
+    rc::Rc,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Location {
     pub current_link: String,
     pub source_position: SourcePositionData,
-    pub enclosing_class: Option<Rc<symbol_table::Entry>>,
+    pub enclosing_class: Option<Rc<Entry>>,
     pub next_link: Option<Box<Location>>,
-    pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
+    pub symbol_table_entry: Option<Rc<Entry>>,
 }
 
 impl Location {
@@ -29,7 +37,7 @@ impl Location {
         self
     }
 
-    pub fn get_entry(&self) -> Result<Rc<symbol_table::Entry>> {
+    pub fn get_entry(&self) -> Result<Rc<Entry>> {
         match self.symbol_table_entry.clone() {
             Some(entry) => Ok(entry),
             None => {
@@ -52,7 +60,7 @@ impl Location {
         let entry = self.get_entry()?;
 
         match entry.as_ref() {
-            symbol_table::Entry::Class(_) => Ok(true),
+            Entry::Class(_) => Ok(true),
             _ => Ok(false),
         }
     }
@@ -61,7 +69,7 @@ impl Location {
         let entry = self.get_entry()?;
 
         match entry.as_ref() {
-            symbol_table::Entry::Function(_, _) => Ok(true),
+            Entry::Function(_, _) => Ok(true),
             _ => Ok(false),
         }
     }
@@ -70,7 +78,7 @@ impl Location {
         let entry = self.get_entry()?;
 
         match entry.as_ref() {
-            symbol_table::Entry::Variable(_) => Ok(true),
+            Entry::Variable(_) => Ok(true),
             _ => Ok(false),
         }
     }
@@ -85,8 +93,8 @@ impl Display for Location {
         let name = &self.current_link;
 
         match entry.as_ref() {
-            symbol_table::Entry::Function(formals, output) => unparse_fn(f, name, formals, output)?,
-            symbol_table::Entry::Variable(t) => unparse_id(f, name, t)?,
+            Entry::Function(formals, output) => unparse_fn(f, name, formals, output)?,
+            Entry::Variable(t) => unparse_id(f, name, t)?,
             _ => (),
         };
 
@@ -102,9 +110,9 @@ impl Kinded for Location {
         match (&self.next_link, &self.symbol_table_entry) {
             (Some(l), _) => l.get_kind(),
             (None, Some(entry)) => match entry.as_ref() {
-                symbol_table::Entry::Class(_) => Ok(Kind::Class),
-                symbol_table::Entry::Function(_, _) => Ok(Kind::Function),
-                symbol_table::Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
+                Entry::Class(_) => Ok(Kind::Class),
+                Entry::Function(_, _) => Ok(Kind::Function),
+                Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
             },
             _ => Err(anyhow!(
                 "No Symbol table entry when getting type of {}",

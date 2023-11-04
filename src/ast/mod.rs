@@ -27,14 +27,7 @@ pub use primitive::Primitive;
 pub use statement::Statement;
 pub use type_::Type;
 
-use std::{
-    cell::RefCell,
-    fmt::{Debug, Display, Formatter},
-    fs::File,
-    io::Write,
-    rc::Rc,
-    str::FromStr,
-};
+use std::{cell::RefCell, rc::Rc};
 
 use anyhow::{anyhow, Result};
 use lalrpop_util::lalrpop_mod;

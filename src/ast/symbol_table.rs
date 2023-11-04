@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-
-use super::*;
+use super::{rc, Formal, Id, Primitive, SourcePosition, SourcePositionData, Type};
+use anyhow::{anyhow, Result};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug, PartialEq)]
 pub enum Entry {
@@ -53,7 +53,7 @@ impl SymbolTable {
 
     pub fn add_class(&mut self, id: &Id) -> Result<()> {
         let scope = rc(HashMap::new());
-        let entry = symbol_table::Entry::Class(scope.clone());
+        let entry = Entry::Class(scope.clone());
         self.add(&id.name, entry, id.source_position())?;
         self.table.push(scope);
         Ok(())

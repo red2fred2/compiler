@@ -1,4 +1,9 @@
-use super::*;
+use super::{
+    symbol_table::Entry, unparse_id, Expression, Id, Kind, Kinded, NameAnalysis, Primitive,
+    SourcePosition, SourcePositionData, SymbolTable, Type, TypeAnalysis,
+};
+use anyhow::{anyhow, Result};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug)]
 pub struct VariableDeclaration {
@@ -39,8 +44,8 @@ impl VariableDeclaration {
     fn exit_class(&self, symbol_table: &mut SymbolTable) -> Result<()> {
         match symbol_table.link(&format!("{}", &self.t), self.t.source_position()) {
             Ok(entry) => match entry.as_ref() {
-                symbol_table::Entry::Class(_) => {
-                    let entry = symbol_table::Entry::Variable(self.t.clone());
+                Entry::Class(_) => {
+                    let entry = Entry::Variable(self.t.clone());
                     symbol_table.add(&self.name.name, entry, self.name.source_position())
                 }
                 _ => {
@@ -79,7 +84,7 @@ impl VariableDeclaration {
                 Err(anyhow!("{err}"))
             }
             _ => {
-                let entry = symbol_table::Entry::Variable(self.t.clone());
+                let entry = Entry::Variable(self.t.clone());
                 symbol_table.add(&self.name.name, entry, pos)
             }
         }

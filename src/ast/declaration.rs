@@ -1,4 +1,6 @@
-use super::*;
+use super::{Class, Function, NameAnalysis, SymbolTable, TypeAnalysis, VariableDeclaration};
+use anyhow::Result;
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug)]
 pub enum Declaration {
