@@ -55,33 +55,6 @@ impl Location {
         }
         link
     }
-
-    pub fn is_class(&self) -> Result<bool> {
-        let entry = self.get_entry()?;
-
-        match entry.as_ref() {
-            Entry::Class(_) => Ok(true),
-            _ => Ok(false),
-        }
-    }
-
-    pub fn is_function(&self) -> Result<bool> {
-        let entry = self.get_entry()?;
-
-        match entry.as_ref() {
-            Entry::Function(_, _) => Ok(true),
-            _ => Ok(false),
-        }
-    }
-
-    pub fn is_variable(&self) -> Result<bool> {
-        let entry = self.get_entry()?;
-
-        match entry.as_ref() {
-            Entry::Variable(_) => Ok(true),
-            _ => Ok(false),
-        }
-    }
 }
 
 impl Display for Location {

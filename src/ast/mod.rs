@@ -4,15 +4,12 @@ mod nodes;
 mod symbol_table;
 mod type_analysis;
 
-pub use nodes::*;
-
-use std::{cell::RefCell, rc::Rc};
+use nodes::*;
 
 use anyhow::{anyhow, Result};
 use lalrpop_util::lalrpop_mod;
 
 use super::Args;
-use crate::source_position::{SourcePosition, SourcePositionData};
 
 use display::*;
 use name_analysis::NameAnalysis;
@@ -20,11 +17,6 @@ use symbol_table::SymbolTable;
 use type_analysis::TypeAnalysis;
 
 lalrpop_mod!(pub grammar);
-
-// Wrap in a box so I don't have to write Box::new() 100 times
-pub fn b<T>(x: T) -> Box<T> {
-    Box::new(x)
-}
 
 pub fn build(file_contents: &str, args: &Args) -> Result<Vec<Declaration>> {
     let should_type_check = args.check_types;
@@ -58,11 +50,6 @@ fn parse(file_contents: &str) -> Result<Vec<Declaration>> {
     };
 
     Ok(ast)
-}
-
-// I don't want to type Rc::new(RefCell::new(v)) 100 times
-fn rc<T>(x: T) -> Rc<RefCell<T>> {
-    Rc::new(RefCell::new(x))
 }
 
 fn name_analysis(mut ast: Vec<Declaration>, args: &Args) -> Result<Vec<Declaration>> {

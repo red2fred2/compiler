@@ -12,8 +12,8 @@ use test::Bencher;
 use anyhow::Result;
 use clap::Parser;
 
-pub mod ast;
-pub mod source_position;
+mod ast;
+mod source_position;
 
 /// Drewno Mars language compiler
 #[derive(Parser, Debug)]

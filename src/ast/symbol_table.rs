@@ -1,4 +1,5 @@
-use super::{rc, Formal, Id, Primitive, SourcePosition, SourcePositionData, Type};
+use super::{Formal, Id, Primitive, Type};
+use crate::source_position::{SourcePosition, SourcePositionData};
 use anyhow::{anyhow, Result};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
@@ -19,7 +20,7 @@ pub struct SymbolTable {
 impl SymbolTable {
     pub fn new() -> Self {
         let mut table = Vec::new();
-        table.push(rc(HashMap::new()));
+        table.push(Rc::new(RefCell::new(HashMap::new())));
         Self { table }
     }
 
@@ -52,7 +53,7 @@ impl SymbolTable {
     }
 
     pub fn add_class(&mut self, id: &Id) -> Result<()> {
-        let scope = rc(HashMap::new());
+        let scope = Rc::new(RefCell::new(HashMap::new()));
         let entry = Entry::Class(scope.clone());
         self.add(&id.name, entry, id.source_position())?;
         self.table.push(scope);
@@ -61,7 +62,7 @@ impl SymbolTable {
 
     /// Called when entering a new scope
     pub fn enter_scope(&mut self) {
-        let scope = rc(HashMap::new());
+        let scope = Rc::new(RefCell::new(HashMap::new()));
         self.table.push(scope);
     }
 
