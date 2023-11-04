@@ -89,15 +89,15 @@ BlockStatement: Statement = {
 }
 
 Statement: Statement = {
-    <x: VariableDeclaration>                  => Statement::VariableDeclaration(x),
-    <x: Loc> ASSIGN <y: Expression> SEMICOLON => Statement::Assignment(x, y),
-    <x: Loc> POSTDEC SEMICOLON                => Statement::Decrement(x),
-    <x: Loc> POSTINC SEMICOLON                => Statement::Increment(x),
-    GIVE <x: Expression> SEMICOLON            => Statement::Give(x),
-    TAKE <x: Loc> SEMICOLON                   => Statement::Take(x),
-    RETURN <x: (<Expression>)?> SEMICOLON     => Statement::Return(x),
-    EXIT SEMICOLON                            => Statement::Exit,
-    <x: CallExpression> SEMICOLON             => Statement::CallExpression(x),
+    <x: VariableDeclaration>                          => Statement::VariableDeclaration(x),
+    <x: Loc> ASSIGN <y: Expression> SEMICOLON         => Statement::Assignment(x, y),
+    <x: Loc> POSTDEC SEMICOLON                        => Statement::Decrement(x),
+    <x: Loc> POSTINC SEMICOLON                        => Statement::Increment(x),
+    GIVE <x: Expression> SEMICOLON                    => Statement::Give(x),
+    TAKE <x: Loc> SEMICOLON                           => Statement::Take(x),
+    <s:@L>RETURN <x: (<Expression>)?><e:@R> SEMICOLON => Statement::Return(x, SourcePositionData { s, e }),
+    EXIT SEMICOLON                                    => Statement::Exit,
+    <x: CallExpression> SEMICOLON                     => Statement::CallExpression(x),
 }
 
 Expression = {

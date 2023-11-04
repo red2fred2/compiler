@@ -24,7 +24,7 @@ pub enum Statement {
     Give(Expression),
     If(Expression, Body, Body),
     Increment(Location),
-    Return(Option<Expression>),
+    Return(Option<Expression>, SourcePositionData),
     Take(Location),
     VariableDeclaration(Declaration),
     While(Expression, Body),
@@ -50,7 +50,7 @@ impl Statement {
             Statement::Exit => Ok(()),
             Statement::Give(x) => check_give(x),
             Statement::If(x, _, _) | Statement::While(x, _) => check_condition(x),
-            Statement::Return(_) => Ok(()), // Return checking is done in function declaration
+            Statement::Return(_, _) => Ok(()), // Return checking is done in function declaration
             Statement::Take(x) => check_take(x),
             Statement::VariableDeclaration(Declaration::Variable(VariableDeclaration {
                 name: _,
@@ -72,8 +72,8 @@ impl Display for Statement {
             Self::Give(x) => write!(f, "give {x};"),
             Self::If(_, _, _) => fmt_if(f, self),
             Self::Increment(x) => write!(f, "{x}++"),
-            Self::Return(Some(x)) => write!(f, "return {x};"),
-            Self::Return(None) => write!(f, "return;"),
+            Self::Return(Some(x), _) => write!(f, "return {x};"),
+            Self::Return(None, _) => write!(f, "return;"),
             Self::Take(x) => write!(f, "take {x};"),
             Self::VariableDeclaration(x) => write!(f, "{x}"),
             Self::While(condition, body) => {
@@ -91,8 +91,8 @@ impl SemanticNode for Statement {
             Self::CallExpression(x) => Some(vec![x]),
             Self::Decrement(x) | Self::Increment(x) | Self::Take(x) => Some(vec![x]),
             Self::If(condition, body, else_body) => Some(vec![condition, body, else_body]),
-            Self::Return(Some(x)) | Self::Give(x) => Some(vec![x]),
-            Self::Return(None) | Self::Exit => None,
+            Self::Return(Some(x), _) | Self::Give(x) => Some(vec![x]),
+            Self::Return(None, _) | Self::Exit => None,
             Self::VariableDeclaration(x) => Some(vec![x]),
             Self::While(condition, body) => Some(vec![condition, body]),
         }

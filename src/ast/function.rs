@@ -21,10 +21,7 @@ impl Function {
         let returns = self.find_returns();
 
         for ret in returns {
-            let Statement::Return(x) = ret else {
-                unreachable!()
-            };
-            check_return(&self.fn_output, x)?;
+            check_return(&self.fn_output, &ret)?;
         }
 
         Ok(())
@@ -34,7 +31,7 @@ impl Function {
         self.body
             .iter()
             .filter(|s| match s {
-                Statement::Return(_) => true,
+                Statement::Return(_, _) => true,
                 _ => false,
             })
             .map(|e| e.clone())
@@ -72,15 +69,19 @@ impl SemanticNode for Function {
     }
 }
 
-fn check_return(expected_output: &Type, x: Option<Expression>) -> Result<()> {
+fn check_return(expected_output: &Type, ret: &Statement) -> Result<()> {
     let void = Type::Primitive(Primitive::Void, SourcePositionData { s: 0, e: 0 });
+
+    let Statement::Return(x, pos) = &ret else {
+        unreachable!()
+    };
 
     if expected_output.equivalent(&void) && x.is_some() {
         return err("Return with a value in void function".to_string());
     }
 
     let Some(x) = x else {
-        return err("Missing return value".to_string());
+        return err(format!("FATAL {pos}: Missing return value"));
     };
 
     let Kind::Variable(t) = x.get_kind()? else {
