@@ -41,22 +41,34 @@ impl Typed for CallExpression {
         let entry = self.location.get_last_link().get_entry()?;
 
         let symbol_table::Entry::Function(formals, output) = entry.as_ref() else {
-            return err("Attempt to call a non-function");
+            return err(format!(
+                "FATAL {}: Attempt to call a non-function",
+                self.location.source_position()
+            ));
         };
 
         if formals.len() != self.actuals.len() {
-            return err("Function call with wrong number of args");
+            return err(format!(
+                "FATAL {}: Function call with wrong number of args",
+                self.source_position()
+            ));
         }
 
         // Closures don't like to be fallible, so this has to be a for loop
         for i in 0..formals.len() {
             let Kind::Variable(actual_type) = self.actuals[i].get_kind()? else {
-                return err("Type of actual does not match type of formal");
+                return err(format!(
+                    "FATAL {}: Type of actual does not match type of formal",
+                    self.actuals[i].source_position()
+                ));
             };
             let formal_type = &formals[i].t;
 
             if !actual_type.equivalent(formal_type) {
-                return err("Type of actual does not match type of formal");
+                return err(format!(
+                    "FATAL {}: Type of actual does not match type of formal",
+                    self.actuals[i].source_position()
+                ));
             }
         }
 
@@ -72,7 +84,7 @@ impl Typed for CallExpression {
     }
 }
 
-fn err(err_message: &str) -> Result<Kind> {
+fn err(err_message: String) -> Result<Kind> {
     eprintln!("{err_message}");
     Err(anyhow!("{err_message}"))
 }
