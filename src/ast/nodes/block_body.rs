@@ -1,4 +1,4 @@
-use super::{dyn_vec, NameAnalysis, Statement, SymbolTable};
+use super::{super::SymbolTable, dyn_vec, NameAnalysis, Statement};
 use anyhow::Result;
 
 #[derive(Clone, Debug)]

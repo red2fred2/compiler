@@ -1,31 +1,10 @@
-mod block_body;
-mod call_expression;
-mod class;
-mod declaration;
 mod display;
-mod expression;
-mod formal;
-mod function;
-mod id;
-mod location;
 mod name_analysis;
-mod primitive;
-mod statement;
+mod nodes;
 mod symbol_table;
-mod type_;
 mod type_analysis;
-mod variable_declaration;
 
-pub use block_body::Body;
-pub use call_expression::CallExpression;
-pub use declaration::Declaration;
-pub use expression::Expression;
-pub use formal::Formal;
-pub use id::Id;
-pub use location::Location;
-pub use primitive::Primitive;
-pub use statement::Statement;
-pub use type_::Type;
+pub use nodes::*;
 
 use std::{cell::RefCell, rc::Rc};
 
@@ -34,23 +13,17 @@ use lalrpop_util::lalrpop_mod;
 
 use super::Args;
 use crate::source_position::{SourcePosition, SourcePositionData};
-use class::Class;
+
 use display::*;
-use function::Function;
 use name_analysis::NameAnalysis;
 use symbol_table::SymbolTable;
-use type_analysis::{Kind, Kinded, TypeAnalysis};
-use variable_declaration::VariableDeclaration;
+use type_analysis::TypeAnalysis;
 
 lalrpop_mod!(pub grammar);
 
 // Wrap in a box so I don't have to write Box::new() 100 times
 pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
-}
-
-fn dyn_vec<T: NameAnalysis>(vec: &mut Vec<T>) -> Vec<&mut dyn NameAnalysis> {
-    vec.iter_mut().map(|e| e as &mut dyn NameAnalysis).collect()
 }
 
 pub fn build(file_contents: &str, args: &Args) -> Result<Vec<Declaration>> {

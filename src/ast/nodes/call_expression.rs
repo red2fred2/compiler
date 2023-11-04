@@ -1,5 +1,5 @@
 use super::{
-    dyn_vec, fmt_list, symbol_table::Entry, Expression, Kind, Kinded, Location, NameAnalysis,
+    dyn_vec, fmt_list, symbol_table, Expression, Kind, Kinded, Location, NameAnalysis,
     SourcePosition, SourcePositionData, SymbolTable, Type,
 };
 use anyhow::{anyhow, Result};
@@ -22,7 +22,7 @@ impl Kinded for CallExpression {
     fn get_kind(&self) -> Result<Kind> {
         let entry = self.location.get_last_link().get_entry()?;
 
-        let Entry::Function(formals, output) = entry.as_ref() else {
+        let symbol_table::Entry::Function(formals, output) = entry.as_ref() else {
             return err(format!(
                 "FATAL {}: Attempt to call a non-function",
                 self.location.source_position()
