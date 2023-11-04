@@ -140,14 +140,20 @@ fn check_condition(x: &Expression) -> Result<()> {
 
 fn check_give(x: &Expression) -> Result<()> {
     match x.get_kind()? {
-        Kind::Class => err("Attempt to output a class".to_string()),
+        Kind::Class => err(format!(
+            "FATAL {}: Attempt to output a class",
+            x.source_position()
+        )),
         Kind::Function => err(format!(
             "FATAL {}: Attempt to output a function",
             x.source_position()
         )),
         Kind::Variable(
             Type::Primitive(Primitive::Void, _) | Type::PerfectPrimitive(Primitive::Void, _),
-        ) => err("Attempt to output void".to_string()),
+        ) => err(format!(
+            "FATAL {}: Attempt to output void",
+            x.source_position()
+        )),
         _ => Ok(()),
     }
 }
