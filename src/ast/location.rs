@@ -97,8 +97,8 @@ impl Display for Location {
     }
 }
 
-impl SemanticNode for Location {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for Location {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         match &mut self.next_link {
             Some(link) => Some(vec![link.as_mut()]),
             None => None,

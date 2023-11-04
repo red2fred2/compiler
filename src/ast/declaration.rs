@@ -27,8 +27,8 @@ impl Display for Declaration {
     }
 }
 
-impl SemanticNode for Declaration {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for Declaration {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         match self {
             Self::Class(x) => x.get_children(),
             Self::Function(x) => x.get_children(),

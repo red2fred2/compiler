@@ -44,7 +44,7 @@ use crate::source_position::{SourcePosition, SourcePositionData};
 use class::Class;
 use display::*;
 use function::Function;
-use name_analysis::SemanticNode;
+use name_analysis::NameCheck;
 use symbol_table::SymbolTable;
 use type_analysis::{Kind, Kinded, TypeCheck};
 use variable_declaration::VariableDeclaration;
@@ -56,8 +56,8 @@ pub fn b<T>(x: T) -> Box<T> {
     Box::new(x)
 }
 
-fn dyn_vec<T: SemanticNode>(vec: &mut Vec<T>) -> Vec<&mut dyn SemanticNode> {
-    vec.iter_mut().map(|e| e as &mut dyn SemanticNode).collect()
+fn dyn_vec<T: NameCheck>(vec: &mut Vec<T>) -> Vec<&mut dyn NameCheck> {
+    vec.iter_mut().map(|e| e as &mut dyn NameCheck).collect()
 }
 
 pub fn build(file_contents: &str, args: &Args) -> Result<Vec<Declaration>> {

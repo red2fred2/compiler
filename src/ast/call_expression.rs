@@ -13,9 +13,9 @@ impl Display for CallExpression {
     }
 }
 
-impl SemanticNode for CallExpression {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
-        let mut children = vec![&mut self.location as &mut dyn SemanticNode];
+impl NameCheck for CallExpression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+        let mut children = vec![&mut self.location as &mut dyn NameCheck];
         children.append(&mut dyn_vec(&mut self.actuals));
 
         Some(children)

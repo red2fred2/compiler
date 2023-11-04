@@ -5,8 +5,8 @@ pub struct Body {
     pub statements: Vec<Statement>,
 }
 
-impl SemanticNode for Body {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for Body {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         Some(dyn_vec(&mut self.statements))
     }
 

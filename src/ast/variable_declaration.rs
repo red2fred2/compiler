@@ -97,8 +97,8 @@ impl Display for VariableDeclaration {
     }
 }
 
-impl SemanticNode for VariableDeclaration {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for VariableDeclaration {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         match &mut self.assignment {
             Some(exp) => Some(vec![exp]),
             None => None,

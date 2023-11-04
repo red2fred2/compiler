@@ -13,8 +13,8 @@ impl Display for Formal {
     }
 }
 
-impl SemanticNode for Formal {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for Formal {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         None
     }
 

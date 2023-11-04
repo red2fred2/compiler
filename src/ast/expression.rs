@@ -66,8 +66,8 @@ impl Display for Expression {
     }
 }
 
-impl SemanticNode for Expression {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for Expression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         match self {
             Expression::CallExpression(x) => Some(vec![x]),
             Expression::Location(x) => Some(vec![x]),

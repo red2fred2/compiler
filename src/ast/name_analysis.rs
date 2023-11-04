@@ -18,7 +18,7 @@ pub fn analyze(program: &mut Vec<Declaration>) -> Result<()> {
     }
 }
 
-fn traverse(tree: &mut dyn SemanticNode, symbol_table: &mut SymbolTable) -> Result<()> {
+fn traverse(tree: &mut dyn NameCheck, symbol_table: &mut SymbolTable) -> Result<()> {
     tree.visit(symbol_table)?;
     if let Some(children) = tree.get_children() {
         for child in children {
@@ -29,8 +29,8 @@ fn traverse(tree: &mut dyn SemanticNode, symbol_table: &mut SymbolTable) -> Resu
     Ok(())
 }
 
-pub trait SemanticNode {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>>;
+pub trait NameCheck {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>>;
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()>;
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()>;
 }

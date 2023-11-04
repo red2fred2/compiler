@@ -51,8 +51,8 @@ impl Display for Function {
     }
 }
 
-impl SemanticNode for Function {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for Function {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         let mut children = dyn_vec(&mut self.fn_input);
         children.append(&mut dyn_vec(&mut self.body));
         Some(children)

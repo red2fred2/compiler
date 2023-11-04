@@ -30,8 +30,8 @@ impl Display for Class {
     }
 }
 
-impl SemanticNode for Class {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn SemanticNode>> {
+impl NameCheck for Class {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         Some(dyn_vec(&mut self.body))
     }
 
