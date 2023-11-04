@@ -31,16 +31,6 @@ impl Function {
     }
 }
 
-impl TypeCheck for Function {
-    fn type_check(&self) -> Result<()> {
-        for statement in &self.body {
-            statement.check_type()?;
-        }
-
-        self.check_returns()
-    }
-}
-
 impl Display for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let in_list = fmt_list(&self.fn_input);
@@ -68,6 +58,16 @@ impl NameCheck for Function {
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         symbol_table.exit_scope();
         Ok(())
+    }
+}
+
+impl TypeCheck for Function {
+    fn type_check(&self) -> Result<()> {
+        for statement in &self.body {
+            statement.check_type()?;
+        }
+
+        self.check_returns()
     }
 }
 

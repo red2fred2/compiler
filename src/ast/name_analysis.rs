@@ -1,5 +1,11 @@
 use super::*;
 
+pub trait NameCheck {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>>;
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()>;
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()>;
+}
+
 pub fn analyze(program: &mut Vec<Declaration>) -> Result<()> {
     let mut symbol_table = SymbolTable::new();
     let mut failed = false;
@@ -27,10 +33,4 @@ fn traverse(tree: &mut dyn NameCheck, symbol_table: &mut SymbolTable) -> Result<
     }
     tree.exit(symbol_table)?;
     Ok(())
-}
-
-pub trait NameCheck {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>>;
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()>;
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()>;
 }

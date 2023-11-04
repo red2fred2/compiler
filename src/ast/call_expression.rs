@@ -13,29 +13,6 @@ impl Display for CallExpression {
     }
 }
 
-impl NameCheck for CallExpression {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
-        let mut children = vec![&mut self.location as &mut dyn NameCheck];
-        children.append(&mut dyn_vec(&mut self.actuals));
-
-        Some(children)
-    }
-
-    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
-        Ok(())
-    }
-
-    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl SourcePosition for CallExpression {
-    fn source_position(&self) -> SourcePositionData {
-        self.source_position.clone()
-    }
-}
-
 impl Kinded for CallExpression {
     fn get_kind(&self) -> Result<Kind> {
         let entry = self.location.get_last_link().get_entry()?;
@@ -81,6 +58,29 @@ impl Kinded for CallExpression {
                 self.source_position(),
             ))),
         }
+    }
+}
+
+impl NameCheck for CallExpression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+        let mut children = vec![&mut self.location as &mut dyn NameCheck];
+        children.append(&mut dyn_vec(&mut self.actuals));
+
+        Some(children)
+    }
+
+    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
+        Ok(())
+    }
+
+    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl SourcePosition for CallExpression {
+    fn source_position(&self) -> SourcePositionData {
+        self.source_position.clone()
     }
 }
 

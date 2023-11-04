@@ -1,20 +1,10 @@
-use super::{type_analysis::TypeCheck, *};
+use super::*;
 
 #[derive(Clone, Debug)]
 pub enum Declaration {
     Class(Class),
     Function(Function),
     Variable(VariableDeclaration),
-}
-
-impl TypeCheck for Declaration {
-    fn type_check(&self) -> Result<()> {
-        match self {
-            Self::Class(x) => x.type_check(),
-            Self::Function(x) => x.type_check(),
-            Self::Variable(x) => x.type_check(),
-        }
-    }
 }
 
 impl Display for Declaration {
@@ -49,6 +39,16 @@ impl NameCheck for Declaration {
             Self::Class(x) => x.exit(symbol_table),
             Self::Function(x) => x.exit(symbol_table),
             Self::Variable(x) => x.exit(symbol_table),
+        }
+    }
+}
+
+impl TypeCheck for Declaration {
+    fn type_check(&self) -> Result<()> {
+        match self {
+            Self::Class(x) => x.type_check(),
+            Self::Function(x) => x.type_check(),
+            Self::Variable(x) => x.type_check(),
         }
     }
 }

@@ -97,6 +97,23 @@ impl Display for Location {
     }
 }
 
+impl Kinded for Location {
+    fn get_kind(&self) -> Result<Kind> {
+        match (&self.next_link, &self.symbol_table_entry) {
+            (Some(l), _) => l.get_kind(),
+            (None, Some(entry)) => match entry.as_ref() {
+                symbol_table::Entry::Class(_) => Ok(Kind::Class),
+                symbol_table::Entry::Function(_, _) => Ok(Kind::Function),
+                symbol_table::Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
+            },
+            _ => Err(anyhow!(
+                "No Symbol table entry when getting type of {}",
+                self.current_link
+            )),
+        }
+    }
+}
+
 impl NameCheck for Location {
     fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
         match &mut self.next_link {
@@ -128,22 +145,5 @@ impl NameCheck for Location {
 impl SourcePosition for Location {
     fn source_position(&self) -> SourcePositionData {
         self.source_position.clone()
-    }
-}
-
-impl Kinded for Location {
-    fn get_kind(&self) -> Result<Kind> {
-        match (&self.next_link, &self.symbol_table_entry) {
-            (Some(l), _) => l.get_kind(),
-            (None, Some(entry)) => match entry.as_ref() {
-                symbol_table::Entry::Class(_) => Ok(Kind::Class),
-                symbol_table::Entry::Function(_, _) => Ok(Kind::Function),
-                symbol_table::Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
-            },
-            _ => Err(anyhow!(
-                "No Symbol table entry when getting type of {}",
-                self.current_link
-            )),
-        }
     }
 }

@@ -6,16 +6,6 @@ pub struct Class {
     pub body: Vec<Declaration>,
 }
 
-impl TypeCheck for Class {
-    fn type_check(&self) -> Result<()> {
-        for declaration in &self.body {
-            declaration.type_check()?;
-        }
-
-        Ok(())
-    }
-}
-
 impl Display for Class {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         unparse_id(
@@ -42,6 +32,16 @@ impl NameCheck for Class {
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
         symbol_table.exit_scope();
+        Ok(())
+    }
+}
+
+impl TypeCheck for Class {
+    fn type_check(&self) -> Result<()> {
+        for declaration in &self.body {
+            declaration.type_check()?;
+        }
+
         Ok(())
     }
 }

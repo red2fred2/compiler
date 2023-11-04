@@ -66,71 +66,6 @@ impl Display for Expression {
     }
 }
 
-impl NameCheck for Expression {
-    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
-        match self {
-            Expression::CallExpression(x) => Some(vec![x]),
-            Expression::Location(x) => Some(vec![x]),
-            Expression::Negative(x) | Expression::Not(x) => Some(vec![x.as_mut()]),
-            Expression::True(_)
-            | Expression::False(_)
-            | Expression::IntegerLiteral(_, _)
-            | Expression::StringLiteral(_, _)
-            | Expression::Magic(_) => None,
-            Expression::Add(x, y)
-            | Expression::And(x, y)
-            | Expression::Divide(x, y)
-            | Expression::Equals(x, y)
-            | Expression::Greater(x, y)
-            | Expression::GreaterEq(x, y)
-            | Expression::Less(x, y)
-            | Expression::LessEq(x, y)
-            | Expression::Multiply(x, y)
-            | Expression::NotEquals(x, y)
-            | Expression::Or(x, y)
-            | Expression::Subtract(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
-        }
-    }
-
-    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
-        Ok(())
-    }
-
-    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl SourcePosition for Expression {
-    fn source_position(&self) -> SourcePositionData {
-        match self {
-            Expression::Add(a, b)
-            | Expression::And(a, b)
-            | Expression::Divide(a, b)
-            | Expression::Equals(a, b)
-            | Expression::Greater(a, b)
-            | Expression::GreaterEq(a, b)
-            | Expression::Less(a, b)
-            | Expression::LessEq(a, b)
-            | Expression::Multiply(a, b)
-            | Expression::NotEquals(a, b)
-            | Expression::Or(a, b)
-            | Expression::Subtract(a, b) => SourcePositionData {
-                s: a.source_position().s,
-                e: b.source_position().e,
-            },
-            Expression::False(p)
-            | Expression::IntegerLiteral(_, p)
-            | Expression::Magic(p)
-            | Expression::StringLiteral(_, p)
-            | Expression::True(p) => p.clone(),
-            Expression::Negative(x) | Expression::Not(x) => x.source_position(),
-            Expression::CallExpression(x) => x.source_position(),
-            Expression::Location(x) => x.source_position(),
-        }
-    }
-}
-
 impl Kinded for Expression {
     fn get_kind(&self) -> Result<Kind> {
         match self {
@@ -239,6 +174,71 @@ impl Kinded for Expression {
             Self::Location(x) => x.get_kind(),
             Self::CallExpression(x) => x.get_kind(),
             Self::Equals(a, b) | Self::NotEquals(a, b) => check_equals(a, b),
+        }
+    }
+}
+
+impl NameCheck for Expression {
+    fn get_children(&mut self) -> Option<Vec<&mut dyn NameCheck>> {
+        match self {
+            Expression::CallExpression(x) => Some(vec![x]),
+            Expression::Location(x) => Some(vec![x]),
+            Expression::Negative(x) | Expression::Not(x) => Some(vec![x.as_mut()]),
+            Expression::True(_)
+            | Expression::False(_)
+            | Expression::IntegerLiteral(_, _)
+            | Expression::StringLiteral(_, _)
+            | Expression::Magic(_) => None,
+            Expression::Add(x, y)
+            | Expression::And(x, y)
+            | Expression::Divide(x, y)
+            | Expression::Equals(x, y)
+            | Expression::Greater(x, y)
+            | Expression::GreaterEq(x, y)
+            | Expression::Less(x, y)
+            | Expression::LessEq(x, y)
+            | Expression::Multiply(x, y)
+            | Expression::NotEquals(x, y)
+            | Expression::Or(x, y)
+            | Expression::Subtract(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
+        }
+    }
+
+    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
+        Ok(())
+    }
+
+    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl SourcePosition for Expression {
+    fn source_position(&self) -> SourcePositionData {
+        match self {
+            Expression::Add(a, b)
+            | Expression::And(a, b)
+            | Expression::Divide(a, b)
+            | Expression::Equals(a, b)
+            | Expression::Greater(a, b)
+            | Expression::GreaterEq(a, b)
+            | Expression::Less(a, b)
+            | Expression::LessEq(a, b)
+            | Expression::Multiply(a, b)
+            | Expression::NotEquals(a, b)
+            | Expression::Or(a, b)
+            | Expression::Subtract(a, b) => SourcePositionData {
+                s: a.source_position().s,
+                e: b.source_position().e,
+            },
+            Expression::False(p)
+            | Expression::IntegerLiteral(_, p)
+            | Expression::Magic(p)
+            | Expression::StringLiteral(_, p)
+            | Expression::True(p) => p.clone(),
+            Expression::Negative(x) | Expression::Not(x) => x.source_position(),
+            Expression::CallExpression(x) => x.source_position(),
+            Expression::Location(x) => x.source_position(),
         }
     }
 }
