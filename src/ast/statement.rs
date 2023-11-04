@@ -113,17 +113,17 @@ fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
     if let symbol_table::Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
         l_entry.as_ref()
     {
-        return err("Non-Lval assignment");
+        return err("Non-Lval assignment".to_string());
     }
 
     let (symbol_table::Entry::Variable(t1), Kind::Variable(t2)) =
         (l_entry.as_ref(), &rval.get_kind()?)
     else {
-        return err("Invalid assignment operand");
+        return err("Invalid assignment operand".to_string());
     };
 
     if !t1.equivalent(t2) {
-        return err("Invalid assignment operation");
+        return err("Invalid assignment operation".to_string());
     }
 
     Ok(())
@@ -134,25 +134,28 @@ fn check_condition(x: &Expression) -> Result<()> {
         Kind::Variable(
             Type::Primitive(Primitive::Bool, _) | Type::PerfectPrimitive(Primitive::Bool, _),
         ) => Ok(()),
-        _ => err("Non-bool expression used as a condition"),
+        _ => err("Non-bool expression used as a condition".to_string()),
     }
 }
 
 fn check_give(x: &Expression) -> Result<()> {
     match x.get_kind()? {
-        Kind::Class => err("Attempt to output a class"),
-        Kind::Function => err("Attempt to output a function"),
+        Kind::Class => err("Attempt to output a class".to_string()),
+        Kind::Function => err(format!(
+            "FATAL {}: Attempt to output a function",
+            x.source_position()
+        )),
         Kind::Variable(
             Type::Primitive(Primitive::Void, _) | Type::PerfectPrimitive(Primitive::Void, _),
-        ) => err("Attempt to output void"),
+        ) => err("Attempt to output void".to_string()),
         _ => Ok(()),
     }
 }
 
 fn check_take(x: &Location) -> Result<()> {
     match x.get_kind()? {
-        Kind::Class => err("Attempt to assign user input to class"),
-        Kind::Function => err("Attempt to assign user input to function"),
+        Kind::Class => err("Attempt to assign user input to class".to_string()),
+        Kind::Function => err("Attempt to assign user input to function".to_string()),
         _ => Ok(()),
     }
 }
@@ -161,17 +164,17 @@ fn check_var_decl(t: &Type, rval: &Option<Expression>) -> Result<()> {
     let Some(rval) = rval else { return Ok(()) };
 
     let Kind::Variable(t2) = &rval.get_kind()? else {
-        return err("Invalid assignment operand");
+        return err("Invalid assignment operand".to_string());
     };
 
     if !t.equivalent(t2) {
-        return err("Invalid assignment operation");
+        return err("Invalid assignment operation".to_string());
     }
 
     Ok(())
 }
 
-fn err(err_message: &str) -> Result<()> {
+fn err(err_message: String) -> Result<()> {
     eprintln!("{err_message}");
     Err(anyhow!("{err_message}"))
 }
