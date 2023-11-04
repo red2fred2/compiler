@@ -77,7 +77,10 @@ fn check_return(expected_output: &Type, ret: &Statement) -> Result<()> {
     };
 
     if expected_output.equivalent(&void) && x.is_some() {
-        return err("Return with a value in void function".to_string());
+        return err(format!(
+            "FATAL {}: Return with a value in void function",
+            x.as_ref().unwrap().source_position()
+        ));
     }
 
     let Some(x) = x else {
@@ -85,7 +88,7 @@ fn check_return(expected_output: &Type, ret: &Statement) -> Result<()> {
     };
 
     let Kind::Variable(t) = x.get_kind()? else {
-        return err("Bad return value".to_string());
+        return err(format!("FATAL {pos}: Bad return value"));
     };
 
     if !expected_output.equivalent(&t) {
