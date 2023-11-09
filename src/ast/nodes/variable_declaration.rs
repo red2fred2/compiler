@@ -30,45 +30,6 @@ impl TypeAnalysis for VariableDeclaration {
     }
 }
 
-impl VariableDeclaration {
-    fn exit_class(&self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
-        let pos = self.name.source_position();
-
-        match symbol_table.link(&format!("{}", &self.t), self.t.source_position()) {
-            Ok(entry) => match entry.as_ref() {
-                Class(_) => {
-                    let entry = Variable(self.t.clone());
-                    symbol_table.add(&self.name.name, entry, self.name.source_position())
-                }
-                _ => {
-                    err!("FATAL {pos}: Invalid type in declaration")
-                }
-            },
-            _ => {
-                err!("FATAL {pos}: Invalid type in declaration")
-            }
-        }
-    }
-
-    fn exit_primitive(
-        &self,
-        symbol_table: &mut SymbolTable,
-        t: &Primitive,
-        pos: SourcePositionData,
-    ) -> anyhow::Result<()> {
-        match t {
-            Primitive::Void => {
-                let pos = self.name.source_position();
-                err!("FATAL {pos}: Invalid type in declaration")
-            }
-            _ => {
-                let entry = Variable(self.t.clone());
-                symbol_table.add(&self.name.name, entry, pos)
-            }
-        }
-    }
-}
-
 impl std::fmt::Display for VariableDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         unparse_id(f, &self.name.name, &self.t)?;
@@ -93,10 +54,31 @@ impl NameAnalysis for VariableDeclaration {
     }
 
     fn exit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
-        if let Some((primitive, pos)) = self.t.unwrap_primitive() {
-            return self.exit_primitive(symbol_table, &primitive, pos);
-        }
+        let pos = self.name.source_position();
+        let type_pos = self.t.source_position();
+        let type_name = &self.t.get_name();
+        let table_entry = symbol_table.link(type_name, type_pos);
 
-        self.exit_class(symbol_table)
+        match (&self.t, table_entry) {
+            // Variable set to void or class name not found
+            (Type::Primitive(Primitive::Void, _), _)
+            | (Type::PerfectPrimitive(Primitive::Void, _), _)
+            | (_, Err(_)) => {
+                err!("FATAL {pos}: Invalid type in declaration")
+            }
+
+            // Primitive
+            (Type::Primitive(_, _), _) | (Type::PerfectPrimitive(_, _), _) => {
+                let name = &self.name.name;
+                let entry = Variable(self.t.clone());
+                symbol_table.add(name, entry, pos)
+            }
+
+            // Class
+            (_, Ok(_)) => {
+                let entry = Variable(self.t.clone());
+                symbol_table.add(&self.name.name, entry, pos)
+            }
+        }
     }
 }
