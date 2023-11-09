@@ -37,6 +37,13 @@ impl Type {
             _ => false,
         }
     }
+
+    pub fn unwrap_primitive(&self) -> Option<(Primitive, SourcePositionData)> {
+        match self {
+            Self::Primitive(a, b) | Self::PerfectPrimitive(a, b) => Some((*a, *b)),
+            _ => None,
+        }
+    }
 }
 
 impl std::fmt::Display for Type {

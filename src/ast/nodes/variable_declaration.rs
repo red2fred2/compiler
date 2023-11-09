@@ -1,9 +1,5 @@
-use super::{
-    symbol_table::Entry, unparse_id, Expression, Id, Kind, Kinded, NameAnalysis, Primitive,
-    SourcePosition, SourcePositionData, SymbolTable, Type, TypeAnalysis,
-};
-use anyhow::{anyhow, Result};
-use std::fmt::{Display, Formatter};
+use super::{symbol_table::Entry::*, *};
+use crate::err;
 
 #[derive(Clone, Debug)]
 pub struct VariableDeclaration {
@@ -13,27 +9,21 @@ pub struct VariableDeclaration {
 }
 
 impl TypeAnalysis for VariableDeclaration {
-    fn type_check(&self) -> Result<()> {
+    fn type_check(&self) -> anyhow::Result<()> {
+        // Only continue if there's an expression to check
         let Some(rval) = &self.assignment else {
             return Ok(());
         };
+        let pos = rval.source_position();
 
+        // Make sure there's a variable expression being assigned
         let Kind::Variable(t2) = &rval.get_kind()? else {
-            let err = format!(
-                "FATAL {}: Invalid assignment operand",
-                rval.source_position()
-            );
-            eprintln!("{err}");
-            return Err(anyhow!("{err}"));
+            return err!("FATAL {pos}: Invalid assignment operand");
         };
 
+        // Check the type being assigned
         if !self.t.equivalent(t2) {
-            let err = format!(
-                "FATAL {}: Invalid assignment operation",
-                rval.source_position()
-            );
-            eprintln!("{err}");
-            return Err(anyhow!("{err}"));
+            return err!("FATAL {pos}: Invalid assignment operation");
         }
 
         Ok(())
@@ -41,29 +31,21 @@ impl TypeAnalysis for VariableDeclaration {
 }
 
 impl VariableDeclaration {
-    fn exit_class(&self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn exit_class(&self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
+        let pos = self.name.source_position();
+
         match symbol_table.link(&format!("{}", &self.t), self.t.source_position()) {
             Ok(entry) => match entry.as_ref() {
-                Entry::Class(_) => {
-                    let entry = Entry::Variable(self.t.clone());
+                Class(_) => {
+                    let entry = Variable(self.t.clone());
                     symbol_table.add(&self.name.name, entry, self.name.source_position())
                 }
                 _ => {
-                    let err = format!(
-                        "FATAL {}: Invalid type in declaration",
-                        self.name.source_position()
-                    );
-                    eprintln!("{err}");
-                    Err(anyhow!("{err}"))
+                    err!("FATAL {pos}: Invalid type in declaration")
                 }
             },
             _ => {
-                let err = format!(
-                    "FATAL {}: Invalid type in declaration",
-                    self.name.source_position()
-                );
-                eprintln!("{err}");
-                Err(anyhow!("{err}"))
+                err!("FATAL {pos}: Invalid type in declaration")
             }
         }
     }
@@ -73,26 +55,22 @@ impl VariableDeclaration {
         symbol_table: &mut SymbolTable,
         t: &Primitive,
         pos: SourcePositionData,
-    ) -> Result<()> {
+    ) -> anyhow::Result<()> {
         match t {
             Primitive::Void => {
-                let err = format!(
-                    "FATAL {}: Invalid type in declaration",
-                    self.name.source_position()
-                );
-                eprintln!("{err}");
-                Err(anyhow!("{err}"))
+                let pos = self.name.source_position();
+                err!("FATAL {pos}: Invalid type in declaration")
             }
             _ => {
-                let entry = Entry::Variable(self.t.clone());
+                let entry = Variable(self.t.clone());
                 symbol_table.add(&self.name.name, entry, pos)
             }
         }
     }
 }
 
-impl Display for VariableDeclaration {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for VariableDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         unparse_id(f, &self.name.name, &self.t)?;
 
         match &self.assignment {
@@ -110,16 +88,15 @@ impl NameAnalysis for VariableDeclaration {
         }
     }
 
-    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
+    fn visit(&mut self, _: &mut SymbolTable) -> anyhow::Result<()> {
         Ok(())
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        match &self.t {
-            Type::Primitive(t, _) | Type::PerfectPrimitive(t, _) => {
-                self.exit_primitive(symbol_table, t, self.t.source_position())
-            }
-            Type::Class(_, _) | Type::PerfectClass(_, _) => self.exit_class(symbol_table),
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
+        if let Some((primitive, pos)) = self.t.unwrap_primitive() {
+            return self.exit_primitive(symbol_table, &primitive, pos);
         }
+
+        self.exit_class(symbol_table)
     }
 }
