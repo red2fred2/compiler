@@ -1,20 +1,15 @@
-use super::{
-    symbol_table::Entry, unparse_fn, unparse_id, Kind, Kinded, NameAnalysis, SourcePosition,
-    SourcePositionData, SymbolTable,
-};
-use anyhow::{anyhow, Result};
-use std::{
-    fmt::{Display, Formatter},
-    rc::Rc,
-};
+use std::rc::Rc;
+
+use super::*;
+use crate::err;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Location {
     pub current_link: String,
     pub source_position: SourcePositionData,
-    pub enclosing_class: Option<Rc<Entry>>,
+    pub enclosing_class: Option<Rc<symbol_table::Entry>>,
     pub next_link: Option<Box<Location>>,
-    pub symbol_table_entry: Option<Rc<Entry>>,
+    pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
 }
 
 impl Location {
@@ -37,14 +32,10 @@ impl Location {
         self
     }
 
-    pub fn get_entry(&self) -> Result<Rc<Entry>> {
+    pub fn get_entry(&self) -> anyhow::Result<Rc<symbol_table::Entry>> {
         match self.symbol_table_entry.clone() {
             Some(entry) => Ok(entry),
-            None => {
-                let err = "Failed to read location's symbol table entry";
-                eprintln!("{err}");
-                Err(anyhow!("{err}"))
-            }
+            None => err!("Failed to read location's symbol table entry"),
         }
     }
 
@@ -57,8 +48,8 @@ impl Location {
     }
 }
 
-impl Display for Location {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for Location {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Some(entry) = self.symbol_table_entry.as_ref() else {
             return Ok(());
         };
@@ -66,8 +57,8 @@ impl Display for Location {
         let name = &self.current_link;
 
         match entry.as_ref() {
-            Entry::Function(formals, output) => unparse_fn(f, name, formals, output)?,
-            Entry::Variable(t) => unparse_id(f, name, t)?,
+            symbol_table::Entry::Function(formals, output) => unparse_fn(f, name, formals, output)?,
+            symbol_table::Entry::Variable(t) => unparse_id(f, name, t)?,
             _ => (),
         };
 
@@ -79,18 +70,18 @@ impl Display for Location {
 }
 
 impl Kinded for Location {
-    fn get_kind(&self) -> Result<Kind> {
+    fn get_kind(&self) -> anyhow::Result<Kind> {
         match (&self.next_link, &self.symbol_table_entry) {
             (Some(l), _) => l.get_kind(),
             (None, Some(entry)) => match entry.as_ref() {
-                Entry::Class(_) => Ok(Kind::Class),
-                Entry::Function(_, _) => Ok(Kind::Function),
-                Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
+                symbol_table::Entry::Class(_) => Ok(Kind::Class),
+                symbol_table::Entry::Function(_, _) => Ok(Kind::Function),
+                symbol_table::Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
             },
-            _ => Err(anyhow!(
+            _ => err!(
                 "No Symbol table entry when getting type of {}",
                 self.current_link
-            )),
+            ),
         }
     }
 }
@@ -103,7 +94,7 @@ impl NameAnalysis for Location {
         }
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         let name = &self.current_link;
         self.symbol_table_entry = Some(match &self.enclosing_class {
             Some(class) => {
@@ -118,7 +109,7 @@ impl NameAnalysis for Location {
         Ok(())
     }
 
-    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, _: &mut SymbolTable) -> anyhow::Result<()> {
         Ok(())
     }
 }
