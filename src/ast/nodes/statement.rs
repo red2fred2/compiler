@@ -1,21 +1,5 @@
-use super::*;
-use anyhow::{anyhow, Result};
-use std::fmt::{Display, Formatter};
-
-fn fmt_if(f: &mut std::fmt::Formatter<'_>, statement: &Statement) -> std::fmt::Result {
-    let Statement::If(condition, body, else_body) = statement else {
-        return write!(f, "");
-    };
-
-    write!(f, "if({condition}) ")?;
-    if else_body.statements.len() == 0 {
-        fmt_body(f, &body.statements)
-    } else {
-        fmt_body(f, &body.statements)?;
-        write!(f, " else ")?;
-        fmt_body(f, &else_body.statements)
-    }
-}
+use super::{symbol_table::Entry::*, *};
+use crate::err;
 
 #[derive(Clone, Debug)]
 pub enum Statement {
@@ -33,7 +17,7 @@ pub enum Statement {
 }
 
 impl Statement {
-    pub fn check_type(&self) -> Result<()> {
+    pub fn check_type(&self) -> anyhow::Result<()> {
         match self {
             Statement::Assignment(l, r) => check_assignment(l, r),
             Statement::CallExpression(x) => {
@@ -41,22 +25,14 @@ impl Statement {
                 Ok(())
             }
             Statement::Decrement(x) | Statement::Increment(x) => {
+                let pos = x.source_position();
+
                 let Kind::Variable(t) = x.get_last_link().get_kind()? else {
-                    let err = format!(
-                        "FATAL {}: Arithmetic operator applied to invalid operand",
-                        x.source_position()
-                    );
-                    eprintln!("{err}");
-                    return Err(anyhow!("{err}"));
+                    return err!("FATAL {pos}: Arithmetic operator applied to invalid operand");
                 };
 
                 if !t.equivalent(&type_::INT) {
-                    let err = format!(
-                        "FATAL {}: Arithmetic operator applied to invalid operand",
-                        x.source_position()
-                    );
-                    eprintln!("{err}");
-                    return Err(anyhow!("{err}"));
+                    return err!("FATAL {pos}: Arithmetic operator applied to invalid operand");
                 }
 
                 Ok(())
@@ -76,8 +52,8 @@ impl Statement {
     }
 }
 
-impl Display for Statement {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for Statement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Assignment(loc, exp) => write!(f, "{loc} = {exp};"),
             Self::CallExpression(x) => write!(f, "{x};"),
@@ -112,113 +88,96 @@ impl NameAnalysis for Statement {
         }
     }
 
-    fn visit(&mut self, _: &mut SymbolTable) -> Result<()> {
+    fn visit(&mut self, _: &mut SymbolTable) -> anyhow::Result<()> {
         Ok(())
     }
 
-    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, _: &mut SymbolTable) -> anyhow::Result<()> {
         Ok(())
     }
 }
 
-fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
+fn check_assignment(lval: &Location, rval: &Expression) -> anyhow::Result<()> {
     let l_entry = lval.get_last_link().get_entry()?.clone();
 
-    if let symbol_table::Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
-        l_entry.as_ref()
-    {
-        return err(format!(
-            "FATAL {}: Non-Lval assignment",
-            lval.source_position()
-        ));
+    if let Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) = l_entry.as_ref() {
+        let pos = lval.source_position();
+        return err!("FATAL {pos}: Non-Lval assignment");
     }
 
-    let (symbol_table::Entry::Variable(t1), Kind::Variable(t2)) =
-        (l_entry.as_ref(), &rval.get_kind()?)
-    else {
-        return err(format!(
-            "FATAL {}: Invalid assignment operand",
-            rval.source_position()
-        ));
+    let pos = rval.source_position();
+    let (Variable(t1), Kind::Variable(t2)) = (l_entry.as_ref(), &rval.get_kind()?) else {
+        return err!("FATAL {pos}: Invalid assignment operand");
     };
 
     if !t1.equivalent(t2) {
-        return err(format!(
-            "FATAL {}: Invalid assignment operation",
-            rval.source_position()
-        ));
+        return err!("FATAL {pos}: Invalid assignment operation");
     }
 
     Ok(())
 }
 
-fn check_condition(x: &Expression) -> Result<()> {
+fn check_condition(x: &Expression) -> anyhow::Result<()> {
     match x.get_kind()? {
         Kind::Variable(
             Type::Primitive(Primitive::Bool, _) | Type::PerfectPrimitive(Primitive::Bool, _),
         ) => Ok(()),
-        _ => err(format!(
-            "FATAL {}: Non-bool expression used as a condition",
-            x.source_position()
-        )),
+        _ => {
+            let pos = x.source_position();
+            err!("FATAL {pos}: Non-bool expression used as a condition")
+        }
     }
 }
 
-fn check_give(x: &Expression) -> Result<()> {
+fn check_give(x: &Expression) -> anyhow::Result<()> {
+    let pos = x.source_position();
+
     match x.get_kind()? {
-        Kind::Class => err(format!(
-            "FATAL {}: Attempt to output a class",
-            x.source_position()
-        )),
-        Kind::Function => err(format!(
-            "FATAL {}: Attempt to output a function",
-            x.source_position()
-        )),
+        Kind::Class => err!("FATAL {pos}: Attempt to output a class"),
+        Kind::Function => err!("FATAL {pos}: Attempt to output a function"),
         Kind::Variable(
             Type::Primitive(Primitive::Void, _) | Type::PerfectPrimitive(Primitive::Void, _),
-        ) => err(format!(
-            "FATAL {}: Attempt to output void",
-            x.source_position()
-        )),
+        ) => err!("FATAL {pos}: Attempt to output void"),
         _ => Ok(()),
     }
 }
 
-fn check_take(x: &Location) -> Result<()> {
+fn check_take(x: &Location) -> anyhow::Result<()> {
+    let pos = x.source_position();
     match x.get_kind()? {
-        Kind::Class => err(format!(
-            "FATAL {}: Attempt to assign user input to class",
-            x.source_position()
-        )),
-        Kind::Function => err(format!(
-            "FATAL {}: Attempt to assign user input to function",
-            x.source_position()
-        )),
+        Kind::Class => err!("FATAL {pos}: Attempt to assign user input to class"),
+        Kind::Function => err!("FATAL {pos}: Attempt to assign user input to function"),
         _ => Ok(()),
     }
 }
 
-fn check_var_decl(t: &Type, rval: &Option<Expression>) -> Result<()> {
+fn check_var_decl(t: &Type, rval: &Option<Expression>) -> anyhow::Result<()> {
     let Some(rval) = rval else { return Ok(()) };
+    let pos = rval.source_position();
 
     let Kind::Variable(t2) = &rval.get_kind()? else {
-        return err(format!(
-            "FATAL {}: Invalid assignment operand",
-            rval.source_position()
-        ));
+        return err!("FATAL {pos}: Invalid assignment operand");
     };
 
     if !t.equivalent(t2) {
-        return err(format!(
-            "FATAL {}: Invalid assignment operation",
-            rval.source_position()
-        ));
+        let pos = rval.source_position();
+        return err!("FATAL {pos}: Invalid assignment operation");
     }
 
     Ok(())
 }
 
-fn err(err_message: String) -> Result<()> {
-    eprintln!("{err_message}");
-    Err(anyhow!("{err_message}"))
+fn fmt_if(f: &mut std::fmt::Formatter<'_>, statement: &Statement) -> std::fmt::Result {
+    let Statement::If(condition, body, else_body) = statement else {
+        return write!(f, "");
+    };
+
+    write!(f, "if({condition}) ")?;
+    if else_body.statements.len() == 0 {
+        fmt_body(f, &body.statements)
+    } else {
+        fmt_body(f, &body.statements)?;
+        write!(f, " else ")?;
+        fmt_body(f, &else_body.statements)
+    }
 }
