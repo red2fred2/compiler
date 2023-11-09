@@ -1,3 +1,4 @@
+//! A linked list that just holds strings
 use std::rc::Rc;
 
 use super::*;
@@ -50,11 +51,11 @@ impl Location {
 
 impl std::fmt::Display for Location {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = &self.current_link;
+
         let Some(entry) = self.symbol_table_entry.as_ref() else {
             return Ok(());
         };
-
-        let name = &self.current_link;
 
         match entry.as_ref() {
             symbol_table::Entry::Function(formals, output) => unparse_fn(f, name, formals, output)?,
@@ -62,26 +63,30 @@ impl std::fmt::Display for Location {
             _ => (),
         };
 
-        match &self.next_link {
-            Some(link) => write!(f, "--{link}"),
-            _ => Ok(()),
-        }
+        let Some(link) = &self.next_link else {
+            return Ok(());
+        };
+
+        write!(f, "--{link}")
     }
 }
 
 impl Kinded for Location {
     fn get_kind(&self) -> anyhow::Result<Kind> {
-        match (&self.next_link, &self.symbol_table_entry) {
-            (Some(l), _) => l.get_kind(),
-            (None, Some(entry)) => match entry.as_ref() {
-                symbol_table::Entry::Class(_) => Ok(Kind::Class),
-                symbol_table::Entry::Function(_, _) => Ok(Kind::Function),
-                symbol_table::Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
-            },
-            _ => err!(
-                "No Symbol table entry when getting type of {}",
-                self.current_link
-            ),
+        // If there's a next link, return that one's kind instead
+        if let Some(link) = &self.next_link {
+            return link.get_kind();
+        }
+
+        // Get the symbol table entry
+        let Some(entry) = &self.symbol_table_entry else {
+            return err!("No Symbol table entry found when getting type");
+        };
+
+        match entry.as_ref() {
+            symbol_table::Entry::Class(_) => Ok(Kind::Class),
+            symbol_table::Entry::Function(_, _) => Ok(Kind::Function),
+            symbol_table::Entry::Variable(t) => Ok(Kind::Variable(t.clone())),
         }
     }
 }
@@ -96,16 +101,20 @@ impl NameAnalysis for Location {
 
     fn visit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         let name = &self.current_link;
-        self.symbol_table_entry = Some(match &self.enclosing_class {
-            Some(class) => {
-                symbol_table.get_class_member(class.clone(), name, self.source_position())?
-            }
-            None => symbol_table.link(&self.current_link, self.source_position())?,
-        });
+        let pos = self.source_position();
 
+        // Set symbol table entry
+        let entry = match &self.enclosing_class {
+            Some(class) => symbol_table.get_class_member(class.clone(), name, pos)?,
+            None => symbol_table.link(name, pos)?,
+        };
+        self.symbol_table_entry = Some(entry);
+
+        // Set this as the next entry's enclosing class
         if let Some(link) = &mut self.next_link {
             link.enclosing_class = self.symbol_table_entry.clone();
         }
+
         Ok(())
     }
 
