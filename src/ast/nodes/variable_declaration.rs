@@ -71,13 +71,13 @@ impl NameAnalysis for VariableDeclaration {
             (Type::Primitive(_, _), _) | (Type::PerfectPrimitive(_, _), _) => {
                 let name = &self.name.name;
                 let entry = Variable(self.t.clone());
-                symbol_table.add(name, entry, pos)
+                symbol_table.add(name, entry, type_pos)
             }
 
             // Class
             (_, Ok(_)) => {
                 let entry = Variable(self.t.clone());
-                symbol_table.add(&self.name.name, entry, pos)
+                symbol_table.add(&self.name.name, entry, type_pos)
             }
         }
     }
