@@ -12,6 +12,17 @@ pub enum Type {
 }
 
 impl Type {
+    /// Returns a new perfect version of this type at some position
+    pub fn new_perfect(old: &Self, pos: SourcePositionData) -> Self {
+        match old {
+            Self::Primitive(t, _) | Self::PerfectPrimitive(t, _) => {
+                Self::PerfectPrimitive(t.clone(), pos)
+            }
+            Self::Class(t, _) | Self::PerfectClass(t, _) => Self::PerfectClass(t.clone(), pos),
+        }
+    }
+
+    /// Check if this is equivalent to another type
     pub fn equivalent(&self, x: &Self) -> bool {
         match (self, x) {
             (Type::Primitive(t1, _), Type::Primitive(t2, _))
@@ -24,16 +35,6 @@ impl Type {
             | (Type::PerfectClass(t1, _), Type::Class(t2, _))
             | (Type::PerfectClass(t1, _), Type::PerfectClass(t2, _)) => t1.name == t2.name,
             _ => false,
-        }
-    }
-
-    /// Returns a new perfect version of this type at some position
-    pub fn new_perfect(old: &Self, pos: SourcePositionData) -> Self {
-        match old {
-            Self::Primitive(t, _) | Self::PerfectPrimitive(t, _) => {
-                Self::PerfectPrimitive(t.clone(), pos)
-            }
-            Self::Class(t, _) | Self::PerfectClass(t, _) => Self::PerfectClass(t.clone(), pos),
         }
     }
 }
