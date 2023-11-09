@@ -1,5 +1,7 @@
-use super::{Id, Primitive, SourcePosition, SourcePositionData};
-use std::fmt::{Display, Formatter};
+use super::*;
+
+pub static INT: Type = Type::Primitive(Primitive::Int, SourcePositionData { s: 0, e: 0 });
+pub static VOID: Type = Type::Primitive(Primitive::Void, SourcePositionData { s: 0, e: 0 });
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
@@ -36,8 +38,8 @@ impl Type {
     }
 }
 
-impl Display for Type {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Primitive(x, _) => write!(f, "{x}"),
             Self::PerfectPrimitive(x, _) => write!(f, "perfect {x}"),

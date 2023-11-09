@@ -1,4 +1,3 @@
-//! Function formal parameter
 use super::*;
 
 #[derive(Clone, Debug, PartialEq)]

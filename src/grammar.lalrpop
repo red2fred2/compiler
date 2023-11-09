@@ -101,40 +101,40 @@ Statement: Statement = {
 }
 
 Expression = {
-    <l: Expression> OR <r: Expression2> => Expression::Or(b(l), b(r)),
+    <l: Expression> OR <r: Expression2> => Expression::Or(Box::new(l), Box::new(r)),
     <Expression2>,
 }
 
 Expression2 = {
-    <l: Expression2> AND <r: Expression3> => Expression::And(b(l), b(r)),
+    <l: Expression2> AND <r: Expression3> => Expression::And(Box::new(l), Box::new(r)),
     <Expression3>,
 }
 
 Expression3 = {
-    <l: Expression3> EQUALS <r: Expression4>    => Expression::Equals(b(l), b(r)),
-    <l: Expression3> NOTEQUALS <r: Expression4> => Expression::NotEquals(b(l), b(r)),
-    <l: Expression3> GREATER <r: Expression4>   => Expression::Greater(b(l), b(r)),
-    <l: Expression3> GREATEREQ <r: Expression4> => Expression::GreaterEq(b(l), b(r)),
-    <l: Expression3> LESS <r: Expression4>      => Expression::Less(b(l), b(r)),
-    <l: Expression3> LESSEQ <r: Expression4>    => Expression::LessEq(b(l), b(r)),
+    <l: Expression3> EQUALS <r: Expression4>    => Expression::Equals(Box::new(l), Box::new(r)),
+    <l: Expression3> NOTEQUALS <r: Expression4> => Expression::NotEquals(Box::new(l), Box::new(r)),
+    <l: Expression3> GREATER <r: Expression4>   => Expression::Greater(Box::new(l), Box::new(r)),
+    <l: Expression3> GREATEREQ <r: Expression4> => Expression::GreaterEq(Box::new(l), Box::new(r)),
+    <l: Expression3> LESS <r: Expression4>      => Expression::Less(Box::new(l), Box::new(r)),
+    <l: Expression3> LESSEQ <r: Expression4>    => Expression::LessEq(Box::new(l), Box::new(r)),
     <Expression4>,
 }
 
 Expression4 = {
-    <l: Expression4> DASH <r: Expression5>  => Expression::Subtract(b(l), b(r)),
-    <l: Expression4> CROSS <r: Expression5> => Expression::Add(b(l), b(r)),
+    <l: Expression4> DASH <r: Expression5>  => Expression::Subtract(Box::new(l), Box::new(r)),
+    <l: Expression4> CROSS <r: Expression5> => Expression::Add(Box::new(l), Box::new(r)),
     <Expression5>,
 }
 
 Expression5 = {
-    <l: Expression5> STAR <r: Expression6>  => Expression::Multiply(b(l), b(r)),
-    <l: Expression5> SLASH <r: Expression6> => Expression::Divide(b(l), b(r)),
+    <l: Expression5> STAR <r: Expression6>  => Expression::Multiply(Box::new(l), Box::new(r)),
+    <l: Expression5> SLASH <r: Expression6> => Expression::Divide(Box::new(l), Box::new(r)),
     <Expression6>,
 }
 
 Expression6 = {
-    DASH <x: Expression6> => Expression::Negative(b(x)),
-    NOT <x: Expression6>  => Expression::Not(b(x)),
+    DASH <x: Expression6> => Expression::Negative(Box::new(x)),
+    NOT <x: Expression6>  => Expression::Not(Box::new(x)),
     <Term>,
 }
 

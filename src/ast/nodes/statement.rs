@@ -1,8 +1,4 @@
-use super::{
-    fmt_body, symbol_table::Entry, Body, CallExpression, Declaration, Expression, Kind, Kinded,
-    Location, NameAnalysis, Primitive, SourcePosition, SourcePositionData, SymbolTable, Type,
-    VariableDeclaration,
-};
+use super::*;
 use anyhow::{anyhow, Result};
 use std::fmt::{Display, Formatter};
 
@@ -38,8 +34,6 @@ pub enum Statement {
 
 impl Statement {
     pub fn check_type(&self) -> Result<()> {
-        let int = Type::Primitive(Primitive::Int, SourcePositionData { s: 0, e: 0 });
-
         match self {
             Statement::Assignment(l, r) => check_assignment(l, r),
             Statement::CallExpression(x) => {
@@ -56,7 +50,7 @@ impl Statement {
                     return Err(anyhow!("{err}"));
                 };
 
-                if !t.equivalent(&int) {
+                if !t.equivalent(&type_::INT) {
                     let err = format!(
                         "FATAL {}: Arithmetic operator applied to invalid operand",
                         x.source_position()
@@ -130,7 +124,7 @@ impl NameAnalysis for Statement {
 fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
     let l_entry = lval.get_last_link().get_entry()?.clone();
 
-    if let Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
+    if let symbol_table::Entry::Variable(Type::PerfectPrimitive(_, _) | Type::PerfectClass(_, _)) =
         l_entry.as_ref()
     {
         return err(format!(
@@ -139,7 +133,9 @@ fn check_assignment(lval: &Location, rval: &Expression) -> Result<()> {
         ));
     }
 
-    let (Entry::Variable(t1), Kind::Variable(t2)) = (l_entry.as_ref(), &rval.get_kind()?) else {
+    let (symbol_table::Entry::Variable(t1), Kind::Variable(t2)) =
+        (l_entry.as_ref(), &rval.get_kind()?)
+    else {
         return err(format!(
             "FATAL {}: Invalid assignment operand",
             rval.source_position()

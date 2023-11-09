@@ -1,5 +1,5 @@
 use super::{
-    b, symbol_table::Entry, unparse_fn, unparse_id, Kind, Kinded, NameAnalysis, SourcePosition,
+    symbol_table::Entry, unparse_fn, unparse_id, Kind, Kinded, NameAnalysis, SourcePosition,
     SourcePositionData, SymbolTable,
 };
 use anyhow::{anyhow, Result};
@@ -33,7 +33,7 @@ impl Location {
         while link.next_link.is_some() {
             link = link.next_link.as_mut().unwrap();
         }
-        link.next_link = Some(b(next_link));
+        link.next_link = Some(Box::new(next_link));
         self
     }
 

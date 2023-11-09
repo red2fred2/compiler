@@ -32,11 +32,6 @@ use super::{
 };
 use crate::source_position::{SourcePosition, SourcePositionData};
 
-// Wrap in a box so I don't have to write Box::new() 100 times
-pub fn b<T>(x: T) -> Box<T> {
-    Box::new(x)
-}
-
 fn dyn_vec<T: NameAnalysis>(vec: &mut Vec<T>) -> Vec<&mut dyn NameAnalysis> {
     vec.iter_mut().map(|e| e as &mut dyn NameAnalysis).collect()
 }
