@@ -50,10 +50,10 @@ impl Display for Type {
 impl SourcePosition for Type {
     fn source_position(&self) -> SourcePositionData {
         match self {
-            Type::Primitive(_, pos)
-            | Type::PerfectPrimitive(_, pos)
-            | Type::Class(_, pos)
-            | Type::PerfectClass(_, pos) => pos.clone(),
+            Type::Primitive(_, p)
+            | Type::PerfectPrimitive(_, p)
+            | Type::Class(_, p)
+            | Type::PerfectClass(_, p) => *p,
         }
     }
 }

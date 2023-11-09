@@ -84,7 +84,7 @@ impl SymbolTable {
             return Err(anyhow!("{err}"));
         };
         let t = format!("{t}");
-        let c = self.link(&t, pos.clone())?;
+        let c = self.link(&t, pos)?;
 
         // Get class's scope
         let Entry::Class(scope) = c.as_ref() else {

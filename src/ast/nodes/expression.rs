@@ -77,9 +77,9 @@ impl Display for Expression {
 impl Kinded for Expression {
     fn get_kind(&self) -> Result<Kind> {
         match self {
-            Self::False(p) | Self::Magic(p) | Self::True(p) => Ok(Kind::Variable(
-                Type::PerfectPrimitive(Primitive::Bool, p.clone()),
-            )),
+            Self::False(p) | Self::Magic(p) | Self::True(p) => {
+                Ok(Kind::Variable(Type::PerfectPrimitive(Primitive::Bool, *p)))
+            }
             Self::And(a, b) | Self::Or(a, b) => {
                 let r1 = check_unary_primitive(
                     a,
@@ -113,7 +113,7 @@ impl Kinded for Expression {
             ),
             Self::IntegerLiteral(_, position) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::Int,
-                position.clone(),
+                *position,
             ))),
             Self::Add(a, b) | Self::Divide(a, b) | Self::Multiply(a, b) | Self::Subtract(a, b) => {
                 let r1 = check_unary_primitive(
@@ -175,9 +175,9 @@ impl Kinded for Expression {
                     a.source_position()
                 ),
             ),
-            Self::StringLiteral(_, position) => Ok(Kind::Variable(Type::PerfectPrimitive(
+            Self::StringLiteral(_, p) => Ok(Kind::Variable(Type::PerfectPrimitive(
                 Primitive::String,
-                position.clone(),
+                *p,
             ))),
             Self::Location(x) => x.get_kind(),
             Self::CallExpression(x) => x.get_kind(),
@@ -243,7 +243,7 @@ impl SourcePosition for Expression {
             | Expression::IntegerLiteral(_, p)
             | Expression::Magic(p)
             | Expression::StringLiteral(_, p)
-            | Expression::True(p) => p.clone(),
+            | Expression::True(p) => *p,
             Expression::Negative(x) | Expression::Not(x) => x.source_position(),
             Expression::CallExpression(x) => x.source_position(),
             Expression::Location(x) => x.source_position(),

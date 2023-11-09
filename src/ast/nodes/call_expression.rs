@@ -72,6 +72,6 @@ impl NameAnalysis for CallExpression {
 
 impl SourcePosition for CallExpression {
     fn source_position(&self) -> SourcePositionData {
-        self.source_position.clone()
+        self.source_position
     }
 }

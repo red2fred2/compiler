@@ -14,7 +14,7 @@ pub trait SourcePosition {
     fn source_position(&self) -> SourcePositionData;
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 /// Holds data about a range of source code positions
 pub struct SourcePositionData {
     /// Starting byte position

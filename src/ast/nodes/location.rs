@@ -125,6 +125,6 @@ impl NameAnalysis for Location {
 
 impl SourcePosition for Location {
     fn source_position(&self) -> SourcePositionData {
-        self.source_position.clone()
+        self.source_position
     }
 }
