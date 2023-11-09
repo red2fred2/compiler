@@ -1,4 +1,3 @@
-//! Calling a function
 use super::{symbol_table::Entry::Function, Kind::Variable, *};
 use crate::err;
 

@@ -1,4 +1,3 @@
-//! Holds a block statement's body
 use super::*;
 
 #[derive(Clone, Debug)]

@@ -1,4 +1,3 @@
-//! Holds information for a class declaration
 use super::*;
 
 #[derive(Clone, Debug)]

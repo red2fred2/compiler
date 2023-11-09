@@ -1,6 +1,4 @@
-use super::{Class, Function, NameAnalysis, SymbolTable, TypeAnalysis, VariableDeclaration};
-use anyhow::Result;
-use std::fmt::{Display, Formatter};
+use super::*;
 
 #[derive(Clone, Debug)]
 pub enum Declaration {
@@ -9,13 +7,9 @@ pub enum Declaration {
     Variable(VariableDeclaration),
 }
 
-impl Display for Declaration {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Declaration::Class(x) => write!(f, "{x}"),
-            Declaration::Function(x) => write!(f, "{x}"),
-            Declaration::Variable(x) => write!(f, "{x}"),
-        }
+impl std::fmt::Display for Declaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self}")
     }
 }
 
@@ -28,7 +22,7 @@ impl NameAnalysis for Declaration {
         }
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         match self {
             Self::Class(x) => x.visit(symbol_table),
             Self::Function(x) => x.visit(symbol_table),
@@ -36,7 +30,7 @@ impl NameAnalysis for Declaration {
         }
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         match self {
             Self::Class(x) => x.exit(symbol_table),
             Self::Function(x) => x.exit(symbol_table),
@@ -46,7 +40,7 @@ impl NameAnalysis for Declaration {
 }
 
 impl TypeAnalysis for Declaration {
-    fn type_check(&self) -> Result<()> {
+    fn type_check(&self) -> anyhow::Result<()> {
         match self {
             Self::Class(x) => x.type_check(),
             Self::Function(x) => x.type_check(),

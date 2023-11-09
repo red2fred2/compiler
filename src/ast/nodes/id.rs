@@ -1,4 +1,3 @@
-//! Identifier node
 use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -15,6 +14,6 @@ impl std::fmt::Display for Id {
 
 impl SourcePosition for Id {
     fn source_position(&self) -> SourcePositionData {
-        self.source_position.clone()
+        self.source_position
     }
 }
