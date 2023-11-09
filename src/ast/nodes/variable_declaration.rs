@@ -62,8 +62,7 @@ impl NameAnalysis for VariableDeclaration {
         match (&self.t, table_entry) {
             // Variable set to void or class name not found
             (Type::Primitive(Primitive::Void, _), _)
-            | (Type::PerfectPrimitive(Primitive::Void, _), _)
-            | (_, Err(_)) => {
+            | (Type::PerfectPrimitive(Primitive::Void, _), _) => {
                 err!("FATAL {pos}: Invalid type in declaration")
             }
 
@@ -79,6 +78,8 @@ impl NameAnalysis for VariableDeclaration {
                 let entry = Variable(self.t.clone());
                 symbol_table.add(&self.name.name, entry, type_pos)
             }
+
+            (_, Err(_)) => err!("FATAL {pos}: Invalid type in declaration"),
         }
     }
 }
