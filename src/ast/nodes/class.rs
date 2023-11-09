@@ -1,9 +1,5 @@
-use super::{
-    dyn_vec, fmt_body, unparse_id, Declaration, Id, NameAnalysis, SourcePosition, SymbolTable,
-    Type, TypeAnalysis,
-};
-use anyhow::Result;
-use std::fmt::{Display, Formatter};
+//! Holds information for a class declaration
+use super::*;
 
 #[derive(Clone, Debug)]
 pub struct Class {
@@ -11,8 +7,8 @@ pub struct Class {
     pub body: Vec<Declaration>,
 }
 
-impl Display for Class {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for Class {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         unparse_id(
             f,
             &self.id.name,
@@ -30,19 +26,19 @@ impl NameAnalysis for Class {
         Some(dyn_vec(&mut self.body))
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         symbol_table.add_class(&self.id)?;
         Ok(())
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         symbol_table.exit_scope();
         Ok(())
     }
 }
 
 impl TypeAnalysis for Class {
-    fn type_check(&self) -> Result<()> {
+    fn type_check(&self) -> anyhow::Result<()> {
         for declaration in &self.body {
             declaration.type_check()?;
         }

@@ -1,5 +1,5 @@
-use super::{SourcePosition, SourcePositionData};
-use std::fmt::{Display, Formatter};
+//! Identifier node
+use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Id {
@@ -7,8 +7,8 @@ pub struct Id {
     pub source_position: SourcePositionData,
 }
 
-impl Display for Id {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for Id {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name)
     }
 }

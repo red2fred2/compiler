@@ -1,5 +1,5 @@
-use super::{super::SymbolTable, dyn_vec, NameAnalysis, Statement};
-use anyhow::Result;
+//! Holds a block statement's body
+use super::*;
 
 #[derive(Clone, Debug)]
 pub struct Body {
@@ -11,12 +11,12 @@ impl NameAnalysis for Body {
         Some(dyn_vec(&mut self.statements))
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         symbol_table.enter_scope();
         Ok(())
     }
 
-    fn exit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
         symbol_table.exit_scope();
         Ok(())
     }

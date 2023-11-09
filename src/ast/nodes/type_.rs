@@ -24,6 +24,16 @@ impl Type {
             _ => false,
         }
     }
+
+    /// Returns a new perfect version of this type at some position
+    pub fn new_perfect(old: &Self, pos: SourcePositionData) -> Self {
+        match old {
+            Self::Primitive(t, _) | Self::PerfectPrimitive(t, _) => {
+                Self::PerfectPrimitive(t.clone(), pos)
+            }
+            Self::Class(t, _) | Self::PerfectClass(t, _) => Self::PerfectClass(t.clone(), pos),
+        }
+    }
 }
 
 impl Display for Type {

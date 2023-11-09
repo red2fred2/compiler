@@ -1,7 +1,5 @@
 //! # Drewno Mars language compiler
-//! Here is the [language specification].
-//!
-//! [language Specification](https://compilers.cool/language/)
+//! Here is the [language Specification](https://compilers.cool/language/)
 #![feature(test)]
 
 extern crate test;

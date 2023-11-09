@@ -1,6 +1,5 @@
-use super::{symbol_table::Entry, unparse_id, Id, NameAnalysis, SourcePosition, SymbolTable, Type};
-use anyhow::Result;
-use std::fmt::{Display, Formatter};
+//! Function formal parameter
+use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Formal {
@@ -8,8 +7,8 @@ pub struct Formal {
     pub t: Type,
 }
 
-impl Display for Formal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for Formal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         unparse_id(f, &self.id.name, &self.t)?;
         write!(f, " : {}", self.t)
     }
@@ -20,13 +19,14 @@ impl NameAnalysis for Formal {
         None
     }
 
-    fn visit(&mut self, symbol_table: &mut SymbolTable) -> Result<()> {
-        let entry = Entry::Variable(self.t.clone());
-        symbol_table.add(&self.id.name, entry, self.id.source_position())?;
+    fn visit(&mut self, symbol_table: &mut SymbolTable) -> anyhow::Result<()> {
+        let entry = symbol_table::Entry::Variable(self.t.clone());
+        let pos = self.id.source_position();
+        symbol_table.add(&self.id.name, entry, pos)?;
         Ok(())
     }
 
-    fn exit(&mut self, _: &mut SymbolTable) -> Result<()> {
+    fn exit(&mut self, _: &mut SymbolTable) -> anyhow::Result<()> {
         Ok(())
     }
 }

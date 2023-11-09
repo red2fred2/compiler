@@ -40,3 +40,11 @@ pub fn b<T>(x: T) -> Box<T> {
 fn dyn_vec<T: NameAnalysis>(vec: &mut Vec<T>) -> Vec<&mut dyn NameAnalysis> {
     vec.iter_mut().map(|e| e as &mut dyn NameAnalysis).collect()
 }
+
+#[macro_export]
+macro_rules! err {
+    ($($t:tt)*) => {{
+		eprintln!($($t)*);
+        Err(anyhow::anyhow!($($t)*))
+    }};
+}
