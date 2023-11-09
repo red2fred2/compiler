@@ -271,7 +271,7 @@ fn check_unary_primitive(
 
 fn get_primitive(t: &Result<Kind>) -> Option<Primitive> {
     match t.as_ref().unwrap() {
-        Kind::Variable(Type::Primitive(p, _) | Type::PerfectPrimitive(p, _)) => Some(p.clone()),
+        Kind::Variable(Type::Primitive(p, _) | Type::PerfectPrimitive(p, _)) => Some(*p),
         _ => None,
     }
 }
