@@ -51,6 +51,7 @@ pub fn get_unparse_mode(args: &crate::Args) -> UnparseMode {
         unparse,
         named_unparse,
         check_types: _,
+        ac3_IR_generation: _,
     } = args;
 
     match (unparse, named_unparse) {

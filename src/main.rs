@@ -7,13 +7,15 @@ extern crate test;
 #[allow(unused)]
 use test::Bencher;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use clap::Parser;
 
-mod ast;
-mod source_position;
+pub mod ast;
+pub mod intermediate_code;
+pub mod source_position;
 
 /// Drewno Mars language compiler
+#[allow(non_snake_case)]
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
@@ -35,6 +37,10 @@ pub struct Args {
     /// Do type checking without output
     #[arg(short, long)]
     check_types: bool,
+
+    /// Generate 3ac intermediate code
+    #[arg(short, long)]
+    ac3_IR_generation: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -47,7 +53,13 @@ fn main() -> Result<()> {
     source_position::set_document(&contents);
 
     // Build AST
-    let _ = ast::build(&contents, &args);
+    let ast = ast::build(&contents, &args);
+
+    let Ok(ast) = ast else {
+        return Err(anyhow!("Failed to generate AST"));
+    };
+
+    intermediate_code::generate(ast, &args);
 
     Ok(())
 }
@@ -60,6 +72,7 @@ fn parser_benchmark(b: &mut Bencher) {
         unparse: None,
         named_unparse: None,
         check_types: true,
+        ac3_IR_generation: Some("ir.3ac".to_string()),
     };
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path).unwrap() + "\n";

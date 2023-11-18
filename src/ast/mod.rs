@@ -4,7 +4,7 @@ mod nodes;
 mod symbol_table;
 mod type_analysis;
 
-use nodes::*;
+pub use nodes::*;
 
 use anyhow::{anyhow, Result};
 use lalrpop_util::lalrpop_mod;
