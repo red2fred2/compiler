@@ -38,9 +38,11 @@ impl Type {
         }
     }
 
-    /// Finds the name of this type
-    pub fn get_name(&self) -> String {
-        format!("{self}")
+    pub fn unwrap_primitive(&self) -> Option<(Primitive, SourcePositionData)> {
+        match self {
+            Self::Primitive(a, b) | Self::PerfectPrimitive(a, b) => Some((*a, *b)),
+            _ => None,
+        }
     }
 }
 
