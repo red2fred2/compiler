@@ -55,10 +55,19 @@ impl std::fmt::Display for Function {
 
 impl IRCode for Function {
     fn get_ir_code(&self) -> String {
+        let name = &self.id.name;
+        let exit_label = intermediate_code::get_lbl();
         let starting_tmps = intermediate_code::get_tmp_counter();
 
+        let mut body_str = String::new();
+
+        for statement in &self.body {
+            let ir = statement.get_ir_code();
+            body_str = format!("{body_str}{ir}")
+        }
+
         let ending_tmps = intermediate_code::get_tmp_counter();
-        let mut str = format!("[BEGIN {} LOCALS]\n", self.id.name);
+        let mut str = format!("[BEGIN {name} LOCALS]\n");
 
         for formal in &self.fn_input {
             let name = &formal.id.name;
@@ -72,7 +81,17 @@ impl IRCode for Function {
         let tmps = get_tmps_string(starting_tmps, ending_tmps);
         str = format!("{str}{tmps}");
 
-        str = format!("{str}[END {} LOCALS]\n", self.id.name);
+        str = format!("{str}[END {name} LOCALS]\n");
+        str = format!("{str}fn_{name}: enter {name}\n");
+
+        for i in 0..self.fn_input.len() {
+            let name = &self.fn_input[i].id.name;
+            let number = i + 1;
+            str = format!("{str}getarg {number} [{name}]\n")
+        }
+
+        str = format!("{str}{body_str}");
+        str = format!("{str}{exit_label}: leave {name}\n\n");
 
         str
     }

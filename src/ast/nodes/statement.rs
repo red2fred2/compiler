@@ -1,5 +1,5 @@
 use super::{symbol_table::Entry::*, *};
-use crate::err;
+use crate::{err, intermediate_code};
 
 #[derive(Clone, Debug)]
 pub enum Statement {
@@ -19,12 +19,12 @@ pub enum Statement {
 impl Statement {
     pub fn check_type(&self) -> anyhow::Result<()> {
         match self {
-            Statement::Assignment(l, r) => check_assignment(l, r),
-            Statement::CallExpression(x) => {
+            Self::Assignment(l, r) => check_assignment(l, r),
+            Self::CallExpression(x) => {
                 x.get_kind()?;
                 Ok(())
             }
-            Statement::Decrement(x) | Statement::Increment(x) => {
+            Self::Decrement(x) | Self::Increment(x) => {
                 let pos = x.source_position();
 
                 let Kind::Variable(t) = x.get_last_link().get_kind()? else {
@@ -37,12 +37,12 @@ impl Statement {
 
                 Ok(())
             }
-            Statement::Exit => Ok(()),
-            Statement::Give(x) => check_give(x),
-            Statement::If(x, _, _) | Statement::While(x, _) => check_condition(x),
-            Statement::Return(_, _) => Ok(()), // Return checking is done in function declaration
-            Statement::Take(x) => check_take(x),
-            Statement::VariableDeclaration(Declaration::Variable(VariableDeclaration {
+            Self::Exit => Ok(()),
+            Self::Give(x) => check_give(x),
+            Self::If(x, _, _) | Self::While(x, _) => check_condition(x),
+            Self::Return(_, _) => Ok(()), // Return checking is done in function declaration
+            Self::Take(x) => check_take(x),
+            Self::VariableDeclaration(Declaration::Variable(VariableDeclaration {
                 name: _,
                 t,
                 assignment,
@@ -70,6 +70,39 @@ impl std::fmt::Display for Statement {
                 write!(f, "while({condition}) ")?;
                 fmt_body(f, &body.statements)
             }
+        }
+    }
+}
+
+impl IRCode for Statement {
+    fn get_ir_code(&self) -> String {
+        match self {
+            Self::Assignment(_, _) => todo!(),
+            Self::CallExpression(_) => todo!(),
+            Self::Decrement(_) => todo!(),
+            Self::Exit => todo!(),
+            Self::Give(_) => todo!(),
+            Self::If(_, _, _) => todo!(),
+            Self::Increment(_) => todo!(),
+            Self::Return(x, _) => {
+                let Some(x) = x else {
+                    return format!("goto SOME LABEL\n");
+                };
+
+                let x_code = x.get_ir_code();
+
+                if x.has_subexpression() {
+                    format!(
+                        "{x_code}setret [{}]\ngoto SOME LABEL\n",
+                        intermediate_code::get_last_tmp()
+                    )
+                } else {
+                    format!("setret [{x_code}]\ngoto SOME LABEL\n")
+                }
+            }
+            Self::Take(_) => todo!(),
+            Self::VariableDeclaration(_) => todo!(),
+            Self::While(_, _) => todo!(),
         }
     }
 }

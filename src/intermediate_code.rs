@@ -28,7 +28,7 @@ pub fn generate(ast: Vec<Declaration>) -> String {
     }
 
     // Kick off main like _start should
-    string = format!("{string}call main\n");
+    string = format!("{string}call main\n\n");
 
     // Then hit the function declarations
     for declaration in &ast {
@@ -50,7 +50,7 @@ fn get_globals() -> String {
         str = GLOBALS.join("\n");
     }
 
-    format!("[BEGIN GLOBALS]\n{str}\n[END GLOBALS]\n\n")
+    format!("[BEGIN GLOBALS]\n{str}\n[END GLOBALS]\n")
 }
 
 pub fn get_last_tmp() -> String {
