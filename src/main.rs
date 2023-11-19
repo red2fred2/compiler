@@ -8,6 +8,8 @@
 
 extern crate test;
 
+use std::{fs::File, io::Write};
+
 #[allow(unused)]
 use test::Bencher;
 
@@ -61,8 +63,8 @@ fn main() -> Result<()> {
 
     if let Some(_output_path) = &args.ac3_IR_generation {
         let ir = intermediate_code::generate(ast);
-
-        println!("{ir}");
+        let mut file = File::create(_output_path)?;
+        file.write_all(ir.as_bytes())?;
     }
 
     Ok(())
