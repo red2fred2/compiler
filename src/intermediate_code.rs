@@ -98,3 +98,8 @@ pub fn get_tmp() -> String {
 
     format!("tmp_{ctr}")
 }
+
+/// Gets the current temp counter value
+pub fn get_tmp_counter() -> usize {
+    unsafe { TMP_COUNTER }
+}

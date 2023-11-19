@@ -1,5 +1,5 @@
 use super::{symbol_table::Entry::*, *};
-use crate::err;
+use crate::{err, intermediate_code};
 
 #[derive(Clone, Debug)]
 pub struct Function {
@@ -30,6 +30,18 @@ impl Function {
             .map(|e| e.clone())
             .collect()
     }
+
+    fn get_locals(&self) -> Vec<Id> {
+        let mut vec = Vec::new();
+
+        for child in &self.body {
+            if let Statement::VariableDeclaration(Declaration::Variable(decl)) = child {
+                vec.push(decl.name.clone())
+            }
+        }
+
+        vec
+    }
 }
 
 impl std::fmt::Display for Function {
@@ -43,7 +55,26 @@ impl std::fmt::Display for Function {
 
 impl IRCode for Function {
     fn get_ir_code(&self) -> String {
-        todo!()
+        let starting_tmps = intermediate_code::get_tmp_counter();
+
+        let ending_tmps = intermediate_code::get_tmp_counter();
+        let mut str = format!("[BEGIN {} LOCALS]\n", self.id.name);
+
+        for formal in &self.fn_input {
+            let name = &formal.id.name;
+            str = format!("{str}{name} (formal arg of 8 bytes)\n");
+        }
+
+        for local in self.get_locals() {
+            str = format!("{str}{local} (local var of 8 bytes)\n");
+        }
+
+        let tmps = get_tmps_string(starting_tmps, ending_tmps);
+        str = format!("{str}{tmps}");
+
+        str = format!("{str}[END {} LOCALS]\n", self.id.name);
+
+        str
     }
 }
 
@@ -120,4 +151,14 @@ fn check_return(expected_output: &Type, ret: &Statement) -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+fn get_tmps_string(start: usize, end: usize) -> String {
+    let mut str = String::new();
+
+    for i in start..end {
+        str = format!("{str}tmp_{i} (tmp var of 8 bytes)\n")
+    }
+
+    str
 }
