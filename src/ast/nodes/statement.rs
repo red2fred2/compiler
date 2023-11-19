@@ -93,7 +93,54 @@ impl IRCode for Statement {
             Self::Decrement(loc) => format!("[{loc}] := [{loc}] SUB64 1\n"),
             Self::Exit => "exit\n".to_string(),
             Self::Give(x) => format!("WRITE {}\n", x.get_ir_code()),
-            Self::If(_, _, _) => todo!(),
+            Self::If(condition, if_, else_) => {
+                if else_.statements.len() > 0 {
+                    let else_label = intermediate_code::get_lbl();
+                    let after_label = intermediate_code::get_lbl();
+                    let condition_code = condition.get_ir_code();
+                    let mut if_code = String::new();
+                    let mut else_code = String::new();
+
+                    for statement in &if_.statements {
+                        let statement_code = statement.get_ir_code();
+                        if_code = format!("{if_code}{statement_code}")
+                    }
+
+                    for statement in &else_.statements {
+                        let statement_code = statement.get_ir_code();
+                        else_code = format!("{else_code}{statement_code}")
+                    }
+
+                    return if condition.has_subexpression() {
+                        format!(
+                            "{condition_code}IF_Z [{}] GOTO {else_label}\n{if_code}goto {after_label}\n{else_label}: {else_code}{after_label}: nop\n",
+                            intermediate_code::get_last_tmp()
+                        )
+                    } else {
+                        format!("IF_Z {condition_code} GOTO {else_label}\n{if_code}goto {after_label}\n{else_label}: {else_code}{after_label}: nop\n")
+                    };
+                }
+
+                let after_label = intermediate_code::get_lbl();
+                let condition_code = condition.get_ir_code();
+                let mut if_code = String::new();
+
+                for statement in &if_.statements {
+                    let statement_code = statement.get_ir_code();
+                    if_code = format!("{if_code}{statement_code}")
+                }
+
+                if condition.has_subexpression() {
+                    format!(
+                            "{condition_code}IF_Z [{}] GOTO {after_label}\n{if_code}{after_label}: nop\n",
+                            intermediate_code::get_last_tmp()
+                        )
+                } else {
+                    format!(
+                        "IF_Z {condition_code} GOTO {after_label}\n{if_code}{after_label}: nop\n"
+                    )
+                }
+            }
             Self::Increment(loc) => format!("[{loc}] := [{loc}] ADD64 1\n"),
             Self::Return(x, _) => {
                 let Some(x) = x else {
