@@ -109,7 +109,11 @@ impl IRCode for Expression {
             Self::Not(a) => get_unary_ir(a, "NOT64"),
             Self::NotEquals(a, b) => get_binary_ir(a, b, "NEQ64"),
             Self::Or(a, b) => get_binary_ir(a, b, "OR64"),
-            Self::StringLiteral(str, _) => str.clone(),
+            Self::StringLiteral(str, _) => {
+                let label = intermediate_code::get_str();
+                intermediate_code::add_global(&format!("{label} \"{str}\""));
+                label
+            }
             Self::Subtract(a, b) => get_binary_ir(a, b, "SUB64"),
             Self::True(_) => "1".to_string(),
         }

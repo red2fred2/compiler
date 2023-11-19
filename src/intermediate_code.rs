@@ -1,3 +1,6 @@
+//! It only occurred to me that I shouldn't just output text after a few hours of
+//! work. That's a problem for future me. Screw that guy.
+
 use super::ast::Declaration;
 
 static mut LBL_COUNTER: usize = 0;
