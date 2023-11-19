@@ -31,7 +31,16 @@ impl IRCode for Declaration {
                     return "".to_string();
                 };
 
-                assignment.get_ir_code()
+                let expr_code = assignment.get_ir_code();
+
+                if assignment.has_subexpression() {
+                    format!(
+                        "{expr_code}[{name}] := [{}]\n",
+                        intermediate_code::get_last_tmp()
+                    )
+                } else {
+                    format!("[{name}] := {expr_code}\n")
+                }
             }
         }
     }

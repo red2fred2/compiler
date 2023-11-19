@@ -1,3 +1,5 @@
+use crate::intermediate_code;
+
 use super::{
     CallExpression, IRCode, Kind, Kinded, Location, NameAnalysis, Primitive, SourcePosition,
     SourcePositionData, SymbolTable, Type,
@@ -34,6 +36,19 @@ pub enum Expression {
 }
 
 impl Expression {
+    pub fn has_subexpression(&self) -> bool {
+        match self {
+            Self::CallExpression(_) => todo!(),
+            Self::False(_)
+            | Self::IntegerLiteral(_, _)
+            | Self::Location(_)
+            | Self::Magic(_)
+            | Self::StringLiteral(_, _)
+            | Self::True(_) => false,
+            _ => true,
+        }
+    }
+
     pub fn new_int(value: &str, position: SourcePositionData) -> Self {
         Self::IntegerLiteral(u64::from_str(value).unwrap(), position)
     }
@@ -76,7 +91,55 @@ impl Display for Expression {
 
 impl IRCode for Expression {
     fn get_ir_code(&self) -> String {
-        todo!()
+        match self {
+            Self::Add(a, b) => {
+                let mut str = String::new();
+
+                let a_code = a.get_ir_code();
+                let a_expr;
+
+                if a.has_subexpression() {
+                    str = format!("{str}{a_code}");
+                    a_expr = format!("[{}]", intermediate_code::get_last_tmp())
+                } else {
+                    a_expr = a_code
+                }
+
+                let b_code = b.get_ir_code();
+                let b_expr;
+
+                if b.has_subexpression() {
+                    b_expr = format!("[{}]", intermediate_code::get_last_tmp())
+                } else {
+                    b_expr = b_code
+                }
+
+                format!(
+                    "{str}[{}] := {a_expr} ADD64 {b_expr}\n",
+                    intermediate_code::get_tmp()
+                )
+            }
+            Self::And(_, _) => todo!(),
+            Self::CallExpression(_) => todo!(),
+            Self::Divide(_, _) => todo!(),
+            Self::Equals(_, _) => todo!(),
+            Self::False(_) => "0".to_string(),
+            Self::Greater(_, _) => todo!(),
+            Self::GreaterEq(_, _) => todo!(),
+            Self::IntegerLiteral(int, _) => format!("{int}"),
+            Self::Less(_, _) => todo!(),
+            Self::LessEq(_, _) => todo!(),
+            Self::Location(loc) => format!("[{loc}]"),
+            Self::Magic(_) => todo!(),
+            Self::Multiply(_, _) => todo!(),
+            Self::Negative(_) => todo!(),
+            Self::Not(_) => todo!(),
+            Self::NotEquals(_, _) => todo!(),
+            Self::Or(_, _) => todo!(),
+            Self::StringLiteral(str, _) => str.clone(),
+            Self::Subtract(_, _) => todo!(),
+            Self::True(_) => "1".to_string(),
+        }
     }
 }
 
@@ -195,26 +258,26 @@ impl Kinded for Expression {
 impl NameAnalysis for Expression {
     fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         match self {
-            Expression::CallExpression(x) => Some(vec![x]),
-            Expression::Location(x) => Some(vec![x]),
-            Expression::Negative(x) | Expression::Not(x) => Some(vec![x.as_mut()]),
-            Expression::True(_)
-            | Expression::False(_)
-            | Expression::IntegerLiteral(_, _)
-            | Expression::StringLiteral(_, _)
-            | Expression::Magic(_) => None,
-            Expression::Add(x, y)
-            | Expression::And(x, y)
-            | Expression::Divide(x, y)
-            | Expression::Equals(x, y)
-            | Expression::Greater(x, y)
-            | Expression::GreaterEq(x, y)
-            | Expression::Less(x, y)
-            | Expression::LessEq(x, y)
-            | Expression::Multiply(x, y)
-            | Expression::NotEquals(x, y)
-            | Expression::Or(x, y)
-            | Expression::Subtract(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
+            Self::CallExpression(x) => Some(vec![x]),
+            Self::Location(x) => Some(vec![x]),
+            Self::Negative(x) | Self::Not(x) => Some(vec![x.as_mut()]),
+            Self::True(_)
+            | Self::False(_)
+            | Self::IntegerLiteral(_, _)
+            | Self::StringLiteral(_, _)
+            | Self::Magic(_) => None,
+            Self::Add(x, y)
+            | Self::And(x, y)
+            | Self::Divide(x, y)
+            | Self::Equals(x, y)
+            | Self::Greater(x, y)
+            | Self::GreaterEq(x, y)
+            | Self::Less(x, y)
+            | Self::LessEq(x, y)
+            | Self::Multiply(x, y)
+            | Self::NotEquals(x, y)
+            | Self::Or(x, y)
+            | Self::Subtract(x, y) => Some(vec![x.as_mut(), y.as_mut()]),
         }
     }
 
@@ -230,29 +293,29 @@ impl NameAnalysis for Expression {
 impl SourcePosition for Expression {
     fn source_position(&self) -> SourcePositionData {
         match self {
-            Expression::Add(a, b)
-            | Expression::And(a, b)
-            | Expression::Divide(a, b)
-            | Expression::Equals(a, b)
-            | Expression::Greater(a, b)
-            | Expression::GreaterEq(a, b)
-            | Expression::Less(a, b)
-            | Expression::LessEq(a, b)
-            | Expression::Multiply(a, b)
-            | Expression::NotEquals(a, b)
-            | Expression::Or(a, b)
-            | Expression::Subtract(a, b) => SourcePositionData {
+            Self::Add(a, b)
+            | Self::And(a, b)
+            | Self::Divide(a, b)
+            | Self::Equals(a, b)
+            | Self::Greater(a, b)
+            | Self::GreaterEq(a, b)
+            | Self::Less(a, b)
+            | Self::LessEq(a, b)
+            | Self::Multiply(a, b)
+            | Self::NotEquals(a, b)
+            | Self::Or(a, b)
+            | Self::Subtract(a, b) => SourcePositionData {
                 s: a.source_position().s,
                 e: b.source_position().e,
             },
-            Expression::False(p)
-            | Expression::IntegerLiteral(_, p)
-            | Expression::Magic(p)
-            | Expression::StringLiteral(_, p)
-            | Expression::True(p) => *p,
-            Expression::Negative(x) | Expression::Not(x) => x.source_position(),
-            Expression::CallExpression(x) => x.source_position(),
-            Expression::Location(x) => x.source_position(),
+            Self::False(p)
+            | Self::IntegerLiteral(_, p)
+            | Self::Magic(p)
+            | Self::StringLiteral(_, p)
+            | Self::True(p) => *p,
+            Self::Negative(x) | Self::Not(x) => x.source_position(),
+            Self::CallExpression(x) => x.source_position(),
+            Self::Location(x) => x.source_position(),
         }
     }
 }

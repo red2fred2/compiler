@@ -34,6 +34,16 @@ fn get_globals() -> String {
     format!("[BEGIN GLOBALS]\n{str}\n[END GLOBALS]\n")
 }
 
+pub fn get_last_tmp() -> String {
+    let ctr;
+
+    unsafe {
+        ctr = TMP_COUNTER - 1;
+    }
+
+    format!("tmp_{ctr}")
+}
+
 /// Gets a new lbl_# label
 pub fn get_lbl() -> String {
     let ctr;
