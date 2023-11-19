@@ -111,7 +111,7 @@ impl IRCode for Statement {
                     format!("setret [{x_code}]\ngoto SOME LABEL\n")
                 }
             }
-            Self::Take(_) => todo!(),
+            Self::Take(x) => format!("READ [{x}]\n"),
             Self::VariableDeclaration(Declaration::Variable(decl)) => {
                 if let Some(x) = &decl.assignment {
                     let name = &decl.name.name;
