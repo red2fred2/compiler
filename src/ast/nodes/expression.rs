@@ -103,7 +103,7 @@ impl IRCode for Expression {
             Self::Less(a, b) => get_binary_ir(a, b, "LT64"),
             Self::LessEq(a, b) => get_binary_ir(a, b, "LTE64"),
             Self::Location(loc) => format!("[{loc}]"),
-            Self::Magic(_) => todo!(),
+            Self::Magic(_) => unimplemented!(),
             Self::Multiply(a, b) => get_binary_ir(a, b, "MULT64"),
             Self::Negative(a) => get_unary_ir(a, "NEG64"),
             Self::Not(a) => get_unary_ir(a, "NOT64"),
