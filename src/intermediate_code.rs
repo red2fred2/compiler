@@ -6,6 +6,7 @@ use super::ast::Declaration;
 static mut LBL_COUNTER: usize = 0;
 static mut STR_COUNTER: usize = 0;
 static mut TMP_COUNTER: usize = 0;
+static mut FN_EXIT_LBL: String = String::new();
 pub static mut GLOBALS: Vec<String> = Vec::new();
 
 pub trait IRCode {
@@ -47,6 +48,10 @@ pub fn generate(ast: Vec<Declaration>) -> String {
     format!("{globals}{string}")
 }
 
+pub fn get_fn_exit_lbl() -> String {
+    unsafe { FN_EXIT_LBL.clone() }
+}
+
 fn get_globals() -> String {
     let str;
     unsafe {
@@ -76,6 +81,12 @@ pub fn get_lbl() -> String {
     }
 
     format!("lbl_{ctr}")
+}
+
+pub fn get_new_fn_exit_lbl() -> String {
+    let lbl = get_lbl();
+    unsafe { FN_EXIT_LBL = lbl.clone() }
+    lbl
 }
 
 /// Gets a new str_# label

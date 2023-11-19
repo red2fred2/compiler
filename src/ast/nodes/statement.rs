@@ -143,19 +143,21 @@ impl IRCode for Statement {
             }
             Self::Increment(loc) => format!("[{loc}] := [{loc}] ADD64 1\n"),
             Self::Return(x, _) => {
+                let exit_label = intermediate_code::get_fn_exit_lbl();
+
                 let Some(x) = x else {
-                    return format!("goto SOME LABEL\n");
+                    return format!("goto {exit_label}\n");
                 };
 
                 let x_code = x.get_ir_code();
 
                 if x.has_subexpression() {
                     format!(
-                        "{x_code}setret [{}]\ngoto SOME LABEL\n",
+                        "{x_code}setret [{}]\ngoto {exit_label}\n",
                         intermediate_code::get_last_tmp()
                     )
                 } else {
-                    format!("setret [{x_code}]\ngoto SOME LABEL\n")
+                    format!("setret [{x_code}]\ngoto {exit_label}\n")
                 }
             }
             Self::Take(x) => format!("READ [{x}]\n"),

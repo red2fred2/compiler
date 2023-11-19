@@ -57,7 +57,7 @@ impl IRCode for Function {
     fn get_ir_code(&self) -> String {
         let name = &self.id.name;
         intermediate_code::add_global(name);
-        let exit_label = intermediate_code::get_lbl();
+        let exit_label = intermediate_code::get_new_fn_exit_lbl();
         let starting_tmps = intermediate_code::get_tmp_counter();
 
         let mut body_str = String::new();
