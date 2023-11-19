@@ -43,9 +43,7 @@ pub fn get_lbl() -> String {
         LBL_COUNTER += 1;
     }
 
-    let str = format!("lbl_{ctr}");
-
-    str
+    format!("lbl_{ctr}")
 }
 
 /// Gets a new str_# label
@@ -57,9 +55,7 @@ pub fn get_str() -> String {
         STR_COUNTER += 1;
     }
 
-    let str = format!("str_{ctr}");
-
-    str
+    format!("str_{ctr}")
 }
 
 /// Gets a new tmp_# label
@@ -71,7 +67,5 @@ pub fn get_tmp() -> String {
         TMP_COUNTER += 1;
     }
 
-    let str = format!("tmp_{ctr}");
-
-    str
+    format!("tmp_{ctr}")
 }
