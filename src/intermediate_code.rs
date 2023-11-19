@@ -14,9 +14,10 @@ pub fn add_global(str: &String) {
 }
 
 pub fn generate(ast: Vec<Declaration>) -> String {
-    let mut string = String::new();
+    let mut string = "_start: ".to_string();
 
-    // Run thrugh variable declarations
+    // Run thrugh variable declarations to define the _start label
+    // I want to try not using the C standard library. This is a first step.
     for declaration in &ast {
         let Declaration::Variable(var) = declaration else {
             continue;
@@ -25,6 +26,9 @@ pub fn generate(ast: Vec<Declaration>) -> String {
         let decl_ir_code = var.get_ir_code();
         string = format!("{string}{decl_ir_code}")
     }
+
+    // Kick off main like _start should
+    string = format!("{string}call main\n");
 
     // Then hit the function declarations
     for declaration in &ast {
