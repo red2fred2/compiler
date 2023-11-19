@@ -1,3 +1,5 @@
+use crate::intermediate_code;
+
 use super::*;
 
 #[derive(Clone, Debug)]
@@ -15,7 +17,23 @@ impl std::fmt::Display for Declaration {
 
 impl IRCode for Declaration {
     fn get_ir_code(&self) -> String {
-        todo!()
+        match self {
+            Self::Class(_) => "classes are outside the project scope\n".to_string(),
+            Self::Function(_) => todo!(),
+            Self::Variable(VariableDeclaration {
+                name,
+                t: _,
+                assignment,
+            }) => {
+                intermediate_code::add_global(&name.name);
+
+                let Some(assignment) = assignment else {
+                    return "".to_string();
+                };
+
+                assignment.get_ir_code()
+            }
+        }
     }
 }
 

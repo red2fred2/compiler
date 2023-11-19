@@ -1,5 +1,5 @@
 use super::{
-    CallExpression, Kind, Kinded, Location, NameAnalysis, Primitive, SourcePosition,
+    CallExpression, IRCode, Kind, Kinded, Location, NameAnalysis, Primitive, SourcePosition,
     SourcePositionData, SymbolTable, Type,
 };
 use anyhow::{anyhow, Result};
@@ -71,6 +71,12 @@ impl Display for Expression {
             Self::Subtract(l, r) => write!(f, "({l} - {r})"),
             Self::True(_) => write!(f, "true"),
         }
+    }
+}
+
+impl IRCode for Expression {
+    fn get_ir_code(&self) -> String {
+        todo!()
     }
 }
 
