@@ -41,6 +41,12 @@ impl std::fmt::Display for Function {
     }
 }
 
+impl IRCode for Function {
+    fn get_ir_code(&self) -> String {
+        todo!()
+    }
+}
+
 impl NameAnalysis for Function {
     fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         let mut children = dyn_vec(&mut self.fn_input);

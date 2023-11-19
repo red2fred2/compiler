@@ -16,8 +16,23 @@ pub fn add_global(str: &String) {
 pub fn generate(ast: Vec<Declaration>) -> String {
     let mut string = String::new();
 
-    for declaration in ast {
-        let decl_ir_code = declaration.get_ir_code();
+    // Run thrugh variable declarations
+    for declaration in &ast {
+        let Declaration::Variable(var) = declaration else {
+            continue;
+        };
+
+        let decl_ir_code = var.get_ir_code();
+        string = format!("{string}{decl_ir_code}")
+    }
+
+    // Then hit the function declarations
+    for declaration in &ast {
+        let Declaration::Function(function) = declaration else {
+            continue;
+        };
+
+        let decl_ir_code = function.get_ir_code();
         string = format!("{string}{decl_ir_code}")
     }
 

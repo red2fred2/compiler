@@ -1,5 +1,5 @@
 use super::{symbol_table::Entry::*, *};
-use crate::err;
+use crate::{err, intermediate_code};
 
 #[derive(Clone, Debug)]
 pub struct VariableDeclaration {
@@ -76,6 +76,28 @@ impl std::fmt::Display for VariableDeclaration {
         match &self.assignment {
             Some(a) => write!(f, " : {} = {a};", self.t),
             None => write!(f, " : {};", self.t),
+        }
+    }
+}
+
+impl IRCode for VariableDeclaration {
+    fn get_ir_code(&self) -> String {
+        let name = &self.name.name;
+        intermediate_code::add_global(name);
+
+        let Some(assignment) = &self.assignment else {
+            return "".to_string();
+        };
+
+        let expr_code = assignment.get_ir_code();
+
+        if assignment.has_subexpression() {
+            format!(
+                "{expr_code}[{name}] := [{}]\n",
+                intermediate_code::get_last_tmp()
+            )
+        } else {
+            format!("[{name}] := {expr_code}\n")
         }
     }
 }

@@ -1,5 +1,3 @@
-use crate::intermediate_code;
-
 use super::*;
 
 #[derive(Clone, Debug)]
@@ -12,37 +10,6 @@ pub enum Declaration {
 impl std::fmt::Display for Declaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self}")
-    }
-}
-
-impl IRCode for Declaration {
-    fn get_ir_code(&self) -> String {
-        match self {
-            Self::Class(_) => "classes are outside the project scope\n".to_string(),
-            Self::Function(_) => todo!(),
-            Self::Variable(VariableDeclaration {
-                name,
-                t: _,
-                assignment,
-            }) => {
-                intermediate_code::add_global(&name.name);
-
-                let Some(assignment) = assignment else {
-                    return "".to_string();
-                };
-
-                let expr_code = assignment.get_ir_code();
-
-                if assignment.has_subexpression() {
-                    format!(
-                        "{expr_code}[{name}] := [{}]\n",
-                        intermediate_code::get_last_tmp()
-                    )
-                } else {
-                    format!("[{name}] := {expr_code}\n")
-                }
-            }
-        }
     }
 }
 
