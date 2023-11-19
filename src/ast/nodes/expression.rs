@@ -92,33 +92,7 @@ impl Display for Expression {
 impl IRCode for Expression {
     fn get_ir_code(&self) -> String {
         match self {
-            Self::Add(a, b) => {
-                let mut str = String::new();
-
-                let a_code = a.get_ir_code();
-                let a_expr;
-
-                if a.has_subexpression() {
-                    str = format!("{str}{a_code}");
-                    a_expr = format!("[{}]", intermediate_code::get_last_tmp())
-                } else {
-                    a_expr = a_code
-                }
-
-                let b_code = b.get_ir_code();
-                let b_expr;
-
-                if b.has_subexpression() {
-                    b_expr = format!("[{}]", intermediate_code::get_last_tmp())
-                } else {
-                    b_expr = b_code
-                }
-
-                format!(
-                    "{str}[{}] := {a_expr} ADD64 {b_expr}\n",
-                    intermediate_code::get_tmp()
-                )
-            }
+            Self::Add(a, b) => get_binary_ir(a, b, "ADD64"),
             Self::And(_, _) => todo!(),
             Self::CallExpression(_) => todo!(),
             Self::Divide(_, _) => todo!(),
@@ -392,4 +366,32 @@ fn check_equals(a: &Box<Expression>, b: &Box<Expression>) -> Result<Kind> {
         eprintln!("{err}");
         return Err(anyhow!("{err}"));
     }
+}
+
+fn get_binary_ir(a: &Box<Expression>, b: &Box<Expression>, operator: &str) -> String {
+    let mut str = String::new();
+
+    let a_code = a.get_ir_code();
+    let a_expr;
+
+    if a.has_subexpression() {
+        str = format!("{str}{a_code}");
+        a_expr = format!("[{}]", intermediate_code::get_last_tmp())
+    } else {
+        a_expr = a_code
+    }
+
+    let b_code = b.get_ir_code();
+    let b_expr;
+
+    if b.has_subexpression() {
+        b_expr = format!("[{}]", intermediate_code::get_last_tmp())
+    } else {
+        b_expr = b_code
+    }
+
+    format!(
+        "{str}[{}] := {a_expr} {operator} {b_expr}\n",
+        intermediate_code::get_tmp()
+    )
 }
