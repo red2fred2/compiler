@@ -2,6 +2,7 @@ use super::ast::Declaration;
 
 static mut LBL_COUNTER: usize = 0;
 static mut STR_COUNTER: usize = 0;
+static mut TMP_COUNTER: usize = 0;
 pub static mut GLOBALS: Vec<String> = Vec::new();
 
 pub trait IRCode {
@@ -57,6 +58,20 @@ pub fn get_str() -> String {
     }
 
     let str = format!("str_{ctr}");
+
+    str
+}
+
+/// Gets a new tmp_# label
+pub fn get_tmp() -> String {
+    let ctr;
+
+    unsafe {
+        ctr = TMP_COUNTER;
+        TMP_COUNTER += 1;
+    }
+
+    let str = format!("tmp_{ctr}");
 
     str
 }
