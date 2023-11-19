@@ -7,7 +7,7 @@ extern crate test;
 #[allow(unused)]
 use test::Bencher;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use clap::Parser;
 
 pub mod ast;
@@ -53,13 +53,13 @@ fn main() -> Result<()> {
     source_position::set_document(&contents);
 
     // Build AST
-    let ast = ast::build(&contents, &args);
+    let ast = ast::build(&contents, &args)?;
 
-    let Ok(ast) = ast else {
-        return Err(anyhow!("Failed to generate AST"));
-    };
+    if let Some(_output_path) = &args.ac3_IR_generation {
+        let ir = intermediate_code::generate(ast);
 
-    intermediate_code::generate(ast, &args);
+        println!("{ir}");
+    }
 
     Ok(())
 }

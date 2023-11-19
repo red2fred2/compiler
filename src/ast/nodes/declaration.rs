@@ -13,6 +13,12 @@ impl std::fmt::Display for Declaration {
     }
 }
 
+impl IRCode for Declaration {
+    fn get_ir_code(&self) -> String {
+        todo!()
+    }
+}
+
 impl NameAnalysis for Declaration {
     fn get_children(&mut self) -> Option<Vec<&mut dyn NameAnalysis>> {
         match self {
