@@ -38,7 +38,6 @@ pub enum Expression {
 impl Expression {
     pub fn has_subexpression(&self) -> bool {
         match self {
-            Self::CallExpression(_) => todo!(),
             Self::False(_)
             | Self::IntegerLiteral(_, _)
             | Self::Location(_)
@@ -94,7 +93,7 @@ impl IRCode for Expression {
         match self {
             Self::Add(a, b) => get_binary_ir(a, b, "ADD64"),
             Self::And(a, b) => get_binary_ir(a, b, "AND64"),
-            Self::CallExpression(_) => todo!(),
+            Self::CallExpression(call) => call.get_ir_code(),
             Self::Divide(a, b) => get_binary_ir(a, b, "DIV64"),
             Self::Equals(a, b) => get_binary_ir(a, b, "EQ64"),
             Self::False(_) => "0".to_string(),

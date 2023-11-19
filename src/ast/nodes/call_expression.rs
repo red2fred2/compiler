@@ -1,5 +1,5 @@
 use super::{symbol_table::Entry::Function, Kind::Variable, *};
-use crate::err;
+use crate::{err, intermediate_code};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CallExpression {
@@ -11,6 +11,32 @@ pub struct CallExpression {
 impl std::fmt::Display for CallExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}{}", self.location, fmt_list(&self.actuals))
+    }
+}
+
+impl IRCode for CallExpression {
+    fn get_ir_code(&self) -> String {
+        let mut str = String::new();
+
+        for i in 0..self.actuals.len() {
+            let actual = &self.actuals[i];
+            let actual_code = actual.get_ir_code();
+            let number = i + 1;
+
+            if actual.has_subexpression() {
+                str = format!(
+                    "{str}{actual_code}setarg {number} {}\n",
+                    intermediate_code::get_last_tmp()
+                );
+            } else {
+                str = format!("{str}setarg {number} {actual_code}\n");
+            }
+        }
+
+        str = format!("{str}call {}\n", &self.location);
+        str = format!("{str}getret [{}]\n", intermediate_code::get_tmp());
+
+        str
     }
 }
 

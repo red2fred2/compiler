@@ -78,7 +78,7 @@ impl IRCode for Statement {
     fn get_ir_code(&self) -> String {
         match self {
             Self::Assignment(_, _) => todo!(),
-            Self::CallExpression(_) => todo!(),
+            Self::CallExpression(call) => call.get_ir_code(),
             Self::Decrement(_) => todo!(),
             Self::Exit => todo!(),
             Self::Give(_) => todo!(),
