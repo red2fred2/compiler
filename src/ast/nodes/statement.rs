@@ -101,8 +101,25 @@ impl IRCode for Statement {
                 }
             }
             Self::Take(_) => todo!(),
-            Self::VariableDeclaration(_) => todo!(),
+            Self::VariableDeclaration(Declaration::Variable(decl)) => {
+                if let Some(x) = &decl.assignment {
+                    let name = &decl.name.name;
+                    let x_code = x.get_ir_code();
+
+                    if x.has_subexpression() {
+                        format!(
+                            "{x_code}[{name}] := [{}]\n",
+                            intermediate_code::get_last_tmp()
+                        )
+                    } else {
+                        format!("[{name}] := {x_code}\n")
+                    }
+                } else {
+                    "".to_string()
+                }
+            }
             Self::While(_, _) => todo!(),
+            _ => unreachable!(),
         }
     }
 }
