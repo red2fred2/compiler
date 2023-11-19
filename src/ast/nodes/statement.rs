@@ -79,11 +79,11 @@ impl IRCode for Statement {
         match self {
             Self::Assignment(_, _) => todo!(),
             Self::CallExpression(call) => call.get_ir_code(),
-            Self::Decrement(_) => todo!(),
+            Self::Decrement(loc) => format!("[{loc}] := [{loc}] SUB64 1\n"),
             Self::Exit => todo!(),
             Self::Give(_) => todo!(),
             Self::If(_, _, _) => todo!(),
-            Self::Increment(_) => todo!(),
+            Self::Increment(loc) => format!("[{loc}] := [{loc}] ADD64 1\n"),
             Self::Return(x, _) => {
                 let Some(x) = x else {
                     return format!("goto SOME LABEL\n");
