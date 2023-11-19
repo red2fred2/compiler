@@ -31,7 +31,7 @@ fn get_globals() -> String {
         str = GLOBALS.join("\n");
     }
 
-    format!("[BEGIN GLOBALS]\n{str}\n[END GLOBALS]\n")
+    format!("[BEGIN GLOBALS]\n{str}\n[END GLOBALS]\n\n")
 }
 
 pub fn get_last_tmp() -> String {

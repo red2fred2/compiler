@@ -93,25 +93,25 @@ impl IRCode for Expression {
     fn get_ir_code(&self) -> String {
         match self {
             Self::Add(a, b) => get_binary_ir(a, b, "ADD64"),
-            Self::And(_, _) => todo!(),
+            Self::And(a, b) => get_binary_ir(a, b, "AND64"),
             Self::CallExpression(_) => todo!(),
-            Self::Divide(_, _) => todo!(),
-            Self::Equals(_, _) => todo!(),
+            Self::Divide(a, b) => get_binary_ir(a, b, "DIV64"),
+            Self::Equals(a, b) => get_binary_ir(a, b, "EQ64"),
             Self::False(_) => "0".to_string(),
-            Self::Greater(_, _) => todo!(),
-            Self::GreaterEq(_, _) => todo!(),
+            Self::Greater(a, b) => get_binary_ir(a, b, "GT64"),
+            Self::GreaterEq(a, b) => get_binary_ir(a, b, "GTE64"),
             Self::IntegerLiteral(int, _) => format!("{int}"),
-            Self::Less(_, _) => todo!(),
-            Self::LessEq(_, _) => todo!(),
+            Self::Less(a, b) => get_binary_ir(a, b, "LT64"),
+            Self::LessEq(a, b) => get_binary_ir(a, b, "LTE64"),
             Self::Location(loc) => format!("[{loc}]"),
             Self::Magic(_) => todo!(),
-            Self::Multiply(_, _) => todo!(),
+            Self::Multiply(a, b) => get_binary_ir(a, b, "MULT64"),
             Self::Negative(_) => todo!(),
             Self::Not(_) => todo!(),
-            Self::NotEquals(_, _) => todo!(),
-            Self::Or(_, _) => todo!(),
+            Self::NotEquals(a, b) => get_binary_ir(a, b, "NEQ64"),
+            Self::Or(a, b) => get_binary_ir(a, b, "OR64"),
             Self::StringLiteral(str, _) => str.clone(),
-            Self::Subtract(_, _) => todo!(),
+            Self::Subtract(a, b) => get_binary_ir(a, b, "SUB64"),
             Self::True(_) => "1".to_string(),
         }
     }
@@ -385,6 +385,7 @@ fn get_binary_ir(a: &Box<Expression>, b: &Box<Expression>, operator: &str) -> St
     let b_expr;
 
     if b.has_subexpression() {
+        str = format!("{str}{b_code}");
         b_expr = format!("[{}]", intermediate_code::get_last_tmp())
     } else {
         b_expr = b_code
