@@ -77,7 +77,18 @@ impl std::fmt::Display for Statement {
 impl IRCode for Statement {
     fn get_ir_code(&self) -> String {
         match self {
-            Self::Assignment(_, _) => todo!(),
+            Self::Assignment(loc, x) => {
+                let x_code = x.get_ir_code();
+
+                if x.has_subexpression() {
+                    format!(
+                        "{x_code}[{loc}] := [{}]\n",
+                        intermediate_code::get_last_tmp()
+                    )
+                } else {
+                    format!("[{loc}] := {x_code}\n")
+                }
+            }
             Self::CallExpression(call) => call.get_ir_code(),
             Self::Decrement(loc) => format!("[{loc}] := [{loc}] SUB64 1\n"),
             Self::Exit => "exit\n".to_string(),
