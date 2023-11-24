@@ -31,8 +31,8 @@ use super::{
     SymbolTable,
 };
 use crate::{
-    intermediate_code::IRCode,
     source_position::{SourcePosition, SourcePositionData},
+    three_ac::IRCode,
 };
 
 fn dyn_vec<T: NameAnalysis>(vec: &mut Vec<T>) -> Vec<&mut dyn NameAnalysis> {

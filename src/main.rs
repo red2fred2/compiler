@@ -17,8 +17,8 @@ use anyhow::Result;
 use clap::Parser;
 
 pub mod ast;
-pub mod intermediate_code;
 pub mod source_position;
+pub mod three_ac;
 
 /// Drewno Mars language compiler
 #[allow(non_snake_case)]
@@ -62,7 +62,7 @@ fn main() -> Result<()> {
     let ast = ast::build(&contents, &args)?;
 
     if let Some(_output_path) = &args.ac3_IR_generation {
-        let ir = intermediate_code::generate(ast);
+        let ir = three_ac::generate(ast);
         let mut file = File::create(_output_path)?;
         file.write_all(ir.as_bytes())?;
     }

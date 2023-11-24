@@ -1,4 +1,4 @@
-use crate::intermediate_code;
+use crate::three_ac;
 
 use super::{
     CallExpression, IRCode, Kind, Kinded, Location, NameAnalysis, Primitive, SourcePosition,
@@ -110,8 +110,8 @@ impl IRCode for Expression {
             Self::NotEquals(a, b) => get_binary_ir(a, b, "NEQ64"),
             Self::Or(a, b) => get_binary_ir(a, b, "OR64"),
             Self::StringLiteral(str, _) => {
-                let label = intermediate_code::get_str();
-                intermediate_code::add_global(&format!("{label} \"{str}\""));
+                let label = three_ac::get_str();
+                three_ac::add_global(&format!("{label} \"{str}\""));
                 label
             }
             Self::Subtract(a, b) => get_binary_ir(a, b, "SUB64"),
@@ -379,7 +379,7 @@ fn get_binary_ir(a: &Box<Expression>, b: &Box<Expression>, operator: &str) -> St
 
     if a.has_subexpression() {
         str = format!("{str}{a_code}");
-        a_expr = format!("[{}]", intermediate_code::get_last_tmp())
+        a_expr = format!("[{}]", three_ac::get_last_tmp())
     } else {
         a_expr = a_code
     }
@@ -389,14 +389,14 @@ fn get_binary_ir(a: &Box<Expression>, b: &Box<Expression>, operator: &str) -> St
 
     if b.has_subexpression() {
         str = format!("{str}{b_code}");
-        b_expr = format!("[{}]", intermediate_code::get_last_tmp())
+        b_expr = format!("[{}]", three_ac::get_last_tmp())
     } else {
         b_expr = b_code
     }
 
     format!(
         "{str}[{}] := {a_expr} {operator} {b_expr}\n",
-        intermediate_code::get_tmp()
+        three_ac::get_tmp()
     )
 }
 
@@ -408,14 +408,11 @@ fn get_unary_ir(a: &Box<Expression>, operator: &str) -> String {
 
     if a.has_subexpression() {
         str = format!("{a_code}");
-        a_expr = format!("[{}]", intermediate_code::get_last_tmp())
+        a_expr = format!("[{}]", three_ac::get_last_tmp())
     } else {
         str = "".to_string();
         a_expr = a_code
     }
 
-    format!(
-        "{str}[{}] := {operator} {a_expr}\n",
-        intermediate_code::get_tmp()
-    )
+    format!("{str}[{}] := {operator} {a_expr}\n", three_ac::get_tmp())
 }

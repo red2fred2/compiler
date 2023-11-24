@@ -1,5 +1,5 @@
 use super::{symbol_table::Entry::*, *};
-use crate::{err, intermediate_code};
+use crate::{err, three_ac};
 
 #[derive(Clone, Debug)]
 pub enum Statement {
@@ -81,10 +81,7 @@ impl IRCode for Statement {
                 let x_code = x.get_ir_code();
 
                 if x.has_subexpression() {
-                    format!(
-                        "{x_code}[{loc}] := [{}]\n",
-                        intermediate_code::get_last_tmp()
-                    )
+                    format!("{x_code}[{loc}] := [{}]\n", three_ac::get_last_tmp())
                 } else {
                     format!("[{loc}] := {x_code}\n")
                 }
@@ -95,8 +92,8 @@ impl IRCode for Statement {
             Self::Give(x) => format!("WRITE {}\n", x.get_ir_code()),
             Self::If(condition, if_, else_) => {
                 if else_.statements.len() > 0 {
-                    let else_label = intermediate_code::get_lbl();
-                    let after_label = intermediate_code::get_lbl();
+                    let else_label = three_ac::get_lbl();
+                    let after_label = three_ac::get_lbl();
                     let condition_code = condition.get_ir_code();
                     let mut if_code = String::new();
                     let mut else_code = String::new();
@@ -114,14 +111,14 @@ impl IRCode for Statement {
                     return if condition.has_subexpression() {
                         format!(
                             "{condition_code}IF_Z [{}] GOTO {else_label}\n{if_code}goto {after_label}\n{else_label}: {else_code}{after_label}: nop\n",
-                            intermediate_code::get_last_tmp()
+                            three_ac::get_last_tmp()
                         )
                     } else {
                         format!("IF_Z {condition_code} GOTO {else_label}\n{if_code}goto {after_label}\n{else_label}: {else_code}{after_label}: nop\n")
                     };
                 }
 
-                let after_label = intermediate_code::get_lbl();
+                let after_label = three_ac::get_lbl();
                 let condition_code = condition.get_ir_code();
                 let mut if_code = String::new();
 
@@ -133,7 +130,7 @@ impl IRCode for Statement {
                 if condition.has_subexpression() {
                     format!(
                             "{condition_code}IF_Z [{}] GOTO {after_label}\n{if_code}{after_label}: nop\n",
-                            intermediate_code::get_last_tmp()
+                            three_ac::get_last_tmp()
                         )
                 } else {
                     format!(
@@ -143,7 +140,7 @@ impl IRCode for Statement {
             }
             Self::Increment(loc) => format!("[{loc}] := [{loc}] ADD64 1\n"),
             Self::Return(x, _) => {
-                let exit_label = intermediate_code::get_fn_exit_lbl();
+                let exit_label = three_ac::get_fn_exit_lbl();
 
                 let Some(x) = x else {
                     return format!("goto {exit_label}\n");
@@ -154,7 +151,7 @@ impl IRCode for Statement {
                 if x.has_subexpression() {
                     format!(
                         "{x_code}setret [{}]\ngoto {exit_label}\n",
-                        intermediate_code::get_last_tmp()
+                        three_ac::get_last_tmp()
                     )
                 } else {
                     format!("setret [{x_code}]\ngoto {exit_label}\n")
@@ -167,10 +164,7 @@ impl IRCode for Statement {
                     let x_code = x.get_ir_code();
 
                     if x.has_subexpression() {
-                        format!(
-                            "{x_code}[{name}] := [{}]\n",
-                            intermediate_code::get_last_tmp()
-                        )
+                        format!("{x_code}[{name}] := [{}]\n", three_ac::get_last_tmp())
                     } else {
                         format!("[{name}] := {x_code}\n")
                     }
@@ -179,8 +173,8 @@ impl IRCode for Statement {
                 }
             }
             Self::While(condition, body) => {
-                let condition_label = intermediate_code::get_lbl();
-                let after_label = intermediate_code::get_lbl();
+                let condition_label = three_ac::get_lbl();
+                let after_label = three_ac::get_lbl();
                 let condition_code = condition.get_ir_code();
                 let mut body_code = String::new();
 
@@ -192,7 +186,7 @@ impl IRCode for Statement {
                 if condition.has_subexpression() {
                     format!(
                             "{condition_label}: {condition_code}IF_Z [{}] GOTO {after_label}\n{body_code}goto {condition_label}\n{after_label}: nop\n",
-                            intermediate_code::get_last_tmp()
+                            three_ac::get_last_tmp()
                         )
                 } else {
                     format!(

@@ -1,5 +1,5 @@
 use super::{symbol_table::Entry::Function, Kind::Variable, *};
-use crate::{err, intermediate_code};
+use crate::{err, three_ac};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CallExpression {
@@ -26,7 +26,7 @@ impl IRCode for CallExpression {
             if actual.has_subexpression() {
                 str = format!(
                     "{str}{actual_code}setarg {number} {}\n",
-                    intermediate_code::get_last_tmp()
+                    three_ac::get_last_tmp()
                 );
             } else {
                 str = format!("{str}setarg {number} {actual_code}\n");
@@ -34,7 +34,7 @@ impl IRCode for CallExpression {
         }
 
         str = format!("{str}call {}\n", &self.location);
-        str = format!("{str}getret [{}]\n", intermediate_code::get_tmp());
+        str = format!("{str}getret [{}]\n", three_ac::get_tmp());
 
         str
     }

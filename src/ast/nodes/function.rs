@@ -1,5 +1,5 @@
 use super::{symbol_table::Entry::*, *};
-use crate::{err, intermediate_code};
+use crate::{err, three_ac};
 
 #[derive(Clone, Debug)]
 pub struct Function {
@@ -56,9 +56,9 @@ impl std::fmt::Display for Function {
 impl IRCode for Function {
     fn get_ir_code(&self) -> String {
         let name = &self.id.name;
-        intermediate_code::add_global(name);
-        let exit_label = intermediate_code::get_new_fn_exit_lbl();
-        let starting_tmps = intermediate_code::get_tmp_counter();
+        three_ac::add_global(name);
+        let exit_label = three_ac::get_new_fn_exit_lbl();
+        let starting_tmps = three_ac::get_tmp_counter();
 
         let mut body_str = String::new();
 
@@ -67,7 +67,7 @@ impl IRCode for Function {
             body_str = format!("{body_str}{ir}")
         }
 
-        let ending_tmps = intermediate_code::get_tmp_counter();
+        let ending_tmps = three_ac::get_tmp_counter();
         let mut str = format!("[BEGIN {name} LOCALS]\n");
 
         for formal in &self.fn_input {
