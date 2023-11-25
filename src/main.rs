@@ -62,9 +62,9 @@ fn main() -> Result<()> {
     let ast = ast::build(&contents, &args)?;
 
     if let Some(_output_path) = &args.ac3_IR_generation {
-        let ir = three_ac::generate(ast);
+        let ir_code = three_ac::generate(ast);
 
-        println!("{ir:#?}");
+        println!("{ir_code:#?}");
         // let mut file = File::create(_output_path)?;
         // file.write_all(ir.as_bytes())?;
     }
