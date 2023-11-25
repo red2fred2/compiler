@@ -14,3 +14,13 @@ pub enum Argument {
     Location(String),
     Value(String),
 }
+
+impl std::fmt::Display for Argument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Argument::Literal(x) => write!(f, "{x}"),
+            Argument::Location(x) => write!(f, "[{x}]"),
+            Argument::Value(x) => write!(f, "{x}"),
+        }
+    }
+}
