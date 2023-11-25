@@ -44,9 +44,13 @@ pub struct Args {
     #[arg(short, long)]
     check_types: bool,
 
-    /// Generate 3ac intermediate code
+    /// Generate 3AC intermediate code
     #[arg(short, long)]
     ac3_IR_generation: Option<String>,
+
+    /// Generate x64 assembly
+    #[arg(short, long)]
+    output_assembly: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -83,7 +87,8 @@ fn parser_benchmark(b: &mut Bencher) {
         unparse: None,
         named_unparse: None,
         check_types: true,
-        ac3_IR_generation: Some("ir.3ac".to_string()),
+        ac3_IR_generation: None,
+        output_assembly: Some("output.s".to_string()),
     };
     let path = &args.input_file;
     let contents = std::fs::read_to_string(path).unwrap() + "\n";
