@@ -64,9 +64,12 @@ fn main() -> Result<()> {
     if let Some(_output_path) = &args.ac3_IR_generation {
         let ir_code = three_ac::generate(ast);
 
-        println!("{ir_code:#?}");
-        // let mut file = File::create(_output_path)?;
-        // file.write_all(ir.as_bytes())?;
+        let mut string = String::new();
+        for line in ir_code {
+            string = format!("{string}{line}");
+        }
+        let mut file = File::create(_output_path)?;
+        file.write_all(string.as_bytes())?;
     }
 
     Ok(())

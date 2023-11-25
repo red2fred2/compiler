@@ -135,7 +135,16 @@ impl IRCode for Statement {
                 quads
             }
             Self::Take(x) => vec![Quad::Write(Argument::Location(format!("{x}")))],
-            Self::VariableDeclaration(Declaration::Variable(decl)) => decl.get_ir_code(),
+            Self::VariableDeclaration(Declaration::Variable(VariableDeclaration {
+                name,
+                t: _,
+                assignment,
+            })) => {
+                let Some(x) = assignment else { return vec![] };
+                let (mut quads, arg) = x.get_ir_code();
+                quads.push(Quad::Assignment(format!("{name}"), arg));
+                quads
+            }
             Self::While(condition, body) => {
                 let condition_label = three_ac::get_lbl();
                 let after_label = three_ac::get_lbl();
