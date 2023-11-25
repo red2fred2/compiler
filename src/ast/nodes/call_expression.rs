@@ -1,5 +1,8 @@
 use super::{symbol_table::Entry::Function, Kind::Variable, *};
-use crate::{err, three_ac};
+use crate::{
+    err,
+    three_ac::{self, Quad},
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CallExpression {
@@ -15,28 +18,19 @@ impl std::fmt::Display for CallExpression {
 }
 
 impl IRCode for CallExpression {
-    fn get_ir_code(&self) -> String {
-        let mut str = String::new();
+    fn get_ir_code(&self) -> Vec<Quad> {
+        let mut quads = Vec::new();
 
         for i in 0..self.actuals.len() {
             let actual = &self.actuals[i];
-            let actual_code = actual.get_ir_code();
-            let number = i + 1;
-
-            if actual.has_subexpression() {
-                str = format!(
-                    "{str}{actual_code}setarg {number} {}\n",
-                    three_ac::get_last_tmp()
-                );
-            } else {
-                str = format!("{str}setarg {number} {actual_code}\n");
-            }
+            let (mut code, arg) = actual.get_ir_code();
+            quads.append(&mut code);
+            quads.push(Quad::SetArg(i + 1, arg));
         }
 
-        str = format!("{str}call {}\n", &self.location);
-        str = format!("{str}getret [{}]\n", three_ac::get_tmp());
-
-        str
+        quads.push(Quad::Call(format!("{}", self.location)));
+        quads.push(Quad::GetRet(three_ac::get_tmp()));
+        quads
     }
 }
 

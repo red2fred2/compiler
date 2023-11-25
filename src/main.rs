@@ -63,8 +63,10 @@ fn main() -> Result<()> {
 
     if let Some(_output_path) = &args.ac3_IR_generation {
         let ir = three_ac::generate(ast);
-        let mut file = File::create(_output_path)?;
-        file.write_all(ir.as_bytes())?;
+
+        println!("{ir:#?}");
+        // let mut file = File::create(_output_path)?;
+        // file.write_all(ir.as_bytes())?;
     }
 
     Ok(())

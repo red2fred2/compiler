@@ -1,5 +1,8 @@
 use super::{symbol_table::Entry::*, *};
-use crate::{err, three_ac};
+use crate::{
+    err,
+    three_ac::{self, Quad},
+};
 
 #[derive(Clone, Debug)]
 pub struct Function {
@@ -54,47 +57,35 @@ impl std::fmt::Display for Function {
 }
 
 impl IRCode for Function {
-    fn get_ir_code(&self) -> String {
+    fn get_ir_code(&self) -> Vec<Quad> {
+        let mut body_quads = Vec::new();
         let name = &self.id.name;
         three_ac::add_global(name);
         let exit_label = three_ac::get_new_fn_exit_lbl();
-        let starting_tmps = three_ac::get_tmp_counter();
 
-        let mut body_str = String::new();
-
+        let start_tmps = three_ac::get_tmp_counter();
         for statement in &self.body {
-            let ir = statement.get_ir_code();
-            body_str = format!("{body_str}{ir}")
+            body_quads.append(&mut statement.get_ir_code());
         }
+        let end_tmps = three_ac::get_tmp_counter();
 
-        let ending_tmps = three_ac::get_tmp_counter();
-        let mut str = format!("[BEGIN {name} LOCALS]\n");
-
-        for formal in &self.fn_input {
-            let name = &formal.id.name;
-            str = format!("{str}{name} (formal arg of 8 bytes)\n");
-        }
-
-        for local in self.get_locals() {
-            str = format!("{str}{local} (local var of 8 bytes)\n");
-        }
-
-        let tmps = get_tmps_string(starting_tmps, ending_tmps);
-        str = format!("{str}{tmps}");
-
-        str = format!("{str}[END {name} LOCALS]\n");
-        str = format!("{str}fn_{name}: enter {name}\n");
+        let mut quads = vec![Quad::Locals(
+            name.clone(),
+            self.fn_input.clone(),
+            self.get_locals(),
+            start_tmps..end_tmps,
+        )];
+        quads.push(Quad::Enter(name.clone()));
 
         for i in 0..self.fn_input.len() {
-            let name = &self.fn_input[i].id.name;
-            let number = i + 1;
-            str = format!("{str}getarg {number} [{name}]\n")
+            let name = self.fn_input[i].id.name.clone();
+            quads.push(Quad::GetArg(i + 1, name));
         }
 
-        str = format!("{str}{body_str}");
-        str = format!("{str}{exit_label}: leave {name}\n\n");
+        quads.append(&mut body_quads);
+        quads.push(Quad::Leave(exit_label, name.clone()));
 
-        str
+        quads
     }
 }
 
@@ -171,14 +162,4 @@ fn check_return(expected_output: &Type, ret: &Statement) -> anyhow::Result<()> {
     }
 
     Ok(())
-}
-
-fn get_tmps_string(start: usize, end: usize) -> String {
-    let mut str = String::new();
-
-    for i in start..end {
-        str = format!("{str}tmp_{i} (tmp var of 8 bytes)\n")
-    }
-
-    str
 }

@@ -1,4 +1,4 @@
-use crate::three_ac;
+use crate::three_ac::{self, Argument, Quad};
 
 use super::{
     CallExpression, IRCode, Kind, Kinded, Location, NameAnalysis, Primitive, SourcePosition,
@@ -36,6 +36,111 @@ pub enum Expression {
 }
 
 impl Expression {
+    pub fn get_ir_code(&self) -> (Vec<Quad>, Argument) {
+        match self {
+            Self::Add(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Add(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::And(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::And(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::CallExpression(call) => (
+                call.get_ir_code(),
+                Argument::Location(three_ac::get_last_tmp()),
+            ),
+            Self::Divide(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Divide(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::Equals(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Equals(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::False(_) => (Vec::new(), Argument::Literal(0)),
+            Self::Greater(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Greater(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::GreaterEq(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::GreaterEq(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::IntegerLiteral(int, _) => (Vec::new(), Argument::Literal(int.clone())),
+            Self::Less(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Less(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::LessEq(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::LessEq(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::Location(loc) => (Vec::new(), Argument::Location(format!("{loc}"))),
+            Self::Magic(_) => unimplemented!(),
+            Self::Multiply(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Multiply(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::Negative(a) => {
+                let (quads, handles) = get_expression_ir(vec![a]);
+                let operation = Quad::Subtract(
+                    three_ac::get_tmp(),
+                    Argument::Literal(0),
+                    handles[0].clone(),
+                );
+                handle_operation_ir(quads, operation)
+            }
+            Self::Not(a) => {
+                let (quads, handles) = get_expression_ir(vec![a]);
+                let operation = Quad::Not(three_ac::get_tmp(), handles[0].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::NotEquals(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::NotEq(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::Or(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Or(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::StringLiteral(str, _) => {
+                let label = three_ac::get_str();
+                three_ac::add_global(&format!("{label} \"{str}\""));
+                (Vec::new(), Argument::Location(label))
+            }
+            Self::Subtract(a, b) => {
+                let (quads, handles) = get_expression_ir(vec![a, b]);
+                let operation =
+                    Quad::Subtract(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
+                handle_operation_ir(quads, operation)
+            }
+            Self::True(_) => (Vec::new(), Argument::Literal(1)),
+        }
+    }
+
     pub fn has_subexpression(&self) -> bool {
         match self {
             Self::False(_)
@@ -84,38 +189,6 @@ impl Display for Expression {
             Self::StringLiteral(x, _) => write!(f, "\"{x}\""),
             Self::Subtract(l, r) => write!(f, "({l} - {r})"),
             Self::True(_) => write!(f, "true"),
-        }
-    }
-}
-
-impl IRCode for Expression {
-    fn get_ir_code(&self) -> String {
-        match self {
-            Self::Add(a, b) => get_binary_ir(a, b, "ADD64"),
-            Self::And(a, b) => get_binary_ir(a, b, "AND64"),
-            Self::CallExpression(call) => call.get_ir_code(),
-            Self::Divide(a, b) => get_binary_ir(a, b, "DIV64"),
-            Self::Equals(a, b) => get_binary_ir(a, b, "EQ64"),
-            Self::False(_) => "0".to_string(),
-            Self::Greater(a, b) => get_binary_ir(a, b, "GT64"),
-            Self::GreaterEq(a, b) => get_binary_ir(a, b, "GTE64"),
-            Self::IntegerLiteral(int, _) => format!("{int}"),
-            Self::Less(a, b) => get_binary_ir(a, b, "LT64"),
-            Self::LessEq(a, b) => get_binary_ir(a, b, "LTE64"),
-            Self::Location(loc) => format!("[{loc}]"),
-            Self::Magic(_) => unimplemented!(),
-            Self::Multiply(a, b) => get_binary_ir(a, b, "MULT64"),
-            Self::Negative(a) => get_unary_ir(a, "NEG64"),
-            Self::Not(a) => get_unary_ir(a, "NOT64"),
-            Self::NotEquals(a, b) => get_binary_ir(a, b, "NEQ64"),
-            Self::Or(a, b) => get_binary_ir(a, b, "OR64"),
-            Self::StringLiteral(str, _) => {
-                let label = three_ac::get_str();
-                three_ac::add_global(&format!("{label} \"{str}\""));
-                label
-            }
-            Self::Subtract(a, b) => get_binary_ir(a, b, "SUB64"),
-            Self::True(_) => "1".to_string(),
         }
     }
 }
@@ -371,48 +444,20 @@ fn check_equals(a: &Box<Expression>, b: &Box<Expression>) -> Result<Kind> {
     }
 }
 
-fn get_binary_ir(a: &Box<Expression>, b: &Box<Expression>, operator: &str) -> String {
-    let mut str = String::new();
+fn get_expression_ir(expressions: Vec<&Box<Expression>>) -> (Vec<Quad>, Vec<Argument>) {
+    let mut quads = Vec::new();
+    let mut handles = Vec::new();
 
-    let a_code = a.get_ir_code();
-    let a_expr;
-
-    if a.has_subexpression() {
-        str = format!("{str}{a_code}");
-        a_expr = format!("[{}]", three_ac::get_last_tmp())
-    } else {
-        a_expr = a_code
+    for expression in expressions {
+        let (mut code, arg) = expression.get_ir_code();
+        quads.append(&mut code);
+        handles.push(arg);
     }
 
-    let b_code = b.get_ir_code();
-    let b_expr;
-
-    if b.has_subexpression() {
-        str = format!("{str}{b_code}");
-        b_expr = format!("[{}]", three_ac::get_last_tmp())
-    } else {
-        b_expr = b_code
-    }
-
-    format!(
-        "{str}[{}] := {a_expr} {operator} {b_expr}\n",
-        three_ac::get_tmp()
-    )
+    (quads, handles)
 }
 
-fn get_unary_ir(a: &Box<Expression>, operator: &str) -> String {
-    let str;
-
-    let a_code = a.get_ir_code();
-    let a_expr;
-
-    if a.has_subexpression() {
-        str = format!("{a_code}");
-        a_expr = format!("[{}]", three_ac::get_last_tmp())
-    } else {
-        str = "".to_string();
-        a_expr = a_code
-    }
-
-    format!("{str}[{}] := {operator} {a_expr}\n", three_ac::get_tmp())
+fn handle_operation_ir(mut quads: Vec<Quad>, operation: Quad) -> (Vec<Quad>, Argument) {
+    quads.push(operation);
+    (quads, Argument::Location(three_ac::get_last_tmp()))
 }

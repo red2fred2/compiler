@@ -1,5 +1,8 @@
 use super::{symbol_table::Entry::*, *};
-use crate::{err, three_ac};
+use crate::{
+    err,
+    three_ac::{self, Argument, Quad},
+};
 
 #[derive(Clone, Debug)]
 pub enum Statement {
@@ -75,124 +78,81 @@ impl std::fmt::Display for Statement {
 }
 
 impl IRCode for Statement {
-    fn get_ir_code(&self) -> String {
+    fn get_ir_code(&self) -> Vec<Quad> {
         match self {
             Self::Assignment(loc, x) => {
-                let x_code = x.get_ir_code();
-
-                if x.has_subexpression() {
-                    format!("{x_code}[{loc}] := [{}]\n", three_ac::get_last_tmp())
-                } else {
-                    format!("[{loc}] := {x_code}\n")
-                }
+                let (mut quads, arg) = x.get_ir_code();
+                quads.push(Quad::Assignment(format!("{loc}"), arg));
+                quads
             }
             Self::CallExpression(call) => call.get_ir_code(),
-            Self::Decrement(loc) => format!("[{loc}] := [{loc}] SUB64 1\n"),
-            Self::Exit => "exit\n".to_string(),
-            Self::Give(x) => format!("WRITE {}\n", x.get_ir_code()),
+            Self::Decrement(loc) => vec![Quad::Subtract(
+                format!("{loc}"),
+                Argument::Location(format!("{loc}")),
+                Argument::Literal(1),
+            )],
+            Self::Exit => vec![Quad::Exit],
+            Self::Give(x) => {
+                let (mut quads, arg) = x.get_ir_code();
+                quads.push(Quad::Write(arg));
+                quads
+            }
             Self::If(condition, if_, else_) => {
-                if else_.statements.len() > 0 {
-                    let else_label = three_ac::get_lbl();
-                    let after_label = three_ac::get_lbl();
-                    let condition_code = condition.get_ir_code();
-                    let mut if_code = String::new();
-                    let mut else_code = String::new();
-
-                    for statement in &if_.statements {
-                        let statement_code = statement.get_ir_code();
-                        if_code = format!("{if_code}{statement_code}")
-                    }
-
-                    for statement in &else_.statements {
-                        let statement_code = statement.get_ir_code();
-                        else_code = format!("{else_code}{statement_code}")
-                    }
-
-                    return if condition.has_subexpression() {
-                        format!(
-                            "{condition_code}IF_Z [{}] GOTO {else_label}\n{if_code}goto {after_label}\n{else_label}: {else_code}{after_label}: nop\n",
-                            three_ac::get_last_tmp()
-                        )
-                    } else {
-                        format!("IF_Z {condition_code} GOTO {else_label}\n{if_code}goto {after_label}\n{else_label}: {else_code}{after_label}: nop\n")
-                    };
-                }
-
+                let else_label = three_ac::get_lbl();
                 let after_label = three_ac::get_lbl();
-                let condition_code = condition.get_ir_code();
-                let mut if_code = String::new();
+
+                let (mut quads, arg) = condition.get_ir_code();
+                quads.push(Quad::Ifz(arg, else_label.clone()));
 
                 for statement in &if_.statements {
-                    let statement_code = statement.get_ir_code();
-                    if_code = format!("{if_code}{statement_code}")
+                    quads.append(&mut statement.get_ir_code());
                 }
+                quads.push(Quad::Goto(after_label.clone()));
 
-                if condition.has_subexpression() {
-                    format!(
-                            "{condition_code}IF_Z [{}] GOTO {after_label}\n{if_code}{after_label}: nop\n",
-                            three_ac::get_last_tmp()
-                        )
-                } else {
-                    format!(
-                        "IF_Z {condition_code} GOTO {after_label}\n{if_code}{after_label}: nop\n"
-                    )
+                quads.push(Quad::Label(else_label));
+                for statement in &else_.statements {
+                    quads.append(&mut statement.get_ir_code());
                 }
+                quads.push(Quad::Label(after_label));
+
+                quads
             }
-            Self::Increment(loc) => format!("[{loc}] := [{loc}] ADD64 1\n"),
+            Self::Increment(loc) => vec![Quad::Add(
+                format!("{loc}"),
+                Argument::Location(format!("{loc}")),
+                Argument::Literal(1),
+            )],
             Self::Return(x, _) => {
                 let exit_label = three_ac::get_fn_exit_lbl();
-
                 let Some(x) = x else {
-                    return format!("goto {exit_label}\n");
+                    return vec![Quad::Goto(exit_label)];
                 };
 
-                let x_code = x.get_ir_code();
+                let (mut quads, arg) = x.get_ir_code();
+                quads.push(Quad::SetRet(arg));
+                quads.push(Quad::Goto(exit_label));
 
-                if x.has_subexpression() {
-                    format!(
-                        "{x_code}setret [{}]\ngoto {exit_label}\n",
-                        three_ac::get_last_tmp()
-                    )
-                } else {
-                    format!("setret [{x_code}]\ngoto {exit_label}\n")
-                }
+                quads
             }
-            Self::Take(x) => format!("READ [{x}]\n"),
-            Self::VariableDeclaration(Declaration::Variable(decl)) => {
-                if let Some(x) = &decl.assignment {
-                    let name = &decl.name.name;
-                    let x_code = x.get_ir_code();
-
-                    if x.has_subexpression() {
-                        format!("{x_code}[{name}] := [{}]\n", three_ac::get_last_tmp())
-                    } else {
-                        format!("[{name}] := {x_code}\n")
-                    }
-                } else {
-                    "".to_string()
-                }
-            }
+            Self::Take(x) => vec![Quad::Write(Argument::Location(format!("{x}")))],
+            Self::VariableDeclaration(Declaration::Variable(decl)) => decl.get_ir_code(),
             Self::While(condition, body) => {
                 let condition_label = three_ac::get_lbl();
                 let after_label = three_ac::get_lbl();
-                let condition_code = condition.get_ir_code();
-                let mut body_code = String::new();
+
+                let mut quads = vec![Quad::Label(condition_label.clone())];
+                let (mut condition_code, arg) = condition.get_ir_code();
+                quads.append(&mut condition_code);
+                quads.push(Quad::Ifz(arg, after_label.clone()));
 
                 for statement in &body.statements {
-                    let statement_code = statement.get_ir_code();
-                    body_code = format!("{body_code}{statement_code}")
+                    quads.append(&mut statement.get_ir_code());
                 }
 
-                if condition.has_subexpression() {
-                    format!(
-                            "{condition_label}: {condition_code}IF_Z [{}] GOTO {after_label}\n{body_code}goto {condition_label}\n{after_label}: nop\n",
-                            three_ac::get_last_tmp()
-                        )
-                } else {
-                    format!(
-                        "{condition_label}: IF_Z {condition_code} GOTO {after_label}\n{body_code}goto {condition_label}\n{after_label}: nop\n"
-                )
-                }
+                quads.push(Quad::Goto(condition_label));
+                quads.push(Quad::Label(after_label));
+
+                quads
             }
             _ => unreachable!(),
         }

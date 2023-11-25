@@ -1,7 +1,7 @@
 //! It only occurred to me that I shouldn't just output text after a few hours of
 //! work. That's a problem for future me. Screw that guy.
 
-use super::IRCode;
+use super::{IRCode, Quad};
 use crate::ast::Declaration;
 
 static mut LBL_COUNTER: usize = 0;
@@ -14,8 +14,8 @@ pub fn add_global(str: &String) {
     unsafe { GLOBALS.push(str.clone()) }
 }
 
-pub fn generate(ast: Vec<Declaration>) -> String {
-    let mut string = "_start: ".to_string();
+pub fn generate(ast: Vec<Declaration>) -> Vec<Quad> {
+    let mut quads = Vec::new();
 
     // Run thrugh variable declarations to define the _start label
     // I want to try not using the C standard library. This is a first step.
@@ -24,12 +24,12 @@ pub fn generate(ast: Vec<Declaration>) -> String {
             continue;
         };
 
-        let decl_ir_code = var.get_ir_code();
-        string = format!("{string}{decl_ir_code}")
+        quads.append(&mut var.get_ir_code());
     }
 
     // Kick off main like _start should
-    string = format!("{string}call main\n\n");
+    quads.push(Quad::Label("_start".to_string()));
+    quads.push(Quad::Call("main".to_string()));
 
     // Then hit the function declarations
     for declaration in &ast {
@@ -37,25 +37,20 @@ pub fn generate(ast: Vec<Declaration>) -> String {
             continue;
         };
 
-        let decl_ir_code = function.get_ir_code();
-        string = format!("{string}{decl_ir_code}")
+        quads.append(&mut function.get_ir_code());
     }
 
-    let globals = get_globals();
-    format!("{globals}{string}")
+    let mut globals = vec![get_globals()];
+    globals.append(&mut quads);
+    globals
 }
 
 pub fn get_fn_exit_lbl() -> String {
     unsafe { FN_EXIT_LBL.clone() }
 }
 
-fn get_globals() -> String {
-    let str;
-    unsafe {
-        str = GLOBALS.join("\n");
-    }
-
-    format!("[BEGIN GLOBALS]\n{str}\n[END GLOBALS]\n")
+fn get_globals() -> Quad {
+    unsafe { Quad::Globals(GLOBALS.clone()) }
 }
 
 pub fn get_last_tmp() -> String {
