@@ -1,6 +1,7 @@
 //! It only occurred to me that I shouldn't just output text after a few hours of
 //! work. That's a problem for future me. Screw that guy.
 
+use super::IRCode;
 use crate::ast::Declaration;
 
 static mut LBL_COUNTER: usize = 0;
@@ -8,10 +9,6 @@ static mut STR_COUNTER: usize = 0;
 static mut TMP_COUNTER: usize = 0;
 static mut FN_EXIT_LBL: String = String::new();
 pub static mut GLOBALS: Vec<String> = Vec::new();
-
-pub trait IRCode {
-    fn get_ir_code(&self) -> String;
-}
 
 pub fn add_global(str: &String) {
     unsafe { GLOBALS.push(str.clone()) }
