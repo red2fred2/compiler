@@ -1,9 +1,5 @@
 //! # Drewno Mars language compiler
 //! Here is the [language Specification](https://compilers.cool/language/)
-//!
-//! I've decided to try and avoid using the C standard library later on,
-//! that means my main function won't have to be labeled main, and I'll have to
-//! define my own _start label for the loader.
 #![feature(test)]
 
 extern crate test;

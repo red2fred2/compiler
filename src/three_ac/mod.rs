@@ -1,5 +1,6 @@
 mod intermediate_code;
 mod quads;
+mod x64;
 
 pub use intermediate_code::*;
 pub use quads::Quad;

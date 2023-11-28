@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use super::Argument;
+use super::{x64::X64Target, Argument};
 use crate::ast::{Formal, Id};
 
 #[derive(Debug, Clone)]
@@ -43,7 +43,7 @@ impl std::fmt::Display for Quad {
             Quad::Add(w, x, y) => write!(f, "[{w}] := {x} ADD64 {y}\n"),
             Quad::And(w, x, y) => write!(f, "[{w}] := {x} AND64 {y}\n"),
             Quad::Assignment(w, x) => write!(f, "[{w}] := {x}\n"),
-            Quad::Call(w) => write!(f, "call {w}\n"),
+            Quad::Call(w) => write!(f, "call fn_{w}\n"),
             Quad::Divide(w, x, y) => write!(f, "[{w}] := {x} DIV64 {y}\n"),
             Quad::Enter(w) => write!(f, "fn_{w}: enter {w}\n"),
             Quad::Exit => write!(f, "exit\n"),
@@ -90,6 +90,42 @@ impl std::fmt::Display for Quad {
             Quad::SetRet(x) => write!(f, "setret {x}\n"),
             Quad::Subtract(w, x, y) => write!(f, "[{w}] := {x} SUB64 {y}\n"),
             Quad::Write(x) => write!(f, "write {x}\n"),
+        }
+    }
+}
+
+impl X64Target for Quad {
+    fn compile_x64(&self) -> String {
+        match self {
+            Quad::Add(_, _, _) => todo!(),
+            Quad::And(_, _, _) => todo!(),
+            Quad::Assignment(_, _) => todo!(),
+            Quad::Call(_) => todo!(),
+            Quad::Divide(_, _, _) => todo!(),
+            Quad::Enter(_) => "".to_string(),
+            Quad::Exit => todo!(),
+            Quad::Equals(_, _, _) => todo!(),
+            Quad::GetArg(_, _) => todo!(),
+            Quad::GetRet(_) => todo!(),
+            Quad::Globals(_) => todo!(),
+            Quad::Goto(_) => todo!(),
+            Quad::Greater(_, _, _) => todo!(),
+            Quad::GreaterEq(_, _, _) => todo!(),
+            Quad::Ifz(_, _) => todo!(),
+            Quad::Label(_) => todo!(),
+            Quad::Leave(_, _) => "".to_string(),
+            Quad::Less(_, _, _) => todo!(),
+            Quad::LessEq(_, _, _) => todo!(),
+            Quad::Locals(_, _, _, _) => todo!(),
+            Quad::Multiply(_, _, _) => todo!(),
+            Quad::Not(_, _) => todo!(),
+            Quad::NotEq(_, _, _) => todo!(),
+            Quad::Or(_, _, _) => todo!(),
+            Quad::Read(_) => todo!(),
+            Quad::SetArg(_, _) => todo!(),
+            Quad::SetRet(_) => todo!(),
+            Quad::Subtract(_, _, _) => todo!(),
+            Quad::Write(_) => todo!(),
         }
     }
 }

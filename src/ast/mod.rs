@@ -19,7 +19,8 @@ use type_analysis::TypeAnalysis;
 lalrpop_mod!(pub grammar);
 
 pub fn build(file_contents: &str, args: &Args) -> Result<Vec<Declaration>> {
-    let should_type_check = args.check_types || args.ac3_IR_generation.is_some();
+    let should_type_check =
+        args.check_types || args.ac3_IR_generation.is_some() || args.output_assembly.is_some();
     let should_name_check = should_type_check || args.named_unparse.is_some();
     let should_parse = should_name_check || args.parse || args.unparse.is_some();
 

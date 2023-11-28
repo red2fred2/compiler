@@ -28,7 +28,7 @@ pub fn generate(ast: Vec<Declaration>) -> Vec<Quad> {
     }
 
     // Kick off main like _start should
-    quads.push(Quad::Label("_start".to_string()));
+    quads.push(Quad::Label("main".to_string()));
     quads.push(Quad::Call("main".to_string()));
 
     // Then hit the function declarations
