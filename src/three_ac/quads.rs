@@ -97,16 +97,19 @@ impl std::fmt::Display for Quad {
 impl X64Target for Quad {
     fn compile_x64(&self) -> String {
         match self {
-            Quad::Add(_, _, _) => todo!(),
-            Quad::And(_, _, _) => todo!(),
-            Quad::Assignment(_, _) => todo!(),
-            Quad::Call(_) => todo!(),
+            Quad::Add(_, _, _) => todo!(),     // needs var loading
+            Quad::And(_, _, _) => todo!(),     // needs var loading
+            Quad::Assignment(_, _) => todo!(), // needs var loading
+            Quad::Call(name) => format!("call {name}"),
             Quad::Divide(_, _, _) => todo!(),
-            Quad::Enter(_) => todo!(),
+            Quad::Enter(name) => format!(
+                "fn_{name}: push %rbp\n\
+                 movq %rsp, %rbp\n"
+            ),
             Quad::Exit => format!(
                 "movq $60, %rax\n\
                  movq $0, %rdi\n\
-                 syscall"
+                 syscall\n"
             ),
             Quad::Equals(_, _, _) => todo!(),
             Quad::GetArg(_, _) => todo!(),
@@ -117,7 +120,12 @@ impl X64Target for Quad {
             Quad::GreaterEq(_, _, _) => todo!(),
             Quad::Ifz(_, _) => todo!(),
             Quad::Label(_) => todo!(),
-            Quad::Leave(_, _) => todo!(),
+            Quad::Leave(_, _) => format!(
+                "addq $4, %rsp\n\
+                xor %rax, %rax\n\
+                leave\n\
+                ret"
+            ),
             Quad::Less(_, _, _) => todo!(),
             Quad::LessEq(_, _, _) => todo!(),
             Quad::Locals(_, _, _, _) => todo!(),
@@ -129,7 +137,7 @@ impl X64Target for Quad {
             Quad::SetArg(_, _) => todo!(),
             Quad::SetRet(_) => todo!(),
             Quad::Subtract(_, _, _) => todo!(),
-            Quad::Write(_) => todo!(),
+            Quad::Write(_) => todo!(), // Need type information
         }
     }
 }
