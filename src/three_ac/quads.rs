@@ -103,12 +103,16 @@ impl X64Target for Quad {
             Quad::Call(_) => todo!(),
             Quad::Divide(_, _, _) => todo!(),
             Quad::Enter(_) => todo!(),
-            Quad::Exit => "movq $60, %rax\nmovq $0, %rdi\nsyscall".to_string(),
+            Quad::Exit => format!(
+                "movq $60, %rax\n\
+                 movq $0, %rdi\n\
+                 syscall"
+            ),
             Quad::Equals(_, _, _) => todo!(),
             Quad::GetArg(_, _) => todo!(),
             Quad::GetRet(_) => todo!(),
             Quad::Globals(_) => todo!(),
-            Quad::Goto(_) => todo!(),
+            Quad::Goto(target) => format!("jmp {target}\n"),
             Quad::Greater(_, _, _) => todo!(),
             Quad::GreaterEq(_, _, _) => todo!(),
             Quad::Ifz(_, _) => todo!(),
