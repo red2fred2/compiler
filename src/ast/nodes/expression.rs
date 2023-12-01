@@ -52,7 +52,7 @@ impl Expression {
             }
             Self::CallExpression(call) => (
                 call.get_ir_code(),
-                Argument::Location(three_ac::get_last_tmp()),
+                Argument::LocalLocation(three_ac::get_last_tmp()),
             ),
             Self::Divide(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
@@ -92,7 +92,13 @@ impl Expression {
                     Quad::LessEq(three_ac::get_tmp(), handles[0].clone(), handles[1].clone());
                 handle_operation_ir(quads, operation)
             }
-            Self::Location(loc) => (Vec::new(), Argument::Location(format!("{loc}"))),
+            Self::Location(loc) => {
+                if loc.is_local() {
+                    (Vec::new(), Argument::LocalLocation(format!("{loc}")))
+                } else {
+                    (Vec::new(), Argument::GlobalLocation(format!("{loc}")))
+                }
+            }
             Self::Magic(_) => unimplemented!(),
             Self::Multiply(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
@@ -129,7 +135,7 @@ impl Expression {
             Self::StringLiteral(str, _) => {
                 let label = three_ac::get_str();
                 three_ac::add_global(&format!("{label} \"{str}\""));
-                (Vec::new(), Argument::Location(label))
+                (Vec::new(), Argument::GlobalLocation(label))
             }
             Self::Subtract(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
@@ -459,5 +465,5 @@ fn get_expression_ir(expressions: Vec<&Box<Expression>>) -> (Vec<Quad>, Vec<Argu
 
 fn handle_operation_ir(mut quads: Vec<Quad>, operation: Quad) -> (Vec<Quad>, Argument) {
     quads.push(operation);
-    (quads, Argument::Location(three_ac::get_last_tmp()))
+    (quads, Argument::LocalLocation(three_ac::get_last_tmp()))
 }

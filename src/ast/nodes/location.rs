@@ -47,6 +47,10 @@ impl Location {
         }
         link
     }
+
+    pub fn is_local(&self) -> bool {
+        todo!()
+    }
 }
 
 impl std::fmt::Display for Location {

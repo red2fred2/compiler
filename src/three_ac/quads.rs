@@ -1,39 +1,42 @@
 use std::ops::Range;
 
-use super::{x64::X64Target, Argument};
+use super::{
+    x64::{self, X64Target},
+    Argument,
+};
 use crate::ast::{Formal, Id};
 
 #[derive(Debug, Clone)]
 pub enum Quad {
-    Add(String, Argument, Argument),
-    And(String, Argument, Argument),
-    Assignment(String, Argument),
+    Add(Argument, Argument, Argument),
+    And(Argument, Argument, Argument),
+    Assignment(Argument, Argument),
     Call(String),
-    Divide(String, Argument, Argument),
+    Divide(Argument, Argument, Argument),
     Enter(String),
     Exit,
-    Equals(String, Argument, Argument),
-    GetArg(usize, String),
-    GetRet(String),
+    Equals(Argument, Argument, Argument),
+    GetArg(usize, Argument),
+    GetRet(Argument),
     Globals(Vec<String>),
     Goto(String),
-    Greater(String, Argument, Argument),
-    GreaterEq(String, Argument, Argument),
+    Greater(Argument, Argument, Argument),
+    GreaterEq(Argument, Argument, Argument),
     Ifz(Argument, String),
     Label(String),
     Leave(String, String),
-    Less(String, Argument, Argument),
-    LessEq(String, Argument, Argument),
+    Less(Argument, Argument, Argument),
+    LessEq(Argument, Argument, Argument),
     // Locals header with function name, formals, locals, and temp variable range
     Locals(String, Vec<Formal>, Vec<Id>, Range<usize>),
-    Multiply(String, Argument, Argument),
-    Not(String, Argument),
-    NotEq(String, Argument, Argument),
-    Or(String, Argument, Argument),
+    Multiply(Argument, Argument, Argument),
+    Not(Argument, Argument),
+    NotEq(Argument, Argument, Argument),
+    Or(Argument, Argument, Argument),
     Read(Argument),
     SetArg(usize, Argument),
     SetRet(Argument),
-    Subtract(String, Argument, Argument),
+    Subtract(Argument, Argument, Argument),
     Write(Argument),
 }
 
@@ -97,11 +100,29 @@ impl std::fmt::Display for Quad {
 impl X64Target for Quad {
     fn compile_x64(&self) -> String {
         match self {
-            Quad::Add(_, _, _) => todo!(),     // needs var loading
-            Quad::And(_, _, _) => todo!(),     // needs var loading
-            Quad::Assignment(_, _) => todo!(), // needs var loading
+            Quad::Add(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!("{str}addq %rax, %rcx\n");
+                format!("{str}{}", x64::write(location, "%rcx"))
+            }
+            Quad::And(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!("{str}andq %rax, %rcx\n");
+                format!("{str}{}", x64::write(location, "%rcx"))
+            }
+            Quad::Assignment(location, value) => {
+                let mut str = x64::load(value, "%rax");
+                format!("{str}{}", x64::write(location, "%rax"))
+            }
             Quad::Call(name) => format!("call {name}"),
-            Quad::Divide(_, _, _) => todo!(),
+            Quad::Divide(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!("{str}idivq %rax, %rcx\n");
+                format!("{str}{}", x64::write(location, "%rcx"))
+            }
             Quad::Enter(name) => format!(
                 "fn_{name}: push %rbp\n\
                  movq %rsp, %rbp\n"
@@ -111,33 +132,119 @@ impl X64Target for Quad {
                  movq $0, %rdi\n\
                  syscall\n"
             ),
-            Quad::Equals(_, _, _) => todo!(),
-            Quad::GetArg(_, _) => todo!(),
-            Quad::GetRet(_) => todo!(),
-            Quad::Globals(_) => todo!(),
+            Quad::Equals(_, _, _) => todo!(), // needs var loading
+            Quad::GetArg(number, variable) => {
+                let arg_registers = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"];
+                x64::write(variable, arg_registers[*number])
+            }
+            Quad::GetRet(location) => x64::write(location, "%rax"),
+            Quad::Globals(_) => todo!(), /////////////////////////////////////// create globals
             Quad::Goto(target) => format!("jmp {target}\n"),
-            Quad::Greater(_, _, _) => todo!(),
-            Quad::GreaterEq(_, _, _) => todo!(),
-            Quad::Ifz(_, _) => todo!(),
-            Quad::Label(_) => todo!(),
+            Quad::Greater(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!(
+                    "{str}\
+					cmpq %rcx, %rax\n\
+					movq %rflags, %rax\n\
+					andq $0x80, %rax\n\
+					shrq %rax, $7\n\
+					movq %rflags, %rcx\n\
+					andq $0x40, %rcx\n\
+					shrq %rcx, $6\n\
+					xorq $1, %rcx\n\
+					andq %rcx, %rax\n"
+                );
+                format!("{str}{}", x64::write(location, "%rax"))
+            }
+            Quad::GreaterEq(_, _, _) => todo!(), // needs var loading
+            Quad::Ifz(condition, label) => {
+                let mut str = x64::load(condition, "%rax");
+                str = format!(
+                    "{str}cmpq %rax, $0\n\
+					je {label}\n"
+                );
+
+                str
+            }
+            Quad::Label(name) => format!("{name}: nop"),
             Quad::Leave(_, _) => format!(
                 "addq $4, %rsp\n\
                 xor %rax, %rax\n\
                 leave\n\
-                ret"
+                ret\n"
             ),
-            Quad::Less(_, _, _) => todo!(),
-            Quad::LessEq(_, _, _) => todo!(),
-            Quad::Locals(_, _, _, _) => todo!(),
-            Quad::Multiply(_, _, _) => todo!(),
-            Quad::Not(_, _) => todo!(),
-            Quad::NotEq(_, _, _) => todo!(),
-            Quad::Or(_, _, _) => todo!(),
-            Quad::Read(_) => todo!(),
-            Quad::SetArg(_, _) => todo!(),
-            Quad::SetRet(_) => todo!(),
-            Quad::Subtract(_, _, _) => todo!(),
-            Quad::Write(_) => todo!(), // Need type information
+            Quad::Less(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!(
+                    "{str}\
+					cmpq %rcx, %rax\n\
+					movq %rflags, %rax\n\
+					andq $0x80, %rax\n\
+					shrq %rax, $7\n\
+					xorq $1, %rax\n\
+					movq %rflags, %rcx\n\
+					andq $0x40, %rcx\n\
+					shrq %rcx, $6\n\
+					xorq $1, %rcx\n\
+					andq %rcx, %rax\n"
+                );
+                format!("{str}{}", x64::write(location, "%rax"))
+            }
+            Quad::LessEq(_, _, _) => todo!(), // needs var loading
+            Quad::Locals(_, _, _, _) => todo!(), /////////////////////////////// create local stack positions
+            Quad::Multiply(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!("{str}imulq %rax, %rcx\n");
+                format!("{str}{}", x64::write(location, "%rcx"))
+            }
+            Quad::Not(location, x) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}xorq $1, %rax\n");
+                format!("{str}{}", x64::write(location, "%rcx"))
+            }
+            Quad::NotEq(_, _, _) => todo!(), // needs var loading
+            Quad::Or(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!("{str}orq %rax, %rcx\n");
+                format!("{str}{}", x64::write(location, "%rcx"))
+            }
+            Quad::Read(variable) => {
+                let str = format!(
+                    "leaq FGETS_BUFFER(%rip), %rdi\n\
+					movq $1024, %rsi\n\
+					movq stdin(%rip), %rdx\n\
+					call fgets\n\
+					movq %rax, %rdi\n\
+					call atoi\n"
+                );
+                format!("{str}{}", x64::write(variable, "%rax"))
+            }
+            Quad::SetArg(number, variable) => {
+                let arg_registers = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"];
+                x64::load(variable, arg_registers[*number])
+            }
+            Quad::SetRet(argument) => x64::load(argument, "%rax"),
+            Quad::Subtract(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!("{str}subq %rax, %rcx\n");
+                format!("{str}{}", x64::write(location, "%rcx"))
+            }
+            Quad::Write(argument) => {
+                // // String print
+                // movq $hw_str, %rdi
+                // call puts
+
+                // // Int print
+                // movq $int_fmt, %rdi
+                // movq $4, %rsi
+                // call printf
+                todo!()
+            }
         }
     }
 }

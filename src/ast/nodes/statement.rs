@@ -86,11 +86,15 @@ impl IRCode for Statement {
                 quads
             }
             Self::CallExpression(call) => call.get_ir_code(),
-            Self::Decrement(loc) => vec![Quad::Subtract(
-                format!("{loc}"),
-                Argument::Location(format!("{loc}")),
-                Argument::Literal(1),
-            )],
+            Self::Decrement(loc) => {
+                let arg;
+                if loc.is_local() {
+                    arg = Argument::LocalLocation(format!("{loc}"));
+                } else {
+                    arg = Argument::GlobalLocation(format!("{loc}"));
+                }
+                vec![Quad::Subtract(format!("{loc}"), arg, Argument::Literal(1))]
+            }
             Self::Exit => vec![Quad::Exit],
             Self::Give(x) => {
                 let (mut quads, arg) = x.get_ir_code();
@@ -117,11 +121,15 @@ impl IRCode for Statement {
 
                 quads
             }
-            Self::Increment(loc) => vec![Quad::Add(
-                format!("{loc}"),
-                Argument::Location(format!("{loc}")),
-                Argument::Literal(1),
-            )],
+            Self::Increment(loc) => {
+                let arg;
+                if loc.is_local() {
+                    arg = Argument::LocalLocation(format!("{loc}"));
+                } else {
+                    arg = Argument::GlobalLocation(format!("{loc}"));
+                }
+                vec![Quad::Add(format!("{loc}"), arg, Argument::Literal(1))]
+            }
             Self::Return(x, _) => {
                 let exit_label = three_ac::get_fn_exit_lbl();
                 let Some(x) = x else {
@@ -134,7 +142,15 @@ impl IRCode for Statement {
 
                 quads
             }
-            Self::Take(x) => vec![Quad::Write(Argument::Location(format!("{x}")))],
+            Self::Take(x) => {
+                let arg;
+                if x.is_local() {
+                    arg = Argument::LocalLocation(format!("{x}"));
+                } else {
+                    arg = Argument::GlobalLocation(format!("{x}"));
+                }
+                vec![Quad::Write(arg)]
+            }
             Self::VariableDeclaration(Declaration::Variable(VariableDeclaration {
                 name,
                 t: _,
