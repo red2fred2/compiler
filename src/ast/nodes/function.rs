@@ -60,7 +60,8 @@ impl IRCode for Function {
     fn get_ir_code(&self) -> Vec<Quad> {
         let mut body_quads = Vec::new();
         let name = &self.id.name;
-        three_ac::add_global(name);
+        let fn_name = format!("fn_{name}");
+        three_ac::add_global(&fn_name);
         let exit_label = three_ac::get_new_fn_exit_lbl();
 
         let start_tmps = three_ac::get_tmp_counter();
@@ -79,7 +80,7 @@ impl IRCode for Function {
 
         for i in 0..self.fn_input.len() {
             let name = self.fn_input[i].id.name.clone();
-            quads.push(Quad::GetArg(i + 1, name));
+            quads.push(Quad::GetArg(i + 1, three_ac::Argument::LocalValue(name)));
         }
 
         quads.append(&mut body_quads);

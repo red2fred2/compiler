@@ -86,14 +86,15 @@ impl std::fmt::Display for VariableDeclaration {
 impl IRCode for VariableDeclaration {
     fn get_ir_code(&self) -> Vec<Quad> {
         let name = self.name.name.clone();
-        three_ac::add_global(&name);
+        let global_name = format!("global_{name}");
+        three_ac::add_global(&global_name);
 
         let Some(assignment) = &self.assignment else {
             return Vec::new();
         };
 
         let (mut code, arg) = assignment.get_ir_code();
-        code.push(Quad::Assignment(name, arg));
+        code.push(Quad::Assignment(three_ac::Argument::GlobalValue(name), arg));
 
         code
     }

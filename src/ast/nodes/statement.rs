@@ -82,7 +82,17 @@ impl IRCode for Statement {
         match self {
             Self::Assignment(loc, x) => {
                 let (mut quads, arg) = x.get_ir_code();
-                quads.push(Quad::Assignment(format!("{loc}"), arg));
+                if loc.is_local() {
+                    quads.push(Quad::Assignment(
+                        Argument::LocalValue(format!("{loc}")),
+                        arg,
+                    ));
+                } else {
+                    quads.push(Quad::Assignment(
+                        Argument::GlobalValue(format!("{loc}")),
+                        arg,
+                    ));
+                }
                 quads
             }
             Self::CallExpression(call) => call.get_ir_code(),
@@ -93,7 +103,7 @@ impl IRCode for Statement {
                 } else {
                     arg = Argument::GlobalLocation(format!("{loc}"));
                 }
-                vec![Quad::Subtract(format!("{loc}"), arg, Argument::Literal(1))]
+                vec![Quad::Subtract(arg.clone(), arg, Argument::Literal(1))]
             }
             Self::Exit => vec![Quad::Exit],
             Self::Give(x) => {
@@ -128,7 +138,7 @@ impl IRCode for Statement {
                 } else {
                     arg = Argument::GlobalLocation(format!("{loc}"));
                 }
-                vec![Quad::Add(format!("{loc}"), arg, Argument::Literal(1))]
+                vec![Quad::Add(arg.clone(), arg, Argument::Literal(1))]
             }
             Self::Return(x, _) => {
                 let exit_label = three_ac::get_fn_exit_lbl();
@@ -158,7 +168,10 @@ impl IRCode for Statement {
             })) => {
                 let Some(x) = assignment else { return vec![] };
                 let (mut quads, arg) = x.get_ir_code();
-                quads.push(Quad::Assignment(format!("{name}"), arg));
+                quads.push(Quad::Assignment(
+                    Argument::LocalValue(format!("{name}")),
+                    arg,
+                ));
                 quads
             }
             Self::While(condition, body) => {

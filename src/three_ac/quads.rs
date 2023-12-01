@@ -132,7 +132,18 @@ impl X64Target for Quad {
                  movq $0, %rdi\n\
                  syscall\n"
             ),
-            Quad::Equals(_, _, _) => todo!(), // needs var loading
+            Quad::Equals(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!(
+                    "{str}\
+					cmpq %rcx, %rax\n\
+					movq %rflags, %rax\n\
+					andq $0x40, %rax\n\
+					shrq %rax, $6\n"
+                );
+                format!("{str}{}", x64::write(location, "%rax"))
+            }
             Quad::GetArg(number, variable) => {
                 let arg_registers = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"];
                 x64::write(variable, arg_registers[*number])
@@ -157,7 +168,22 @@ impl X64Target for Quad {
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
-            Quad::GreaterEq(_, _, _) => todo!(), // needs var loading
+            Quad::GreaterEq(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!(
+                    "{str}\
+					cmpq %rcx, %rax\n\
+					movq %rflags, %rax\n\
+					andq $0x80, %rax\n\
+					shrq %rax, $7\n\
+					movq %rflags, %rcx\n\
+					andq $0x40, %rcx\n\
+					shrq %rcx, $6\n\
+					orq %rcx, %rax\n"
+                );
+                format!("{str}{}", x64::write(location, "%rax"))
+            }
             Quad::Ifz(condition, label) => {
                 let mut str = x64::load(condition, "%rax");
                 str = format!(
@@ -179,11 +205,10 @@ impl X64Target for Quad {
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!(
                     "{str}\
-					cmpq %rcx, %rax\n\
+					cmpq %rax, %rcx\n\
 					movq %rflags, %rax\n\
 					andq $0x80, %rax\n\
 					shrq %rax, $7\n\
-					xorq $1, %rax\n\
 					movq %rflags, %rcx\n\
 					andq $0x40, %rcx\n\
 					shrq %rcx, $6\n\
@@ -192,7 +217,22 @@ impl X64Target for Quad {
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
-            Quad::LessEq(_, _, _) => todo!(), // needs var loading
+            Quad::LessEq(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!(
+                    "{str}\
+					cmpq %rax, %rcx\n\
+					movq %rflags, %rax\n\
+					andq $0x80, %rax\n\
+					shrq %rax, $7\n\
+					movq %rflags, %rcx\n\
+					andq $0x40, %rcx\n\
+					shrq %rcx, $6\n\
+					orq %rcx, %rax\n"
+                );
+                format!("{str}{}", x64::write(location, "%rax"))
+            }
             Quad::Locals(_, _, _, _) => todo!(), /////////////////////////////// create local stack positions
             Quad::Multiply(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
@@ -205,7 +245,19 @@ impl X64Target for Quad {
                 str = format!("{str}xorq $1, %rax\n");
                 format!("{str}{}", x64::write(location, "%rcx"))
             }
-            Quad::NotEq(_, _, _) => todo!(), // needs var loading
+            Quad::NotEq(location, x, y) => {
+                let mut str = x64::load(x, "%rax");
+                str = format!("{str}{}", x64::load(y, "%rcx"));
+                str = format!(
+                    "{str}\
+					cmpq %rcx, %rax\n\
+					movq %rflags, %rax\n\
+					andq $0x40, %rax\n\
+					shrq %rax, $6\n\
+					xorq %rax, $1\n"
+                );
+                format!("{str}{}", x64::write(location, "%rax"))
+            }
             Quad::Or(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
@@ -243,7 +295,7 @@ impl X64Target for Quad {
                 // movq $int_fmt, %rdi
                 // movq $4, %rsi
                 // call printf
-                todo!()
+                todo!() //////////////////////////////////////////////////////// requires type info
             }
         }
     }

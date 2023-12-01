@@ -4,9 +4,10 @@
 .bss
 .align 32
 .size FGETS_BUFFER, 1024
-FGETS_BUFFER: .zero	1024
+FGETS_BUFFER: .zero 1024
 
 .data
+global_asdf: .zero 8
 int_fmt: .string "%d\n"
 hw_str: .string "Hello bitches!"
 
