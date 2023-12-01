@@ -37,7 +37,8 @@ pub enum Quad {
     SetArg(usize, Argument),
     SetRet(Argument),
     Subtract(Argument, Argument, Argument),
-    Write(Argument),
+    WriteInt(Argument),
+    WriteStr(Argument),
 }
 
 impl std::fmt::Display for Quad {
@@ -92,7 +93,8 @@ impl std::fmt::Display for Quad {
             Quad::SetArg(n, x) => write!(f, "setarg {n} {x}\n"),
             Quad::SetRet(x) => write!(f, "setret {x}\n"),
             Quad::Subtract(w, x, y) => write!(f, "[{w}] := {x} SUB64 {y}\n"),
-            Quad::Write(x) => write!(f, "write {x}\n"),
+            Quad::WriteInt(x) => write!(f, "write {x}\n"),
+            Quad::WriteStr(x) => write!(f, "write {x}\n"),
         }
     }
 }
@@ -113,7 +115,7 @@ impl X64Target for Quad {
                 format!("{str}{}", x64::write(location, "%rcx"))
             }
             Quad::Assignment(location, value) => {
-                let mut str = x64::load(value, "%rax");
+                let str = x64::load(value, "%rax");
                 format!("{str}{}", x64::write(location, "%rax"))
             }
             Quad::Call(name) => format!("call {name}"),
@@ -286,16 +288,24 @@ impl X64Target for Quad {
                 str = format!("{str}subq %rax, %rcx\n");
                 format!("{str}{}", x64::write(location, "%rcx"))
             }
-            Quad::Write(argument) => {
-                // // String print
-                // movq $hw_str, %rdi
-                // call puts
+            Quad::WriteInt(argument) => {
+                let str = x64::load(argument, "%rsi");
+                format!(
+                    "{str}\
+					movq $int_fmt, %rdi\n\
+                	call printf\n"
+                )
+            }
+            Quad::WriteStr(argument) => {
+                let name = match argument {
+                    Argument::GlobalLocation(s) | Argument::GlobalValue(s) => s,
+                    _ => unreachable!(),
+                };
 
-                // // Int print
-                // movq $int_fmt, %rdi
-                // movq $4, %rsi
-                // call printf
-                todo!() //////////////////////////////////////////////////////// requires type info
+                format!(
+                    "movq ${name}, %rdi\n\
+                	call puts\n"
+                )
             }
         }
     }

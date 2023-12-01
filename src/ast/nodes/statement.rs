@@ -108,7 +108,21 @@ impl IRCode for Statement {
             Self::Exit => vec![Quad::Exit],
             Self::Give(x) => {
                 let (mut quads, arg) = x.get_ir_code();
-                quads.push(Quad::Write(arg));
+
+                let Ok(Kind::Variable(t)) = x.get_kind() else {
+                    unreachable!()
+                };
+
+                let Some((t, _)) = t.unwrap_primitive() else {
+                    unreachable!()
+                };
+
+                match t {
+                    Primitive::Int => quads.push(Quad::WriteInt(arg)),
+                    Primitive::String => quads.push(Quad::WriteStr(arg)),
+                    _ => unreachable!(),
+                }
+
                 quads
             }
             Self::If(condition, if_, else_) => {
@@ -159,7 +173,7 @@ impl IRCode for Statement {
                 } else {
                     arg = Argument::GlobalLocation(format!("{x}"));
                 }
-                vec![Quad::Write(arg)]
+                vec![Quad::Read(arg)]
             }
             Self::VariableDeclaration(Declaration::Variable(VariableDeclaration {
                 name,
