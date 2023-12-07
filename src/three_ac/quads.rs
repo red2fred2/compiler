@@ -144,14 +144,19 @@ impl X64Target for Quad {
                 syscall\n"
             ),
             Quad::Equals(location, x, y) => {
+                let l_else = intermediate_code::get_lbl();
+                let l_end = intermediate_code::get_lbl();
+
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!(
                     "{str}\
 					cmpq %rcx, %rax\n\
-					movq %rflags, %rax\n\
-					andq $0x40, %rax\n\
-					shrq %rax, $6\n"
+					jne {l_else}\n\
+					movq $1, %rax\n\
+					jmp {l_end}\n\
+					{l_else}: movq $0, %rax\n\
+					{l_end}: nop\n"
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
@@ -300,15 +305,19 @@ impl X64Target for Quad {
                 format!("{str}{}", x64::write(location, "%rcx"))
             }
             Quad::NotEq(location, x, y) => {
+                let l_else = intermediate_code::get_lbl();
+                let l_end = intermediate_code::get_lbl();
+
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!(
                     "{str}\
 					cmpq %rcx, %rax\n\
-					movq %rflags, %rax\n\
-					andq $0x40, %rax\n\
-					shrq %rax, $6\n\
-					xorq %rax, $1\n"
+					je {l_else}\n\
+					movq $1, %rax\n\
+					jmp {l_end}\n\
+					{l_else}: movq $0, %rax\n\
+					{l_end}: nop\n"
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
