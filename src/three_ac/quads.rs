@@ -122,7 +122,11 @@ impl X64Target for Quad {
             Quad::Divide(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
-                str = format!("{str}idivq %rcx\n");
+                str = format!(
+                    "{str}\
+					cqo\n\
+					idivq %rcx\n"
+                );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
             Quad::Enter(name) => {
