@@ -173,7 +173,7 @@ impl X64Target for Quad {
 					.size FGETS_BUFFER, 1024\n\
 					FGETS_BUFFER: .zero 1024\n\
 					.data\n\
-					int_fmt: .string \"%d\\n\"\n"
+					int_fmt: .string \"%d\"\n"
                 );
 
                 for global in globals {
@@ -238,7 +238,8 @@ impl X64Target for Quad {
             }
             Quad::Label(name) => format!("{name}: nop\n"),
             Quad::Leave(label, _) => format!(
-                "{label}: addq $4, %rsp\n\
+                "xorq %rax, %rax\n\
+				{label}: addq $4, %rsp\n\
 				leave\n\
 				ret\n"
             ),
@@ -365,7 +366,7 @@ impl X64Target for Quad {
 
                 format!(
                     "movq ${name}, %rdi\n\
-                	call puts\n"
+                	call printf\n"
                 )
             }
         }
