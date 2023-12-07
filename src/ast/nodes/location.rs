@@ -125,7 +125,7 @@ impl NameAnalysis for Location {
             link.enclosing_class = self.symbol_table_entry.clone();
         }
 
-        self.is_local = Some(!symbol_table.is_global(name));
+        self.is_local = Some(symbol_table.in_scope(name));
 
         Ok(())
     }

@@ -106,15 +106,8 @@ impl SymbolTable {
         result
     }
 
-    fn in_scope(&self, name: &String) -> bool {
+    pub fn in_scope(&self, name: &String) -> bool {
         match self.table.last() {
-            Some(scope) => scope.borrow().get(name).is_some(),
-            None => panic!(),
-        }
-    }
-
-    pub fn is_global(&self, name: &String) -> bool {
-        match self.table.first() {
             Some(scope) => scope.borrow().get(name).is_some(),
             None => panic!(),
         }
