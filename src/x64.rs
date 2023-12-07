@@ -11,7 +11,7 @@ pub trait X64Target {
 pub fn get_locals_size() -> usize {
     let size = unsafe { LOCALS.as_ref().unwrap().len() * 8 };
 
-    size + (16 - size % 16)
+    size + (16 - size % 16) % 16
 }
 
 pub fn define_local(name: &String) {
