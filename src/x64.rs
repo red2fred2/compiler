@@ -4,8 +4,6 @@ pub trait X64Target {
     fn compile_x64(&self) -> String;
 }
 
-pub fn define_global(name: &String) {}
-
 pub fn define_local(name: &String, offset: u64) {}
 
 pub fn load(arg: &Argument, register: &str) -> String {

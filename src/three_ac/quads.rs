@@ -172,8 +172,6 @@ impl X64Target for Quad {
                     }
 
                     if first_4 == "glb_" {
-                        let name = global.chars().skip(4).collect();
-                        x64::define_global(&name);
                         string = format!("{string}{global}: .zero 8\n");
                     }
                 }
