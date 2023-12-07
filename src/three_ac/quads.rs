@@ -223,7 +223,7 @@ impl X64Target for Quad {
             Quad::Ifz(condition, label) => {
                 let mut str = x64::load(condition, "%rax");
                 str = format!(
-                    "{str}cmpq %rax, $0\n\
+                    "{str}cmpq $0, %rax\n\
 					je {label}\n"
                 );
 
