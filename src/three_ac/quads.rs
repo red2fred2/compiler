@@ -118,7 +118,7 @@ impl X64Target for Quad {
                 let str = x64::load(value, "%rax");
                 format!("{str}{}", x64::write(location, "%rax"))
             }
-            Quad::Call(name) => format!("call {name}"),
+            Quad::Call(name) => format!("call fn_{name}\n"),
             Quad::Divide(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
@@ -226,10 +226,9 @@ impl X64Target for Quad {
                 str
             }
             Quad::Label(name) => format!("{name}: nop\n"),
-            Quad::Leave(_, _) => format!(
-                "addq $4, %rsp\n\
-                xor %rax, %rax\n\
-                leave\n\
+            Quad::Leave(label, _) => format!(
+                "{label}: addq $4, %rsp\n\
+				leave\n\
 				ret\n"
             ),
             Quad::Less(location, x, y) => {
@@ -265,8 +264,12 @@ impl X64Target for Quad {
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
-            Quad::Locals(_, _, locals, temps) => {
+            Quad::Locals(_, formals, locals, temps) => {
                 x64::reset_fn();
+
+                for formal in formals {
+                    x64::define_local(&formal.id.name);
+                }
 
                 for local in locals {
                     x64::define_local(&local.name);
@@ -328,7 +331,7 @@ impl X64Target for Quad {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!("{str}subq %rcx, %rax\n");
-                format!("{str}{}", x64::write(location, "%rcx"))
+                format!("{str}{}", x64::write(location, "%rax"))
             }
             Quad::WriteInt(argument) => {
                 let str = x64::load(argument, "%rsi");
