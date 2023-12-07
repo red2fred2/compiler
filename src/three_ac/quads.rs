@@ -3,6 +3,7 @@ use std::ops::Range;
 use super::Argument;
 use crate::{
     ast::{Formal, Id},
+    three_ac::intermediate_code,
     x64::{self, X64Target},
 };
 
@@ -188,35 +189,36 @@ impl X64Target for Quad {
             }
             Quad::Goto(target) => format!("jmp {target}\n"),
             Quad::Greater(location, x, y) => {
+                let l_else = intermediate_code::get_lbl();
+                let l_end = intermediate_code::get_lbl();
+
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!(
                     "{str}\
 					cmpq %rcx, %rax\n\
-					movq %rflags, %rax\n\
-					andq $0x80, %rax\n\
-					shrq %rax, $7\n\
-					movq %rflags, %rcx\n\
-					andq $0x40, %rcx\n\
-					shrq %rcx, $6\n\
-					xorq $1, %rcx\n\
-					andq %rcx, %rax\n"
+					jle {l_else}\n\
+					movq $1, %rax\n\
+					jmp {l_end}\n\
+					{l_else}: movq $0, %rax\n\
+					{l_end}: nop\n"
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
             Quad::GreaterEq(location, x, y) => {
+                let l_else = intermediate_code::get_lbl();
+                let l_end = intermediate_code::get_lbl();
+
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!(
                     "{str}\
 					cmpq %rcx, %rax\n\
-					movq %rflags, %rax\n\
-					andq $0x80, %rax\n\
-					shrq %rax, $7\n\
-					movq %rflags, %rcx\n\
-					andq $0x40, %rcx\n\
-					shrq %rcx, $6\n\
-					orq %rcx, %rax\n"
+					jl {l_else}\n\
+					movq $1, %rax\n\
+					jmp {l_end}\n\
+					{l_else}: movq $0, %rax\n\
+					{l_end}: nop\n"
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
@@ -236,35 +238,36 @@ impl X64Target for Quad {
 				ret\n"
             ),
             Quad::Less(location, x, y) => {
+                let l_else = intermediate_code::get_lbl();
+                let l_end = intermediate_code::get_lbl();
+
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!(
                     "{str}\
-					cmpq %rax, %rcx\n\
-					movq %rflags, %rax\n\
-					andq $0x80, %rax\n\
-					shrq %rax, $7\n\
-					movq %rflags, %rcx\n\
-					andq $0x40, %rcx\n\
-					shrq %rcx, $6\n\
-					xorq $1, %rcx\n\
-					andq %rcx, %rax\n"
+					cmpq %rcx, %rax\n\
+					jge {l_else}\n\
+					movq $1, %rax\n\
+					jmp {l_end}\n\
+					{l_else}: movq $0, %rax\n\
+					{l_end}: nop\n"
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
             Quad::LessEq(location, x, y) => {
+                let l_else = intermediate_code::get_lbl();
+                let l_end = intermediate_code::get_lbl();
+
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!(
                     "{str}\
-					cmpq %rax, %rcx\n\
-					movq %rflags, %rax\n\
-					andq $0x80, %rax\n\
-					shrq %rax, $7\n\
-					movq %rflags, %rcx\n\
-					andq $0x40, %rcx\n\
-					shrq %rcx, $6\n\
-					orq %rcx, %rax\n"
+					cmpq %rcx, %rax\n\
+					jg {l_else}\n\
+					movq $1, %rax\n\
+					jmp {l_end}\n\
+					{l_else}: movq $0, %rax\n\
+					{l_end}: nop\n"
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
