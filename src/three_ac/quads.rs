@@ -125,14 +125,18 @@ impl X64Target for Quad {
                 str = format!("{str}idivq %rax, %rcx\n");
                 format!("{str}{}", x64::write(location, "%rcx"))
             }
-            Quad::Enter(name) => format!(
-                "fn_{name}: push %rbp\n\
-                 movq %rsp, %rbp\n"
-            ),
+            Quad::Enter(name) => {
+                let size = x64::get_locals_size();
+                format!(
+                    "fn_{name}: push %rbp\n\
+                	movq %rsp, %rbp\n\
+                	subq ${size}, %rsp\n"
+                )
+            }
             Quad::Exit => format!(
                 "movq $60, %rax\n\
-                 movq $0, %rdi\n\
-                 syscall\n"
+                movq $0, %rdi\n\
+                syscall\n"
             ),
             Quad::Equals(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
@@ -261,7 +265,19 @@ impl X64Target for Quad {
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
-            Quad::Locals(name, formals, locals, temps) => "".to_string(),
+            Quad::Locals(_, _, locals, temps) => {
+                x64::reset_fn();
+
+                for local in locals {
+                    x64::define_local(&local.name);
+                }
+
+                for i in temps.clone() {
+                    x64::define_local(&format!("tmp_{i}"));
+                }
+
+                "".to_string()
+            }
             Quad::Multiply(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
@@ -311,7 +327,7 @@ impl X64Target for Quad {
             Quad::Subtract(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
-                str = format!("{str}subq %rax, %rcx\n");
+                str = format!("{str}subq %rcx, %rax\n");
                 format!("{str}{}", x64::write(location, "%rcx"))
             }
             Quad::WriteInt(argument) => {
