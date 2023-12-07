@@ -112,8 +112,10 @@ impl IRCode for Statement {
                 };
 
                 match t {
+                    Primitive::Bool => quads.push(Quad::WriteBool(arg)),
                     Primitive::Int => quads.push(Quad::WriteInt(arg)),
                     Primitive::String => quads.push(Quad::WriteStr(arg)),
+
                     _ => unreachable!(),
                 }
 

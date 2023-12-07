@@ -38,6 +38,7 @@ pub enum Quad {
     SetArg(usize, Argument),
     SetRet(Argument),
     Subtract(Argument, Argument, Argument),
+    WriteBool(Argument),
     WriteInt(Argument),
     WriteStr(Argument),
 }
@@ -94,8 +95,7 @@ impl std::fmt::Display for Quad {
             Quad::SetArg(n, x) => write!(f, "setarg {n} {x}\n"),
             Quad::SetRet(x) => write!(f, "setret {x}\n"),
             Quad::Subtract(w, x, y) => write!(f, "[{w}] := {x} SUB64 {y}\n"),
-            Quad::WriteInt(x) => write!(f, "write {x}\n"),
-            Quad::WriteStr(x) => write!(f, "write {x}\n"),
+            Quad::WriteBool(x) | Quad::WriteInt(x) | Quad::WriteStr(x) => write!(f, "write {x}\n"),
         }
     }
 }
@@ -173,6 +173,8 @@ impl X64Target for Quad {
 					.size FGETS_BUFFER, 1024\n\
 					FGETS_BUFFER: .zero 1024\n\
 					.data\n\
+					true_str: .string \"true\"\n
+					false_str: .string \"false\"\n
 					int_fmt: .string \"%d\"\n"
                 );
 
@@ -349,6 +351,21 @@ impl X64Target for Quad {
                 str = format!("{str}{}", x64::load(y, "%rcx"));
                 str = format!("{str}subq %rcx, %rax\n");
                 format!("{str}{}", x64::write(location, "%rax"))
+            }
+            Quad::WriteBool(argument) => {
+                let l_false = intermediate_code::get_lbl();
+                let l_end = intermediate_code::get_lbl();
+
+                let str = x64::load(argument, "%rax");
+                format!(
+                    "{str}\
+					cmpq $0, %rax\n\
+					je {l_false}\n\
+					movq $true_str, %rdi\n\
+					jmp {l_end}\n\
+					{l_false}: movq $false_str, %rdi\n\
+                	{l_end}: call printf\n"
+                )
             }
             Quad::WriteInt(argument) => {
                 let str = x64::load(argument, "%rsi");
