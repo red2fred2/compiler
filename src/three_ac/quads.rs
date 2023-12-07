@@ -173,8 +173,8 @@ impl X64Target for Quad {
 					.size FGETS_BUFFER, 1024\n\
 					FGETS_BUFFER: .zero 1024\n\
 					.data\n\
-					true_str: .string \"true\"\n
-					false_str: .string \"false\"\n
+					true_str: .string \"true\"\n\
+					false_str: .string \"false\"\n\
 					int_fmt: .string \"%d\"\n"
                 );
 
@@ -305,7 +305,7 @@ impl X64Target for Quad {
             Quad::Not(location, x) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}xorq $1, %rax\n");
-                format!("{str}{}", x64::write(location, "%rcx"))
+                format!("{str}{}", x64::write(location, "%rax"))
             }
             Quad::NotEq(location, x, y) => {
                 let l_else = intermediate_code::get_lbl();
