@@ -151,7 +151,34 @@ impl X64Target for Quad {
                 x64::write(variable, arg_registers[*number])
             }
             Quad::GetRet(location) => x64::write(location, "%rax"),
-            Quad::Globals(_) => todo!(), /////////////////////////////////////// create globals
+            Quad::Globals(globals) => {
+                println!("{globals:?}");
+                let mut string = format!(
+                    ".globl main\n\
+					.bss\n\
+					.align 32\n\
+					.size FGETS_BUFFER, 1024\n\
+					FGETS_BUFFER: .zero 1024\n\
+					.data\n\
+					int_fmt: .string \"%d\\n\"\n"
+                );
+
+                for global in globals {
+                    let first_4: String = global.chars().take(4).collect();
+                    if first_4 == "str_" {
+                        let mut str = global.split(" ");
+                        let name = str.next().unwrap();
+                        let value = str.next().unwrap();
+                        string = format!("{string}{name}: .string {value}\n");
+                    }
+
+                    if first_4 == "glb_" {
+                        string = format!("{string}{global}: .zero 8\n");
+                    }
+                }
+
+                format!("{string}.text\n")
+            }
             Quad::Goto(target) => format!("jmp {target}\n"),
             Quad::Greater(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
@@ -195,12 +222,12 @@ impl X64Target for Quad {
 
                 str
             }
-            Quad::Label(name) => format!("{name}: nop"),
+            Quad::Label(name) => format!("{name}: nop\n"),
             Quad::Leave(_, _) => format!(
                 "addq $4, %rsp\n\
                 xor %rax, %rax\n\
                 leave\n\
-                ret\n"
+				ret\n"
             ),
             Quad::Less(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
@@ -235,7 +262,7 @@ impl X64Target for Quad {
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
-            Quad::Locals(_, _, _, _) => todo!(), /////////////////////////////// create local stack positions
+            Quad::Locals(_, _, _, _) => "".to_string(), /////////////////////////////// create local stack positions
             Quad::Multiply(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));

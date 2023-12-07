@@ -27,10 +27,6 @@ pub fn generate(ast: &Vec<Declaration>) -> Vec<Quad> {
         quads.append(&mut var.get_ir_code());
     }
 
-    // Kick off main like _start should
-    quads.push(Quad::Label("main".to_string()));
-    quads.push(Quad::Call("main".to_string()));
-
     // Then hit the function declarations
     for declaration in ast {
         let Declaration::Function(function) = declaration else {
@@ -39,6 +35,10 @@ pub fn generate(ast: &Vec<Declaration>) -> Vec<Quad> {
 
         quads.append(&mut function.get_ir_code());
     }
+
+    // Kick off main like _start should
+    quads.push(Quad::Label("main".to_string()));
+    quads.push(Quad::Goto("fn_main\n".to_string()));
 
     let mut globals = vec![get_globals()];
     globals.append(&mut quads);
