@@ -106,11 +106,18 @@ impl SymbolTable {
         result
     }
 
-    pub fn in_scope(&self, name: &String) -> bool {
+    fn in_scope(&self, name: &String) -> bool {
         match self.table.last() {
             Some(scope) => scope.borrow().get(name).is_some(),
             None => panic!(),
         }
+    }
+
+    pub fn is_local(&self, name: &String) -> bool {
+        self.table
+            .iter()
+            .skip(1)
+            .any(|scope| scope.borrow().get(name).is_some())
     }
 
     /// Gets a link to the symbol table entry for this symbol
