@@ -35,11 +35,28 @@ impl Function {
     }
 
     fn get_locals(&self) -> Vec<Id> {
+        Self::get_locals_from_body(&self.body)
+    }
+
+    fn get_locals_from_body(body: &Vec<Statement>) -> Vec<Id> {
         let mut vec = Vec::new();
 
-        for child in &self.body {
+        for child in body {
             if let Statement::VariableDeclaration(Declaration::Variable(decl)) = child {
                 vec.push(decl.name.clone())
+            }
+
+            if let Statement::If(_, b1, b2) = child {
+                let mut b1_locals = Self::get_locals_from_body(&b1.statements);
+                vec.append(&mut b1_locals);
+
+                let mut b2_locals = Self::get_locals_from_body(&b2.statements);
+                vec.append(&mut b2_locals);
+            }
+
+            if let Statement::While(_, body) = child {
+                let mut locals = Self::get_locals_from_body(&body.statements);
+                vec.append(&mut locals);
             }
         }
 
