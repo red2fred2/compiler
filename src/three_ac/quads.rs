@@ -1,10 +1,10 @@
 use std::ops::Range;
 
-use super::{
+use super::Argument;
+use crate::{
+    ast::{Formal, Id},
     x64::{self, X64Target},
-    Argument,
 };
-use crate::ast::{Formal, Id};
 
 #[derive(Debug, Clone)]
 pub enum Quad {

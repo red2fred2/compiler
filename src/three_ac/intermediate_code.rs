@@ -14,12 +14,12 @@ pub fn add_global(str: &String) {
     unsafe { GLOBALS.push(str.clone()) }
 }
 
-pub fn generate(ast: Vec<Declaration>) -> Vec<Quad> {
+pub fn generate(ast: &Vec<Declaration>) -> Vec<Quad> {
     let mut quads = Vec::new();
 
     // Run thrugh variable declarations to define the _start label
     // I want to try not using the C standard library. This is a first step.
-    for declaration in &ast {
+    for declaration in ast {
         let Declaration::Variable(var) = declaration else {
             continue;
         };
@@ -32,7 +32,7 @@ pub fn generate(ast: Vec<Declaration>) -> Vec<Quad> {
     quads.push(Quad::Call("main".to_string()));
 
     // Then hit the function declarations
-    for declaration in &ast {
+    for declaration in ast {
         let Declaration::Function(function) = declaration else {
             continue;
         };

@@ -113,6 +113,13 @@ impl SymbolTable {
         }
     }
 
+    pub fn is_global(&self, name: &String) -> bool {
+        match self.table.first() {
+            Some(scope) => scope.borrow().get(name).is_some(),
+            None => panic!(),
+        }
+    }
+
     /// Gets a link to the symbol table entry for this symbol
     pub fn link(&self, name: &String, pos: SourcePositionData) -> Result<Rc<Entry>> {
         let scope = self

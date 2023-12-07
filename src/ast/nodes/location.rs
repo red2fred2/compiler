@@ -11,6 +11,7 @@ pub struct Location {
     pub enclosing_class: Option<Rc<symbol_table::Entry>>,
     pub next_link: Option<Box<Location>>,
     pub symbol_table_entry: Option<Rc<symbol_table::Entry>>,
+    pub is_local: Option<bool>,
 }
 
 impl Location {
@@ -21,6 +22,7 @@ impl Location {
             enclosing_class: None,
             next_link: None,
             symbol_table_entry: None,
+            is_local: None,
         }
     }
 
@@ -49,7 +51,11 @@ impl Location {
     }
 
     pub fn is_local(&self) -> bool {
-        todo!()
+        let Some(local) = self.is_local else {
+            unreachable!()
+        };
+
+        local
     }
 }
 
@@ -118,6 +124,8 @@ impl NameAnalysis for Location {
         if let Some(link) = &mut self.next_link {
             link.enclosing_class = self.symbol_table_entry.clone();
         }
+
+        self.is_local = Some(!symbol_table.is_global(name));
 
         Ok(())
     }

@@ -11,10 +11,12 @@ use test::Bencher;
 
 use anyhow::Result;
 use clap::Parser;
+use x64::X64Target;
 
 pub mod ast;
 pub mod source_position;
 pub mod three_ac;
+pub mod x64;
 
 /// Drewno Mars language compiler
 #[allow(non_snake_case)]
@@ -61,12 +63,26 @@ fn main() -> Result<()> {
     // Build AST
     let ast = ast::build(&contents, &args)?;
 
+    // Output IR code
     if let Some(_output_path) = &args.ac3_IR_generation {
-        let ir_code = three_ac::generate(ast);
+        let ir_code = three_ac::generate(&ast);
 
         let mut string = String::new();
         for line in ir_code {
             string = format!("{string}{line}");
+        }
+        let mut file = File::create(_output_path)?;
+        file.write_all(string.as_bytes())?;
+    }
+
+    // Output assembly code
+    if let Some(_output_path) = &args.output_assembly {
+        let ir_code = three_ac::generate(&ast);
+
+        let mut string = String::new();
+        for line in ir_code {
+            let asm = line.compile_x64();
+            string = format!("{string}{asm}");
         }
         let mut file = File::create(_output_path)?;
         file.write_all(string.as_bytes())?;
