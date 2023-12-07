@@ -152,7 +152,6 @@ impl X64Target for Quad {
             }
             Quad::GetRet(location) => x64::write(location, "%rax"),
             Quad::Globals(globals) => {
-                println!("{globals:?}");
                 let mut string = format!(
                     ".globl main\n\
 					.bss\n\
@@ -173,6 +172,8 @@ impl X64Target for Quad {
                     }
 
                     if first_4 == "glb_" {
+                        let name = global.chars().skip(4).collect();
+                        x64::define_global(&name);
                         string = format!("{string}{global}: .zero 8\n");
                     }
                 }
@@ -262,7 +263,7 @@ impl X64Target for Quad {
                 );
                 format!("{str}{}", x64::write(location, "%rax"))
             }
-            Quad::Locals(_, _, _, _) => "".to_string(), /////////////////////////////// create local stack positions
+            Quad::Locals(name, formals, locals, temps) => "".to_string(),
             Quad::Multiply(location, x, y) => {
                 let mut str = x64::load(x, "%rax");
                 str = format!("{str}{}", x64::load(y, "%rcx"));
