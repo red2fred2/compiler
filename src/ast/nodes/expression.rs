@@ -41,7 +41,7 @@ impl Expression {
             Self::Add(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Add(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -50,7 +50,7 @@ impl Expression {
             Self::And(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::And(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -58,12 +58,12 @@ impl Expression {
             }
             Self::CallExpression(call) => (
                 call.get_ir_code(),
-                Argument::LocalLocation(three_ac::get_last_tmp()),
+                Argument::Local(three_ac::get_last_tmp()),
             ),
             Self::Divide(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Divide(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -72,7 +72,7 @@ impl Expression {
             Self::Equals(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Equals(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -82,7 +82,7 @@ impl Expression {
             Self::Greater(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Greater(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -91,7 +91,7 @@ impl Expression {
             Self::GreaterEq(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::GreaterEq(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -101,7 +101,7 @@ impl Expression {
             Self::Less(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Less(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -110,7 +110,7 @@ impl Expression {
             Self::LessEq(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::LessEq(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -118,16 +118,16 @@ impl Expression {
             }
             Self::Location(loc) => {
                 if loc.is_local() {
-                    (Vec::new(), Argument::LocalLocation(format!("{loc}")))
+                    (Vec::new(), Argument::Local(format!("{loc}")))
                 } else {
-                    (Vec::new(), Argument::GlobalLocation(format!("{loc}")))
+                    (Vec::new(), Argument::Global(format!("{loc}")))
                 }
             }
             Self::Magic(_) => unimplemented!(),
             Self::Multiply(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Multiply(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -136,7 +136,7 @@ impl Expression {
             Self::Negative(a) => {
                 let (quads, handles) = get_expression_ir(vec![a]);
                 let operation = Quad::Subtract(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     Argument::Literal(0),
                     handles[0].clone(),
                 );
@@ -144,16 +144,13 @@ impl Expression {
             }
             Self::Not(a) => {
                 let (quads, handles) = get_expression_ir(vec![a]);
-                let operation = Quad::Not(
-                    Argument::LocalValue(three_ac::get_tmp()),
-                    handles[0].clone(),
-                );
+                let operation = Quad::Not(Argument::Local(three_ac::get_tmp()), handles[0].clone());
                 handle_operation_ir(quads, operation)
             }
             Self::NotEquals(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::NotEq(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -162,7 +159,7 @@ impl Expression {
             Self::Or(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Or(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -171,12 +168,12 @@ impl Expression {
             Self::StringLiteral(str, _) => {
                 let label = three_ac::get_str();
                 three_ac::add_global(&format!("{label} \"{str}\""));
-                (Vec::new(), Argument::GlobalLocation(label))
+                (Vec::new(), Argument::Global(label))
             }
             Self::Subtract(a, b) => {
                 let (quads, handles) = get_expression_ir(vec![a, b]);
                 let operation = Quad::Subtract(
-                    Argument::LocalValue(three_ac::get_tmp()),
+                    Argument::Local(three_ac::get_tmp()),
                     handles[0].clone(),
                     handles[1].clone(),
                 );
@@ -504,5 +501,5 @@ fn get_expression_ir(expressions: Vec<&Box<Expression>>) -> (Vec<Quad>, Vec<Argu
 
 fn handle_operation_ir(mut quads: Vec<Quad>, operation: Quad) -> (Vec<Quad>, Argument) {
     quads.push(operation);
-    (quads, Argument::LocalLocation(three_ac::get_last_tmp()))
+    (quads, Argument::Local(three_ac::get_last_tmp()))
 }

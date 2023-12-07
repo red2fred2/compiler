@@ -29,9 +29,7 @@ impl IRCode for CallExpression {
         }
 
         quads.push(Quad::Call(format!("{}", self.location)));
-        quads.push(Quad::GetRet(three_ac::Argument::LocalValue(
-            three_ac::get_tmp(),
-        )));
+        quads.push(Quad::GetRet(three_ac::Argument::Local(three_ac::get_tmp())));
         quads
     }
 }

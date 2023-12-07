@@ -94,7 +94,7 @@ impl IRCode for VariableDeclaration {
         };
 
         let (mut code, arg) = assignment.get_ir_code();
-        code.push(Quad::Assignment(three_ac::Argument::GlobalValue(name), arg));
+        code.push(Quad::Assignment(three_ac::Argument::Global(name), arg));
 
         code
     }

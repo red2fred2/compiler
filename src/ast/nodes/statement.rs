@@ -83,15 +83,9 @@ impl IRCode for Statement {
             Self::Assignment(loc, x) => {
                 let (mut quads, arg) = x.get_ir_code();
                 if loc.is_local() {
-                    quads.push(Quad::Assignment(
-                        Argument::LocalValue(format!("{loc}")),
-                        arg,
-                    ));
+                    quads.push(Quad::Assignment(Argument::Local(format!("{loc}")), arg));
                 } else {
-                    quads.push(Quad::Assignment(
-                        Argument::GlobalValue(format!("{loc}")),
-                        arg,
-                    ));
+                    quads.push(Quad::Assignment(Argument::Global(format!("{loc}")), arg));
                 }
                 quads
             }
@@ -99,9 +93,9 @@ impl IRCode for Statement {
             Self::Decrement(loc) => {
                 let arg;
                 if loc.is_local() {
-                    arg = Argument::LocalLocation(format!("{loc}"));
+                    arg = Argument::Local(format!("{loc}"));
                 } else {
-                    arg = Argument::GlobalLocation(format!("{loc}"));
+                    arg = Argument::Global(format!("{loc}"));
                 }
                 vec![Quad::Subtract(arg.clone(), arg, Argument::Literal(1))]
             }
@@ -148,9 +142,9 @@ impl IRCode for Statement {
             Self::Increment(loc) => {
                 let arg;
                 if loc.is_local() {
-                    arg = Argument::LocalLocation(format!("{loc}"));
+                    arg = Argument::Local(format!("{loc}"));
                 } else {
-                    arg = Argument::GlobalLocation(format!("{loc}"));
+                    arg = Argument::Global(format!("{loc}"));
                 }
                 vec![Quad::Add(arg.clone(), arg, Argument::Literal(1))]
             }
@@ -169,9 +163,9 @@ impl IRCode for Statement {
             Self::Take(x) => {
                 let arg;
                 if x.is_local() {
-                    arg = Argument::LocalLocation(format!("{x}"));
+                    arg = Argument::Local(format!("{x}"));
                 } else {
-                    arg = Argument::GlobalLocation(format!("{x}"));
+                    arg = Argument::Global(format!("{x}"));
                 }
                 vec![Quad::Read(arg)]
             }
@@ -182,10 +176,7 @@ impl IRCode for Statement {
             })) => {
                 let Some(x) = assignment else { return vec![] };
                 let (mut quads, arg) = x.get_ir_code();
-                quads.push(Quad::Assignment(
-                    Argument::LocalValue(format!("{name}")),
-                    arg,
-                ));
+                quads.push(Quad::Assignment(Argument::Local(format!("{name}")), arg));
                 quads
             }
             Self::While(condition, body) => {

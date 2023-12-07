@@ -347,7 +347,7 @@ impl X64Target for Quad {
             }
             Quad::WriteStr(argument) => {
                 let name = match argument {
-                    Argument::GlobalLocation(s) | Argument::GlobalValue(s) => s,
+                    Argument::Global(s) => s,
                     _ => unreachable!(),
                 };
 

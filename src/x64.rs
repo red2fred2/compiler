@@ -30,20 +30,16 @@ pub fn reset_fn() {
 pub fn load(arg: &Argument, register: &str) -> String {
     match arg {
         Argument::Literal(value) => format!("movq ${value}, {register}\n"),
-        Argument::LocalLocation(name) => load_local(name, register),
-        Argument::LocalValue(name) => load_local(name, register),
-        Argument::GlobalLocation(name) => format!("movq glb_{name}(%rip), {register}\n"),
-        Argument::GlobalValue(name) => format!("movq glb_{name}(%rip), {register}\n"),
+        Argument::Local(name) => load_local(name, register),
+        Argument::Global(name) => format!("movq glb_{name}(%rip), {register}\n"),
     }
 }
 
 pub fn write(arg: &Argument, register: &str) -> String {
     match arg {
         Argument::Literal(_) => unreachable!(),
-        Argument::LocalLocation(name) => write_local(name, register),
-        Argument::LocalValue(name) => write_local(name, register),
-        Argument::GlobalLocation(name) => format!("movq {register}, glb_{name}(%rip)\n"),
-        Argument::GlobalValue(name) => format!("movq {register}, glb_{name}(%rip)\n"),
+        Argument::Local(name) => write_local(name, register),
+        Argument::Global(name) => format!("movq {register}, glb_{name}(%rip)\n"),
     }
 }
 

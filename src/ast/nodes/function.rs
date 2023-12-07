@@ -80,7 +80,7 @@ impl IRCode for Function {
 
         for i in 0..self.fn_input.len() {
             let name = self.fn_input[i].id.name.clone();
-            quads.push(Quad::GetArg(i + 1, three_ac::Argument::LocalValue(name)));
+            quads.push(Quad::GetArg(i + 1, three_ac::Argument::Local(name)));
         }
 
         quads.append(&mut body_quads);
